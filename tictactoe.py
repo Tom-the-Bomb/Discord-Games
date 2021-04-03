@@ -42,13 +42,9 @@ class Tictactoe:
             board += "".join(row) + "\n"
         return board
 
-    async def add_reactions(self) -> None:
-        for button in self._controls:
-            await self.message.add_reaction(button)
-
     def make_embed(self) -> discord.Embed:
         embed = discord.Embed()
-        if not self.GameOver():
+        if not await self.GameOver():
             embed.description = f"**Turn:** {self.turn}"
         else:
             status = f"{self.winner} won!" if self.winner else "Tie"
@@ -69,7 +65,7 @@ class Tictactoe:
             self._controls.remove(emoji)
             return self.board
 
-    def GameOver(self) -> bool:
+    async def GameOver(self) -> bool:
 
         if not self._controls:
             return True
@@ -93,10 +89,12 @@ class Tictactoe:
            
         return False
 
-    async def start(self, ctx: commands.Context) -> None:
+    async def start(self, ctx: commands.Context):
         embed = self.make_embed()
         self.message = await ctx.send(self.BoardString(), embed=embed)
-        await self.add_reactions()
+
+        for button in self._controls:
+            await self.message.add_reaction(button)
 
         while True:
 
@@ -105,7 +103,7 @@ class Tictactoe:
 
             reaction, user = await ctx.bot.wait_for("reaction_add", check=check)
 
-            if self.GameOver():
+            if await self.GameOver():
                 break
             
             emoji = str(reaction.emoji)
