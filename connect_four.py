@@ -34,15 +34,15 @@ class ConnectFour:
         }
 
     def BoardString(self) -> str:
-        board = ""
+        board = "1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣\n"
         for row in self.board:
             board += "".join(row) + "\n"
         return board
 
-    def make_embed(self) -> discord.Embed:
+    async def make_embed(self) -> discord.Embed:
         embed = discord.Embed()
-        if not self.GameOver():
-            embed.description = f"**Turn:** {self.turn}"
+        if not await self.GameOver():
+            embed.description = f"**Turn:** {self.turn.name}\n**Piece:** `{self._PlayerToEmoji[self.turn]}`"
         else:
             status = f"{self.winner} won!" if self.winner else "Tie"
             embed.description = f"**Game over**\n{status}"
@@ -93,9 +93,9 @@ class ConnectFour:
 
         return False
     
-    async def start(self, ctx: commands.Context):
+    async def start(self, ctx: commands.Context, *, remove_reaction_after: bool = False):
 
-        embed = self.make_embed()
+        embed = await self.make_embed()
         self.message = await ctx.send(self.BoardString(), embed=embed)
 
         for button in self._controls:
@@ -104,17 +104,21 @@ class ConnectFour:
         while True:
 
             def check(reaction, user):
-                return str(reaction.emoji) in self._controls and user == self.turn and reaction.message == self.message and self.board[0][self._conversion[emoji]] == BLANK
+                return str(reaction.emoji) in self._controls and user == self.turn and reaction.message == self.message and self.board[0][self._conversion[str(reaction.emoji)]] == BLANK
 
             reaction, user = await ctx.bot.wait_for("reaction_add", check=check)
 
             if await self.GameOver():
                 break
-            
+
             emoji = str(reaction.emoji)
             await self.PlacePiece(emoji, user)
-            embed = self.make_embed()
+            embed = await self.make_embed()
+
+            if remove_reaction_after:
+                await self.message.remove_reaction(emoji, user)
+
             await self.message.edit(content=self.BoardString(), embed=embed)
         
-        embed = self.make_embed()
+        embed = await self.make_embed()
         return await self.message.edit(content=self.BoardString(), embed=embed)
