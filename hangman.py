@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from typing import Union
 
 import random
 from english_words import english_words_set
@@ -138,7 +139,7 @@ class Hangman:
 
         return self.GameOver
 
-    async def start(self, ctx: commands.Context, *, delete_after_guess: bool = False, color = discord.Color.dark_theme()):
+    async def start(self, ctx: commands.Context, *, delete_after_guess: bool = False, color: Union[discord.Color, int] = 0x2F3136):
 
         self._embed.description = f"```\n{stages[self._counter]}\n```"
         self._embed.color = color
@@ -166,5 +167,4 @@ class Hangman:
                     await message.delete()
                 except:
                     pass
-        
         return 
