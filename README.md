@@ -17,7 +17,7 @@ async def connectfour(self, ctx, member: discord.Member):
     await game.start(ctx, remove_reaction_after=True) #starts the game
 
 ```
-Or for a more custom setup you can create a class that inherits from the "ConnectFour" class
+Or for a more custom setup you can create a class that inherits from the "Game" class
 - You can overwrite certain methods such as the `start` method.
 **Methods for connect-four and tictactoe**
 - `BoardString` - Returns a formatted version of the board-array

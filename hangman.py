@@ -109,14 +109,14 @@ class Hangman:
             await self._message.edit(content="**YOU WON**", embed=self._embed)
 
         elif guess in self.letters:
-
+            self._alpha.remove(guess)
             matches = [a for a, b in enumerate(self.letters) if b == guess]
             for match in matches:
                 self.correct[match] = guess
             self._embed.set_field_at(0, name='Word', value=f"{' '.join(self.correct)}")
             await self._message.edit(embed=self._embed)
         else:
-            
+            self._alpha.remove(guess)
             self._counter -= 1
             self.wrong_letters.append(guess)
             self._embed.set_field_at(1, name='Guessed letters', value=f"{', '.join(self.wrong_letters)}")
