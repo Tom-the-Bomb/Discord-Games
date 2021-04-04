@@ -61,10 +61,13 @@ await game.start(ctx, remove_reaction_after = True, delete_button = False, embed
 - For 2048 you need to call the `update_emojis` method and pass in a dict with the `block number` as a key and the `emoji` as the value
 - If you do not want emojis to display the board you can do `"2": " 2 "` etc. to get the raw value displayed *(might look ugly though)*
 - If you do not call the `update_emojis` method properly you may run into errors.
---- 
+---
+
+#### chess
+- start signature (Example)
+`async def start(self, ctx: commands.Context, *, timeout: int = None, color: Union[int, discord.Color] = 0x2F3136, add_reaction_after_move: bool = False, **kwargs):`
+- aside from that chess is much similar to all the other games and the same logic applies when using the classes
+
 
 All the start methods accept any `**kwargs` and those get passed into the `.send()` in the function, 
 so you can add any kwargs you might want to pass in to the message like `embed=` etc.
-
-**Coming soon**
-- Chess
