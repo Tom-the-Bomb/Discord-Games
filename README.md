@@ -31,7 +31,7 @@ Or for a more custom setup you can create a class that inherits from the "Game" 
 - `CheckWin`    - Checks if the user won
 - `start`       - starts the game and sets up `wait_for` and method calls
 
-#### 2048
+### 2048
 2048 example
 ```py
 from Discord_Games import twenty_48
@@ -63,11 +63,10 @@ await game.start(ctx, remove_reaction_after = True, delete_button = False, embed
 - If you do not call the `update_emojis` method properly you may run into errors.
 ---
 
-#### chess
+### chess
 - start signature (Example)
 `async def start(self, ctx: commands.Context, *, timeout: int = None, color: Union[int, discord.Color] = 0x2F3136, add_reaction_after_move: bool = False, **kwargs):`
 - aside from that chess is much similar to all the other games and the same logic applies when using the classes
-
-
+---
 All the start methods accept any `**kwargs` and those get passed into the `.send()` in the function, 
 so you can add any kwargs you might want to pass in to the message like `embed=` etc.
