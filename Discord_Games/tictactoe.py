@@ -91,7 +91,7 @@ class Tictactoe:
 
     async def start(self, ctx: commands.Context, *, remove_reaction_after: bool = False, return_after_block: int = None, **kwargs):
         embed = self.make_embed()
-        self.message = await ctx.send(self.BoardString(), **kwargs)
+        self.message = await ctx.send(self.BoardString(), embed=embed, **kwargs)
 
         for button in self._controls:
             await self.message.add_reaction(button)
