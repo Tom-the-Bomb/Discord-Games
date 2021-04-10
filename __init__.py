@@ -1,1 +1,1 @@
-from Discord_Games import Discord_Games
+from Discord_Games.Discord_Games import hangman, tictactoe, twenty_48, ChessGame, connect_four
