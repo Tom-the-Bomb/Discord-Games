@@ -1,1 +1,1 @@
-import Discord_Games
+from Discord_Games import Discord_Games
