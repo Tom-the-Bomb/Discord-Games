@@ -23,7 +23,7 @@ class Akinator:
         self.questions = 0
         self.mapping = {
             YES: "y", 
-            NO : "b", 
+            NO : "n", 
             IDK: "i", 
             P  : "p", 
             PN : "pn"
@@ -51,7 +51,7 @@ class Akinator:
         return embed
 
     async def win(self):
-        
+
         await self.aki.win()
         self.guess = self.aki.first_guess
 
