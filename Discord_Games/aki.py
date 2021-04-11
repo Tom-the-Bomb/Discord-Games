@@ -40,8 +40,9 @@ class Akinator:
         embed = discord.Embed(
             title = "Guess your character!", 
             description = (
-                f"Question number `{self.questions}`\n"
-                f"Progression-Level: `{self.aki.progression}`\n"
+                "```swift\n"
+                f"Question number  : {self.questions}\n"
+                f"Progression-Level: {self.aki.progression}\n```"
                 f"{self.build_bar()}"
             ), 
             color = discord.Color.random()
