@@ -80,7 +80,8 @@ class Akinator:
         while self.aki.progression <= win_at_:
 
             def check(reaction, user):
-                return str(reaction.emoji) in self.mapping and reaction.message == self.message and user == ctx.author
+                if reaction.message == self.message and user == ctx.author:
+                    return str(reaction.emoji) in self.mapping or str(reaction.emoji) == STOP
 
             try:
                 reaction, __ = await ctx.bot.wait_for('reaction_add', timeout=timeout, check=check)
