@@ -41,8 +41,8 @@ class Akinator:
             title = "Guess your character!", 
             description = (
                 "```swift\n"
-                f"Question number  : {self.questions}\n"
-                f"Progression-Level: {self.aki.progression}\n```"
+                f"Question-Number  : {self.questions}\n"
+                f"Progression-Level: {self.aki.progression}\n```\n"
                 f"{self.build_bar()}"
             ), 
             color = discord.Color.random()
