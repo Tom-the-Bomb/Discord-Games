@@ -16,7 +16,7 @@ class Akinator:
 
     def __init__(self):
         self.aki     = _Akinator_()
-        self.bar_emojis = ("⬛", "🟥")
+        self.bar_emojis = ("  ", "██")
         self.guess   = None
         self.bar     = ""
         self.message = None
