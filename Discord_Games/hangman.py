@@ -100,7 +100,7 @@ class Hangman:
         self._message = None
         self._counter = 8
         self.GameOver = False
-        self.lives    = lambda : f"`{'❤️' * self._counter}`"
+        self.lives    = lambda : f"`{('❤️' * self._counter) or '-'}`"
 
     async def MakeGuess(self, guess: str) -> None:
 
@@ -120,7 +120,7 @@ class Hangman:
             self._alpha.remove(guess)
             self._counter -= 1
             self.wrong_letters.append(guess)
-            self._embed.set_field_at(1, name='Guessed letters', value=f"{', '.join(self.wrong_letters)}")
+            self._embed.set_field_at(1, name='Guessed letters', value=f"{', '.join(self.wrong_letters) or '-'}")
             self._embed.set_field_at(2, name='Lives left', value=self.lives(), inline=False)
             self._embed.description = f"```\n{stages[self._counter]}\n```"
             await self._message.edit(embed=self._embed)
