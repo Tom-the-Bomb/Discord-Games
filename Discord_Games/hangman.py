@@ -120,7 +120,7 @@ class Hangman:
             self._alpha.remove(guess)
             self._counter -= 1
             self.wrong_letters.append(guess)
-            self._embed.set_field_at(1, name='Guessed letters', value=f"{', '.join(self.wrong_letters)}")
+            self._embed.set_field_at(1, name='Wrong letters', value=f"{', '.join(self.wrong_letters)}")
             self._embed.set_field_at(2, name='Lives left', value=self.lives(), inline=False)
             self._embed.description = f"```\n{stages[self._counter]}\n```"
             await self._message.edit(embed=self._embed)
@@ -147,7 +147,7 @@ class Hangman:
         self._embed.color = color
         self._embed.add_field(name='Word', value=f"{' '.join(self.correct)}")
         wrong_letters = ', '.join(self.wrong_letters) or '  \u200b'
-        self._embed.add_field(name='Guessed letters', value=wrong_letters)
+        self._embed.add_field(name='Wrong letters', value=wrong_letters)
         self._embed.add_field(name='Lives left', value=self.lives(), inline=False)
         self._message = await ctx.send(embed=self._embed, **kwargs)
 
