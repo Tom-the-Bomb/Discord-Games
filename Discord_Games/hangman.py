@@ -6,62 +6,62 @@ import random
 from english_words import english_words_set
 
 stages = ['''
-            _________
-            |/      |
-            |      😵
-            |      \\|/
-            |       |
-            |      / \\
+            _________\t
+            |/      |\t
+            |      😵\t
+            |      \\|/\t
+            |       |\t
+            |      / \\\t
          ___|___
             ''',
             '''
-            _________
-            |/      |
-            |      😦
-            |      \\|/
-            |       |
-            |      /
+            _________\t
+            |/      |\t
+            |      😦\t
+            |      \\|/\t
+            |       |\t
+            |      /\t
          ___|___
             ''',
             '''
-            _________
-            |/      |
-            |      😦
-            |      \\|/
-            |       |
+            _________\t
+            |/      |\t
+            |      😦\t
+            |      \\|/\t
+            |       |\t
             |
          ___|___
             ''',
             '''
-            --------
-            |/     |
-            |     😦
-            |     \\|
-            |      |
+            --------\t
+            |/     |\t
+            |     😦\t
+            |     \\|\t
+            |      |\t
             |
          ___|___
             ''',
             '''
-            _________
-            |/      |
-            |      😦
-            |       |
-            |       |
+            _________\t
+            |/      |\t
+            |      😦\t
+            |       |\t
+            |       |\t
             |
          ___|___
             ''',
             '''
-            _________
-            |/      |
-            |      😦
-            |
+            _________\t
+            |/      |\t
+            |      😦\t
+            |        
             |
             |
          ___|___
             ''',
             '''
-            _________
-            |/      |
+            _________\t
+            |/      |\t
             |      
             |
             |
@@ -69,7 +69,7 @@ stages = ['''
          ___|___
             ''', 
             '''
-            _________
+            _________\t
             |/     
             |      
             |
@@ -78,7 +78,7 @@ stages = ['''
          ___|___
             ''', 
             '''
-            ___
+            ___      \t
             |/      
             |      
             |
@@ -100,6 +100,7 @@ class Hangman:
         self._message = None
         self._counter = 8
         self.GameOver = False
+        self.lives    = lambda : f"`{'❤️' * self._counter}`"
 
     async def MakeGuess(self, guess: str) -> None:
 
@@ -120,6 +121,7 @@ class Hangman:
             self._counter -= 1
             self.wrong_letters.append(guess)
             self._embed.set_field_at(1, name='Guessed letters', value=f"{', '.join(self.wrong_letters)}")
+            self._embed.set_field_at(2, name='Lives left', value=self.lives(), inline=False)
             self._embed.description = f"```\n{stages[self._counter]}\n```"
             await self._message.edit(embed=self._embed)
 
@@ -146,6 +148,7 @@ class Hangman:
         self._embed.add_field(name='Word', value=f"{' '.join(self.correct)}")
         wrong_letters = ', '.join(self.wrong_letters) or '\u200b'
         self._embed.add_field(name='Guessed letters', value=wrong_letters)
+        self._embed.add_field(name='Lives left', value=self.lives(), inline=False)
         self._message = await ctx.send(embed=self._embed, **kwargs)
 
         while True:
