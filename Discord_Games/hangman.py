@@ -146,7 +146,7 @@ class Hangman:
         self._embed.description = f"```\n{stages[self._counter]}\n```"
         self._embed.color = color
         self._embed.add_field(name='Word', value=f"{' '.join(self.correct)}")
-        wrong_letters = ', '.join(self.wrong_letters) or ' - \u200b'
+        wrong_letters = ', '.join(self.wrong_letters) or '  \u200b'
         self._embed.add_field(name='Guessed letters', value=wrong_letters)
         self._embed.add_field(name='Lives left', value=self.lives(), inline=False)
         self._message = await ctx.send(embed=self._embed, **kwargs)
