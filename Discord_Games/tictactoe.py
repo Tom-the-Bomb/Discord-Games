@@ -75,7 +75,7 @@ class Tictactoe:
             if (self.board[i][0] == self.board[i][1] == self.board[i][2]) and self.board[i][0] != BLANK:
                 self.winner = self._EmojiToPlayer[self.board[i][0]]
                 return True
-            if (self.board[0][i] == self.board[1][i] ==self.board[2][i]) and self.board[0][i] != BLANK:
+            if (self.board[0][i] == self.board[1][i] == self.board[2][i]) and self.board[0][i] != BLANK:
                 self.winner = self._EmojiToPlayer[self.board[0][i]]
                 return True
 
