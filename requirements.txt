@@ -1,3 +1,5 @@
-discord.py==1.6.0
-english-words==1.0.3
-chess==1.4.0
+discord.py
+english-words
+chess
+akinator.py
+Pillow
