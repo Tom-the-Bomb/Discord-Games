@@ -54,14 +54,14 @@ class TypeRacer:
     def _tr_img(self, text: str, font: str):
         text = "\n".join(textwrap.wrap(text, width=25))
         height = ceil(len(text) / 25) * 50
-        image  = Image.new("RGBA", (height, 450), (10, 10, 10))
+        image  = Image.new("RGBA", (640, height), (10, 10, 10))
         font   = ImageFont.truetype(font, 40)
 
         draw  = ImageDraw.Draw(image)
         draw.text((5, 5), text, font=font, fill=(255,255,255))
 
-        draw.line((200,0,200,450), fill=(180,180,180), width=1)
-        draw.line((400,0,400,450), fill=(180,180,180), width=1)
+        draw.line((220,0,220,height), fill=(180,180,180), width=1)
+        draw.line((420,0,420,height), fill=(180,180,180), width=1)
 
         buffer = BytesIO()
         image.save(buffer, "png")
@@ -96,7 +96,7 @@ class TypeRacer:
     async def start(
         self, ctx: commands.Context, *, 
         embed_title: str = "Type the following sentence in the chat now!", 
-        embed_color: Union[discord.Color, int], 
+        embed_color: Union[discord.Color, int] = discord.Color.greyple(), 
         path_to_text_font: str = "arial.ttf",
         timeout: SupportsFloat = None, 
         mode: str = "sentence"
