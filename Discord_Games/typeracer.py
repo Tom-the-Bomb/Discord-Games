@@ -90,6 +90,7 @@ class TypeRacer:
             timestamp = dt.utcnow()
         )
 
+        await message.add_reaction("✅")
         await message.reply(embed=embed, allowed_mentions=discord.AllowedMentions.none())
         return True
 
