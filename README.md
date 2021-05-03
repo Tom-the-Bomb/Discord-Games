@@ -40,22 +40,10 @@ Or for a more custom setup you can create a class that inherits from the "Game" 
 from Discord_Games import twenty_48
 
 game = twenty_48.Twenty48()
-game.update_emojis({
-            "0":    "<:grey:821404552783855658>", 
-            "2":    "<:twoo:821396924619161650>", 
-            "4":    "<:fourr:821396936870723602>", 
-            "8":    "<:eightt:821396947029983302>", 
-            "16":   "<:sixteen:821396959616958534>", 
-            "32":   "<:thirtytwo:821396969632169994>", 
-            "64":   "<:sixtyfour:821396982869524563>", 
-            "128":  "<:onetwentyeight:821396997776998472>",
-            "256":  "<:256:821397009394827306>",
-            "512":  "<:512:821397040247865384>",
-            "1024": "<:1024:821397097453846538>",
-            "2048": "<:2048:821397123160342558>",
-            "4096": "<:4096:821397135043067915>",
-            "8192": "<:8192:821397156127965274>",
-        })
+game.update_emojis(
+    #a dictionary with number as a key and display value as value
+    #ex: {"2": "<:two:123238299123342>"...}
+)
 await game.start(ctx, remove_reaction_after = True, delete_button = False, embed = discord.Embed())
 # remove_reaction_after removes the reaction after add
 # delete_button adds a stop_button to stop the game on click
@@ -73,3 +61,16 @@ await game.start(ctx, remove_reaction_after = True, delete_button = False, embed
 ---
 All the start methods accept any `**kwargs` and those get passed into the `.send()` in the function, 
 so you can add any kwargs you might want to pass in to the message like `embed=` etc.
+### Typeracer
+```py
+game = typeracer.TypeRacer()
+await game.start(
+    ctx, 
+    embed_color=0x2F3136,                     #embed color
+    path_to_text_font='assets/font_file.ttf', #or use arial.ttf if you dont have one
+    timeout=100, 
+    mode="sentence"
+)
+```
+### Akinaator
+same as the previous games
