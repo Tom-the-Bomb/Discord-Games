@@ -1,7 +1,7 @@
 from   setuptools import setup
 import re
 
-with open("__init__.py") as f:
+with open("Discord_Games/__init__.py") as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
 setup(
@@ -30,6 +30,7 @@ setup(
     ],
     include_package_data = True,
     packages             = ['Discord_Games'],
+    install_requires     = ['discord.py', 'english-words', 'chess', 'akinator.py', 'Pillow',]
     zip_safe        = False,
     python_requires = '>=3.7'
 )
