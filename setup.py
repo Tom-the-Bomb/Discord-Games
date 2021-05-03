@@ -30,7 +30,7 @@ setup(
     ],
     include_package_data = True,
     packages             = ['Discord_Games'],
-    install_requires     = ['discord.py', 'english-words', 'chess', 'akinator.py', 'Pillow',]
-    zip_safe        = False,
+    install_requires     = ['discord.py', 'english-words', 'chess', 'akinator.py', 'Pillow',],
+    zip_safe        = True,
     python_requires = '>=3.7'
 )
