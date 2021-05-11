@@ -71,7 +71,7 @@ class TypeRacer:
 
     async def wait_for_tr_response(self, ctx: commands.Context, text: str, *, timeout: int):
         
-        emoji_map = {1, "🥇", 2: "🥈", 3: "🥉"}
+        emoji_map = {1: "🥇", 2: "🥈", 3: "🥉"}
         text = text.lower().replace("\n", " ")
         winners = []
 
