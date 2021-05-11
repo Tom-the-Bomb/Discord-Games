@@ -3,6 +3,7 @@ import time
 import random
 import asyncio
 import aiohttp
+import difflib
 
 import discord
 from PIL import Image, ImageDraw, ImageFont
@@ -68,30 +69,52 @@ class TypeRacer:
         buffer.seek(0)
         return buffer
 
-    async def wait_for_tr_response(self, ctx: commands.Context, text: str, *, timeout: int, start):
+    async def wait_for_tr_response(self, ctx: commands.Context, text: str, *, timeout: int):
         
-        text = text.lower().replace("\n", " ").strip(".")
+        emoji_map = {1, "🥇", 2: "🥈", 3: "🥉"}
+        text = text.lower().replace("\n", " ")
+        winners = []
 
-        try:
-            message = await ctx.bot.wait_for(
-                "message", 
-                timeout=timeout, 
-                check = lambda m: m.channel == ctx.channel and m.content.lower().replace("\n", " ").strip(".") == text
-            )
-        except asyncio.TimeoutError:
-            return await ctx.reply("Looks like no one responded", allowed_mentions=discord.AllowedMentions.none())
+        for _ in range(3):
 
-        end = time.perf_counter()
-        wpm = len(text.split(" ")) / ((end - start) / 60)
+            def check(m):
+                content = m.content.lower().replace("\n", " ")
+                if m.channel == ctx.channel and not m.author.bot:
+                    sim = difflib.SequenceMatcher(None, content, text).ratio()
+                    return sim >= 0.8
+
+            start = time.perf_counter()
+
+            try:
+                message = await ctx.bot.wait_for(
+                    "message", 
+                    timeout = timeout, 
+                    check = check
+                )
+            except asyncio.TimeoutError:
+                return await ctx.reply("> Looks like no one responded", allowed_mentions=discord.AllowedMentions.none())
+
+            end = time.perf_counter()
+            content = message.content.lower().replace("\n", " ")
+
+            winners.append({
+                "user": message.author, 
+                "time": end - start, 
+                "wpm" : len(text.split(" ")) / ((end - start) / 60), 
+                "acc" : difflib.SequenceMatcher(None, content, text).ratio()
+            })
+
+            await message.add_reaction(emoji_map[len(winners)+1])
         
+        desc = [f" • {emoji_map[i]} | {x['user'].mention} in {x['time']:.2f} | **WPM:** {x['wpm']:.2f} | **ACC:** {x['acc']}" for i, x in enumerate(winners)]
         embed = discord.Embed(
-            description=f"`{message.author.name} won the typerace`\n**Time-took:** {(end - start):.2f} seconds\n**WPM:** {wpm:.2f}", 
-            color = discord.Color.gold(), 
+            title = "Typerace results",
+            color = 0x2F3136, 
             timestamp = dt.utcnow()
         )
+        embed.add_field(name="Winners", value="\n".join(desc))
 
-        await message.add_reaction("✅")
-        await message.reply(embed=embed, allowed_mentions=discord.AllowedMentions.none())
+        await ctx.reply(embed=embed, allowed_mentions=discord.AllowedMentions.none())
         return True
 
     async def start(
@@ -131,7 +154,6 @@ class TypeRacer:
             file  = discord.File(buffer, "tr.png")
         )
 
-        start = time.perf_counter()
         await self.wait_for_tr_response(ctx, text, start=start, timeout=timeout)
 
         return True
