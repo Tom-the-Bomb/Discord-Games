@@ -76,7 +76,7 @@ class TypeRacer:
         winners = []
         start   = time.perf_counter()
 
-        while len(winners) < 3:
+        while True:
 
             def check(m):
                 content = m.content.lower().replace("\n", " ")
@@ -107,6 +107,9 @@ class TypeRacer:
             })
 
             await message.add_reaction(emoji_map[len(winners)])
+
+            if len(winners) >= 3:
+                break
         
         desc = [f" • {emoji_map[i]} | {x['user'].mention} in {x['time']:.2f}s | **WPM:** {x['wpm']:.2f} | **ACC:** {x['acc']:.2f}%" for i, x in enumerate(winners, 1)]
         embed = discord.Embed(
