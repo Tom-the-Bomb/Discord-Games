@@ -79,7 +79,7 @@ class TypeRacer:
 
             def check(m):
                 content = m.content.lower().replace("\n", " ")
-                if m.channel == ctx.channel and not m.author.bot:
+                if m.channel == ctx.channel and not m.author.bot and m.author not in map(lambda m: m["user"], winners):
                     sim = difflib.SequenceMatcher(None, content, text).ratio()
                     return sim >= 0.8
 
@@ -107,9 +107,9 @@ class TypeRacer:
                 "acc" : difflib.SequenceMatcher(None, content, text).ratio()
             })
 
-            await message.add_reaction(emoji_map[len(winners)+1])
+            await message.add_reaction(emoji_map[len(winners)])
         
-        desc = [f" • {emoji_map[i]} | {x['user'].mention} in {x['time']:.2f} | **WPM:** {x['wpm']:.2f} | **ACC:** {x['acc']}" for i, x in enumerate(winners)]
+        desc = [f" • {emoji_map[i]} | {x['user'].mention} in {x['time']:.2f} | **WPM:** {x['wpm']:.2f} | **ACC:** {x['acc']}" for i, x in enumerate(winners, 1)]
         embed = discord.Embed(
             title = "Typerace results",
             color = 0x2F3136, 
