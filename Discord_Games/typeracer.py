@@ -53,10 +53,11 @@ class TypeRacer:
     )
 
     def _tr_img(self, text: str, font: str):
+        font = ImageFont.truetype(font, 40)
         text = "\n".join(textwrap.wrap(text, width=25))
-        height = ceil(len(text) / 25) * 70
-        image  = Image.new("RGBA", (640, height), (10,10,10))
-        font   = ImageFont.truetype(font, 40)
+        w, h = font.getsize(text)
+
+        image  = Image.new("RGBA", (w+10, h+10), (10,10,10))
 
         draw  = ImageDraw.Draw(image)
         draw.text((5, 5), text, font=font, fill=(255,255,255))
@@ -75,7 +76,7 @@ class TypeRacer:
         text = text.lower().replace("\n", " ")
         winners = []
 
-        for _ in range(3):
+        while len(winners) < 3:
 
             def check(m):
                 content = m.content.lower().replace("\n", " ")
@@ -104,12 +105,12 @@ class TypeRacer:
                 "user": message.author, 
                 "time": end - start, 
                 "wpm" : len(text.split(" ")) / ((end - start) / 60), 
-                "acc" : difflib.SequenceMatcher(None, content, text).ratio()
+                "acc" : difflib.SequenceMatcher(None, content, text).ratio() * 100
             })
 
             await message.add_reaction(emoji_map[len(winners)])
         
-        desc = [f" • {emoji_map[i]} | {x['user'].mention} in {x['time']:.2f} | **WPM:** {x['wpm']:.2f} | **ACC:** {x['acc']}" for i, x in enumerate(winners, 1)]
+        desc = [f" • {emoji_map[i]} | {x['user'].mention} in {x['time']:.2f} | **WPM:** {x['wpm']:.2f} | **ACC:** {x['acc']:.2f}%" for i, x in enumerate(winners, 1)]
         embed = discord.Embed(
             title = "Typerace results",
             color = 0x2F3136, 
