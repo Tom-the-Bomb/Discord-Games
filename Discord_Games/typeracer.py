@@ -81,7 +81,7 @@ class TypeRacer:
                 content = m.content.lower().replace("\n", " ")
                 if m.channel == ctx.channel and not m.author.bot and m.author not in map(lambda m: m["user"], winners):
                     sim = difflib.SequenceMatcher(None, content, text).ratio()
-                    return sim >= 0.8
+                    return sim >= 0.9
 
             start = time.perf_counter()
 
@@ -109,7 +109,7 @@ class TypeRacer:
 
             await message.add_reaction(emoji_map[len(winners)])
         
-        desc = [f" • {emoji_map[i]} | {x['user'].mention} in {x['time']:.2f} | **WPM:** {x['wpm']:.2f} | **ACC:** {x['acc']:.2f}" for i, x in enumerate(winners, 1)]
+        desc = [f" • {emoji_map[i]} | {x['user'].mention} in {x['time']:.2f}s | **WPM:** {x['wpm']:.2f} | **ACC:** {x['acc']:.2f}%" for i, x in enumerate(winners, 1)]
         embed = discord.Embed(
             title = "Typerace results",
             color = 0x2F3136, 
@@ -129,7 +129,7 @@ class TypeRacer:
         mode: str = "sentence"
     ):
 
-        if  mode == "sentence":
+        if mode == "sentence":
             async with aiohttp.ClientSession() as session:
                 async with session.get(self.SENTENCE_URL) as r:
                     if r.status in range(200, 299):
@@ -158,5 +158,4 @@ class TypeRacer:
         )
 
         await self.wait_for_tr_response(ctx, text, timeout=timeout)
-
         return True
