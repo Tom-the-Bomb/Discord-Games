@@ -62,8 +62,8 @@ class TypeRacer:
         draw  = ImageDraw.Draw(image)
         draw.text((5, 5), text, font=font, fill=(255,255,255))
 
-        draw.line((220,0,220,height), fill=(180,180,180), width=1)
-        draw.line((420,0,420,height), fill=(180,180,180), width=1)
+        draw.line((220,0,220,h), fill=(180,180,180), width=1)
+        draw.line((420,0,420,h), fill=(180,180,180), width=1)
 
         buffer = BytesIO()
         image.save(buffer, "png")
