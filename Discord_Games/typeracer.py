@@ -157,6 +157,6 @@ class TypeRacer:
             file  = discord.File(buffer, "tr.png")
         )
 
-        await self.wait_for_tr_response(ctx, text, start=start, timeout=timeout)
+        await self.wait_for_tr_response(ctx, text, timeout=timeout)
 
         return True
