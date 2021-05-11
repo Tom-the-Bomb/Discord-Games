@@ -74,6 +74,7 @@ class TypeRacer:
         emoji_map = {1: "🥇", 2: "🥈", 3: "🥉"}
         text = text.lower().replace("\n", " ")
         winners = []
+        start   = time.perf_counter()
 
         while len(winners) < 3:
 
@@ -82,8 +83,6 @@ class TypeRacer:
                 if m.channel == ctx.channel and not m.author.bot and m.author not in map(lambda m: m["user"], winners):
                     sim = difflib.SequenceMatcher(None, content, text).ratio()
                     return sim >= 0.9
-
-            start = time.perf_counter()
 
             try:
                 message = await ctx.bot.wait_for(
