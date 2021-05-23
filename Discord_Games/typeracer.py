@@ -7,11 +7,10 @@ import difflib
 
 import discord
 from PIL import Image, ImageDraw, ImageFont
-from io  import BytesIO
+from io import BytesIO
 from discord.ext import commands
-from typing import Union, SupportsFloat
+from typing import Union, Optional
 from datetime import datetime as dt
-from math import ceil
 
 
 class TypeRacer:
@@ -52,14 +51,14 @@ class TypeRacer:
         'night', 'real', 'life', 'few', 'north'
     )
 
-    def _tr_img(self, text: str, font: str):
+    def _tr_img(self, text: str, font: str) -> BytesIO:
         text = "\n".join(textwrap.wrap(text, width=25))
         font = ImageFont.truetype(font, 40)
-        x, y = font.getsize(text)
+        x, y = font.getsize_multiline(text)
         image = Image.new("RGBA", (x+10, y+10), (25,0,0))
 
-        draw = ImageDraw.Draw(image)
-        draw.text((5, 5), text, font=font, fill=(200, 200, 200))
+        cursor = ImageDraw.Draw(image)
+        cursor.multiline_text((5, 5), text, font=font, fill=(220, 200, 220))
 
         buffer = BytesIO()
         image.save(buffer, "png")
@@ -71,7 +70,7 @@ class TypeRacer:
         emoji_map = {1: "🥇", 2: "🥈", 3: "🥉"}
         text = text.lower().replace("\n", " ")
         winners = []
-        start   = time.perf_counter()
+        start = time.perf_counter()
 
         while True:
 
@@ -95,6 +94,7 @@ class TypeRacer:
 
             end = time.perf_counter()
             content = message.content.lower().replace("\n", " ")
+            timeout -= round(end - start)
 
             winners.append({
                 "user": message.author, 
@@ -120,22 +120,24 @@ class TypeRacer:
         return True
 
     async def start(
-        self, ctx: commands.Context, *, 
-        embed_title: str = "Type the following sentence in the chat now!", 
-        embed_color: Union[discord.Color, int] = discord.Color.greyple(), 
-        path_to_text_font: str = "arial.ttf",
-        timeout: SupportsFloat = None, 
-        mode: str = "sentence"
+        self, 
+        ctx: commands.Context, *, 
+        embed_title: Optional[str] = "Type the following sentence in the chat now!", 
+        embed_color: Optional[Union[discord.Color, int]] = discord.Color.greyple(), 
+        path_to_text_font: Optional[str] = "arial.ttf",
+        timeout: Optional[Union[int, float]] = None, 
+        mode: Optional[str] = "sentence",
+        show_author: Optional[bool] = True
     ):
 
         if mode == "sentence":
             async with aiohttp.ClientSession() as session:
                 async with session.get(self.SENTENCE_URL) as r:
-                    if r.status in range(200, 299):
+                    if r.ok:
                         text = await r.json()
-                        text = text["content"]
+                        text = text.get("content")
                     else:
-                        return await ctx.send("Oops an error occured")
+                        raise RuntimeError(f"ERROR: {r.status}, {r.reason}")
         elif mode == "random":
             text = " ".join([random.choice(self.GRAMMAR_WORDS).lower() for _ in range(15)])
         else:
@@ -143,17 +145,19 @@ class TypeRacer:
 
         buffer = await ctx.bot.loop.run_in_executor(None, self._tr_img, text, path_to_text_font)
 
-        embed  = discord.Embed(
+        embed = discord.Embed(
             title = embed_title,
             color = embed_color, 
             timestamp = dt.utcnow()
         )
         embed.set_image(url="attachment://tr.png")
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
+
+        if show_author:
+            embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
 
         await ctx.send(
             embed = embed,
-            file  = discord.File(buffer, "tr.png")
+            file = discord.File(buffer, "tr.png")
         )
 
         await self.wait_for_tr_response(ctx, text, timeout=timeout)
