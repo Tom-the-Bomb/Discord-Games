@@ -54,15 +54,12 @@ class TypeRacer:
 
     def _tr_img(self, text: str, font: str):
         text = "\n".join(textwrap.wrap(text, width=25))
-        height = ceil(len(text) / 25) * 70
-        image  = Image.new("RGBA", (640, height), (10,10,10))
-        font   = ImageFont.truetype(font, 40)
+        font = ImageFont.truetype(font, 40)
+        x, y = font.getsize(text)
+        image = Image.new("RGBA", (x+10, y+10), (25,0,0))
 
-        draw  = ImageDraw.Draw(image)
-        draw.text((5, 5), text, font=font, fill=(255,255,255))
-
-        draw.line((220,0,220,height), fill=(180,180,180), width=1)
-        draw.line((420,0,420,height), fill=(180,180,180), width=1)
+        draw = ImageDraw.Draw(image)
+        draw.text((5, 5), text, font=font, fill=(200, 200, 200))
 
         buffer = BytesIO()
         image.save(buffer, "png")
