@@ -53,9 +53,9 @@ class TypeRacer:
 
     def _tr_img(self, text: str, font: str) -> BytesIO:
         text = "\n".join(textwrap.wrap(text, width=25))
-        font = ImageFont.truetype(font, 40)
+        font = ImageFont.truetype(font, 30)
         x, y = font.getsize_multiline(text)
-        image = Image.new("RGBA", (x+20, y+20), (0, 0, 30))
+        image = Image.new("RGBA", (x+20, y+30), (0, 0, 30))
 
         cursor = ImageDraw.Draw(image)
         cursor.multiline_text((10, 10), text, font=font, fill=(220, 200, 220))
