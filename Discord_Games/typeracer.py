@@ -90,7 +90,7 @@ class TypeRacer:
                 if winners:
                     break
                 else:
-                    return await ctx.reply("> Looks like no one responded", allowed_mentions=discord.AllowedMentions.none())
+                    return await ctx.reply("Looks like no one responded", allowed_mentions=discord.AllowedMentions.none())
 
             end = time.perf_counter()
             content = message.content.lower().replace("\n", " ")
@@ -125,7 +125,7 @@ class TypeRacer:
         embed_title: Optional[str] = "Type the following sentence in the chat now!", 
         embed_color: Optional[Union[discord.Color, int]] = discord.Color.greyple(), 
         path_to_text_font: Optional[str] = "arial.ttf",
-        timeout: Optional[Union[int, float]] = None, 
+        timeout: Optional[float] = None, 
         mode: Optional[str] = "sentence",
         show_author: Optional[bool] = True
     ):
