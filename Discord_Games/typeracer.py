@@ -109,7 +109,7 @@ class TypeRacer:
                 "acc" : difflib.SequenceMatcher(None, content, text).ratio() * 100
             })
 
-            self._embed.description += format_line(len(winners), winners[len(winners)-1])
+            self._embed.description += format_line(len(winners), winners[len(winners)-1]) + "\n"
             await self._message.edit(embed=self._embed)
 
             await message.add_reaction(emoji_map[len(winners)])
