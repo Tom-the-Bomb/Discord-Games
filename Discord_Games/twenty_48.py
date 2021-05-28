@@ -1,17 +1,17 @@
 import discord
 from discord.ext import commands
+from typing import Dict
 
 import random
 
 class Twenty48:
 
-    def __init__(self):
+    def __init__(self, number_to_display_dict: Dict[str, str]):
+
         self.board = [[0 for _ in range(4)] for _ in range(4)]
-        self._controls = ['➡️', '⬅️', '⬇️', '⬆️']
         self.message = None
-    
-    def update_emojis(self, number_to_emoji: dict) -> None:
-        self._conversion = number_to_emoji
+        self._controls = ['➡️', '⬅️', '⬇️', '⬆️']
+        self._conversion = number_to_display_dict
 
     async def reverse(self, board: list) -> list:
         new_board = []

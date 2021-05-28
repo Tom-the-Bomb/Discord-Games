@@ -67,7 +67,13 @@ class TypeRacer:
 
     async def wait_for_tr_response(self, ctx: commands.Context, text: str, *, timeout: int):
         
-        emoji_map = {1: "🥇", 2: "🥈", 3: "🥉"}
+        emoji_map = {
+            1: "🥇", 2: "🥈", 3: "🥉"
+        }
+
+        self._embed.description = ""
+        format_line = lambda i, x: f" • {emoji_map[i]} | {x['user'].mention} in {x['time']:.2f}s | **WPM:** {x['wpm']:.2f} | **ACC:** {x['acc']:.2f}%"
+
         text = text.lower().replace("\n", " ")
         winners = []
         start = time.perf_counter()
@@ -103,12 +109,15 @@ class TypeRacer:
                 "acc" : difflib.SequenceMatcher(None, content, text).ratio() * 100
             })
 
+            self._embed.description += format_line(len(winners), winners[len(winners)-1])
+            await self._message.edit(embed=self._embed)
+
             await message.add_reaction(emoji_map[len(winners)])
 
             if len(winners) >= 3:
                 break
         
-        desc = [f" • {emoji_map[i]} | {x['user'].mention} in {x['time']:.2f}s | **WPM:** {x['wpm']:.2f} | **ACC:** {x['acc']:.2f}%" for i, x in enumerate(winners, 1)]
+        desc = [format_line(i, x) for i, x in enumerate(winners, 1)]
         embed = discord.Embed(
             title = "Typerace results",
             color = 0x2F3136, 
@@ -155,7 +164,8 @@ class TypeRacer:
         if show_author:
             embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
 
-        await ctx.send(
+        self._embed = embed
+        self._message = await ctx.send(
             embed = embed,
             file = discord.File(buffer, "tr.png")
         )
