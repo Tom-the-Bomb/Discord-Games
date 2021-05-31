@@ -95,7 +95,7 @@ class ConnectFour:
     
     async def start(self, ctx: commands.Context, *, remove_reaction_after: bool = False, **kwargs):
 
-        embed = await self.make_embed()
+        embed = await self.make_embed(False)
         self.message = await ctx.send(self.BoardString(), embed=embed, **kwargs)
 
         for button in self._controls:
@@ -113,7 +113,7 @@ class ConnectFour:
 
             emoji = str(reaction.emoji)
             await self.PlacePiece(emoji, user)
-            embed = await self.make_embed()
+            embed = await self.make_embed(status)
 
             if remove_reaction_after:
                 await self.message.remove_reaction(emoji, user)
