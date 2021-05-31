@@ -10,7 +10,7 @@ class ConnectFour:
     def __init__(self, *, red: discord.Member, blue: discord.Member):
         self.red_player  = red
         self.blue_player = blue
-        self.board       = [[BLANK for __ in range(7)] for __ in range(6)]
+        self.board       = [[BLANK for _ in range(7)] for _ in range(6)]
         self._controls   = ('1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣')
         self.turn        = self.red_player
         self.message    = None
@@ -39,9 +39,9 @@ class ConnectFour:
             board += "".join(row) + "\n"
         return board
 
-    async def make_embed(self) -> discord.Embed:
+    async def make_embed(self, status: bool) -> discord.Embed:
         embed = discord.Embed()
-        if not await self.GameOver():
+        if not status:
             embed.description = f"**Turn:** {self.turn.name}\n**Piece:** `{self._PlayerToEmoji[self.turn]}`"
         else:
             status = f"{self.winner} won!" if self.winner else "Tie"
@@ -54,7 +54,7 @@ class ConnectFour:
             raise KeyError("Provided emoji is not one of the valid controls")
         y = self._conversion[emoji]
 
-        for x in range(5,-1,-1):
+        for x in range(5, -1, -1):
             if self.board[x][y] == BLANK:
                 self.board[x][y] = self._PlayerToEmoji[user]
                 break
@@ -64,7 +64,7 @@ class ConnectFour:
 
     async def GameOver(self) -> bool:
 
-        if all([i != BLANK for i in self.board[0]]):
+        if all(i != BLANK for i in self.board[0]):
             return True
 
         for x in range(6):
@@ -108,7 +108,7 @@ class ConnectFour:
 
             reaction, user = await ctx.bot.wait_for("reaction_add", check=check)
 
-            if await self.GameOver():
+            if status := await self.GameOver():
                 break
 
             emoji = str(reaction.emoji)
@@ -120,5 +120,5 @@ class ConnectFour:
 
             await self.message.edit(content=self.BoardString(), embed=embed)
         
-        embed = await self.make_embed()
+        embed = await self.make_embed(status)
         return await self.message.edit(content=self.BoardString(), embed=embed)
