@@ -44,8 +44,8 @@ class ConnectFour:
         if not status:
             embed.description = f"**Turn:** {self.turn.name}\n**Piece:** `{self._PlayerToEmoji[self.turn]}`"
         else:
-            status = f"{self.winner} won!" if self.winner else "Tie"
-            embed.description = f"**Game over**\n{status}"
+            _status = f"{self.winner} won!" if self.winner else "Tie"
+            embed.description = f"**Game over**\n{_status}"
         return embed
         
     async def PlacePiece(self, emoji: str, user) -> list:
@@ -108,16 +108,16 @@ class ConnectFour:
 
             reaction, user = await ctx.bot.wait_for("reaction_add", check=check)
 
+            emoji = str(reaction.emoji)
+            await self.PlacePiece(emoji, user)
+
             if status := await self.GameOver():
                 break
 
-            emoji = str(reaction.emoji)
-            await self.PlacePiece(emoji, user)
-            embed = await self.make_embed(status)
-
             if remove_reaction_after:
                 await self.message.remove_reaction(emoji, user)
-
+                
+            embed = await self.make_embed(False)
             await self.message.edit(content=self.BoardString(), embed=embed)
         
         embed = await self.make_embed(status)
