@@ -95,7 +95,13 @@ class Twenty48:
             GameString += "".join(row) + "\n"
         return GameString
 
-    async def start(self, ctx: commands.Context, *, remove_reaction_after: bool = True, delete_button: bool = False, **kwargs):
+    async def start(
+        self, 
+        ctx: commands.Context, *, 
+        remove_reaction_after: bool = True, 
+        delete_button: bool = False, 
+        **kwargs
+    ):
 
         self.board[random.randrange(4)][random.randrange(4)] = 2
         self.board[random.randrange(4)][random.randrange(4)] = 2
