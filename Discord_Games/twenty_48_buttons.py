@@ -7,7 +7,7 @@ from discord.enums import ButtonStyle
 from discord.ext import commands
 from discord.ui import View
 
-from .twenty_48 import Twenty_48
+from .twenty_48 import Twenty48
 
 class Twenty48_Button(discord.ui.Button['Twenty48']):
     
@@ -38,7 +38,7 @@ class Twenty48_Button(discord.ui.Button['Twenty48']):
 
         await interaction.response.edit_message(content=BoardString)
 
-class BetaTwenty48(Twenty_48, discord.ui.View):
+class BetaTwenty48(Twenty48, discord.ui.View):
 
     async def start(self, ctx: commands.Context, **kwargs):
 
