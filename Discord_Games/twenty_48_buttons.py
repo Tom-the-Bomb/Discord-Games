@@ -13,7 +13,6 @@ class Twenty48_Button(discord.ui.Button['Twenty48']):
     
     def __init__(self, emoji: str):
         super().__init__(style=discord.ButtonStyle.secondary, label=emoji)
-        self.y = y
 
     async def callback(self, interaction: discord.Interaction):
 
