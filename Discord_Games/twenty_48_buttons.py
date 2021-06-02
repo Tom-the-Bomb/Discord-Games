@@ -7,7 +7,7 @@ from discord.enums import ButtonStyle
 from discord.ext import commands
 from discord.ui import View
 
-from ..twenty_48 import Twenty_48
+from .twenty_48 import Twenty_48
 
 class Twenty48_Button(discord.ui.Button['Twenty48']):
     
