@@ -40,7 +40,7 @@ class Twenty48_Button(discord.ui.Button['Twenty48']):
 
 class BetaTwenty48(Twenty_48, discord.ui.View):
 
-    async def start(self, ctx: commands.Context, *, **kwargs):
+    async def start(self, ctx: commands.Context, **kwargs):
 
         self.board[random.randrange(4)][random.randrange(4)] = 2
         self.board[random.randrange(4)][random.randrange(4)] = 2
