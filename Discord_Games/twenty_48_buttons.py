@@ -32,7 +32,7 @@ class Twenty48_Button(discord.ui.Button['Twenty48']):
         await self.game.spawn_new()
         BoardString = await self.game.number_to_emoji()
 
-        await interaction.message.edit_message(content=BoardString)
+        await interaction.message.edit(content=BoardString)
 
 
 class BetaTwenty48(Twenty48):
