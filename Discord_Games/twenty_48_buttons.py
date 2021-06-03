@@ -41,9 +41,9 @@ class BetaTwenty48(Twenty48):
         self.view = discord.ui.View()
         self.board[random.randrange(4)][random.randrange(4)] = 2
         self.board[random.randrange(4)][random.randrange(4)] = 2
-        
-        BoardString = await self.number_to_emoji()
-        self.message = await ctx.send(content=BoardString, view=self.view, **kwargs)
 
         for button in self._controls:
             self.view.add_item(Twenty48_Button(button))
+        
+        BoardString = await self.number_to_emoji()
+        self.message = await ctx.send(content=BoardString, view=self.view, **kwargs)
