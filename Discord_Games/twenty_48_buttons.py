@@ -8,13 +8,13 @@ from .twenty_48 import Twenty48
 class Twenty48_Button(discord.ui.Button['Twenty48']):
     
     def __init__(self, emoji: str):
-        super().__init__(style=discord.ButtonStyle.secondary, label=emoji)
+        super().__init__(style=discord.ButtonStyle.blurple, label=emoji)
 
     async def callback(self, interaction: discord.Interaction):
 
         assert self.view
 
-        emoji = self.view.label
+        emoji = self.label
 
         if emoji == '➡️':
             await self.view.MoveRight()
