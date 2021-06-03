@@ -21,6 +21,9 @@ class Twenty48_Button(discord.ui.Button['Twenty48']):
 
         assert self.view
 
+        if not interaction.user == self.game.player:
+            return await interaction.response.send_message(content="This isn't your game!", ephemeral=True)
+
         emoji = str(self.emoji)
 
         if emoji == '➡️':

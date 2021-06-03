@@ -80,7 +80,7 @@ class Twenty48:
 
     async def spawn_new(self) -> None:
         board  = self.board
-        zeroes = [(i, j) for j, sub in enumerate(board) for i, el in enumerate(sub) if el == 0]
+        zeroes = [(j, i) for j, sub in enumerate(board) for i, el in enumerate(sub) if el == 0]
         if not zeroes:
             return
         i, j = random.choice(zeroes)
@@ -102,6 +102,7 @@ class Twenty48:
         **kwargs
     ):
 
+        self.player = ctx.author
         self.board[random.randrange(4)][random.randrange(4)] = 2
         self.board[random.randrange(4)][random.randrange(4)] = 2
         
@@ -118,7 +119,7 @@ class Twenty48:
         while True:
 
             def check(reaction, user):
-                return str(reaction.emoji) in self._controls and user == ctx.author and reaction.message == self.message
+                return str(reaction.emoji) in self._controls and user == self.player and reaction.message == self.message
 
             reaction, __ = await ctx.bot.wait_for("reaction_add", check=check)
 
@@ -127,7 +128,7 @@ class Twenty48:
             if delete_button and emoji == "⏹️":
                 return await self.message.delete()
 
-            if emoji   == '➡️':
+            if emoji == '➡️':
                 await self.MoveRight()
 
             elif emoji == '⬅️':
@@ -145,7 +146,7 @@ class Twenty48:
             if remove_reaction_after:
                 try:
                     await self.message.remove_reaction(emoji, ctx.author)
-                except:
+                except Exception:
                     pass
 
             await self.message.edit(content=BoardString)
