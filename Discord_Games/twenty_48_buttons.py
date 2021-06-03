@@ -15,7 +15,7 @@ class Twenty48_Button(discord.ui.Button['Twenty48']):
     
     def __init__(self, game, emoji: str):
         self.game = game
-        super().__init__(style=discord.ButtonStyle.blurple, emoji=emoji)
+        super().__init__(style=discord.ButtonStyle.primary, emoji=discord.PartialEmoji(emoji))
 
     async def callback(self, interaction: discord.Interaction):
 
