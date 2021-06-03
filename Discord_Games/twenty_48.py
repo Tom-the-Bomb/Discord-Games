@@ -79,13 +79,12 @@ class Twenty48:
         self.board = stage
 
     async def spawn_new(self) -> None:
-        board = self.board
-        while True:
-            i = random.randrange(4)
-            j = random.randrange(4)
-            if board[i][j] == 0:
-                board[i][j] = 2
-                return
+        board  = self.board
+        zeroes = [(i, j) for j, sub in enumerate(board) for i, el in enumerate(sub) if el == 0]
+        if not zeroes:
+            return
+        i, j = random.choice(zeroes)
+        board[i][j] = 2
 
     async def number_to_emoji(self) -> str:
         board = self.board

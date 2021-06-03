@@ -1,3 +1,9 @@
+"""
+Beta version of 2048
+made with discord.py v2.0 and buttons
+please do not use this until dpy 2.0 is offically released
+"""
+
 import random
 
 import discord
@@ -9,13 +15,13 @@ class Twenty48_Button(discord.ui.Button['Twenty48']):
     
     def __init__(self, game, emoji: str):
         self.game = game
-        super().__init__(style=discord.ButtonStyle.blurple, label=emoji)
+        super().__init__(style=discord.ButtonStyle.blurple, emoji=emoji)
 
     async def callback(self, interaction: discord.Interaction):
 
         assert self.view
 
-        emoji = self.label
+        emoji = str(self.emoji)
 
         if emoji == '➡️':
             await self.game.MoveRight()
