@@ -19,8 +19,6 @@ class AkiView(discord.ui.View):
 
     async def process_input(self, interaction: discord.Interaction, answer: str):
 
-        assert self.view
-
         game = self.game
 
         if interaction.user != game.player:
