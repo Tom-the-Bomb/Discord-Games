@@ -32,7 +32,7 @@ class AkiView(discord.ui.View):
                     obb.disabled = True
 
             embed = await game.win()
-            return await interaction.message.edit(embed=embed)
+            return await interaction.message.edit(embed=embed, view=self)
 
     @discord.ui.button(label="yes", style=discord.ButtonStyle.green)
     async def yes_button(self, button: discord.ui.Button, interaction: discord.Interaction):
