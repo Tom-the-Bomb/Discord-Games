@@ -28,11 +28,9 @@ class AkiView(discord.ui.View):
         if game.aki.progression > game.win_at:
 
             for obb in self.children:
-                if isinstance(obb, discord.ui.Button):
-                    obb.disabled = True
+                obb.disabled = True
 
             embed = await game.win()
-            await interaction.response.defer()
             await interaction.message.edit(embed=embed, view=self)
             return self.stop()
 
