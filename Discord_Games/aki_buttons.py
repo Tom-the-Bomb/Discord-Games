@@ -18,14 +18,21 @@ class AkiView(discord.ui.View):
         super().__init__(timeout=timeout)
 
     async def process_input(self, interaction: discord.Interaction, answer: str):
+
+        assert self.view
+
         game = self.game
+
+        if interaction.user != game.player:
+            return await interaction.response.send_message(content="This isn't your game", ephemeral=True)
+        
         game.questions += 1
         await game.aki.answer(answer)
 
         embed = await game.build_embed()
         await interaction.message.edit(embed=embed)
 
-        if game.aki.progression > game.win_at:
+        if game.aki.progression >= game.win_at:
 
             for obb in self.children:
                 obb.disabled = True
@@ -58,6 +65,7 @@ class AkiView(discord.ui.View):
 class BetaAkinator(Akinator):
 
     async def start(self, ctx: commands.Context, win_at: int = 80, timeout: int = None, child_mode: bool = True, **kwargs):
+        self.player = ctx.author
         self.win_at = win_at
         self.view = AkiView(self, timeout=timeout)
 

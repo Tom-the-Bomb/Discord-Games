@@ -17,6 +17,7 @@ class Options:
 class Akinator:
 
     def __init__(self):
+        self.player = None
         self.win_at = None
         self.aki = Akinator_()
         self.bar_emojis = ("  ", "██")
@@ -69,7 +70,8 @@ class Akinator:
         return embed
 
     async def start(self, ctx: commands.Context, remove_reaction_after: bool = False, win_at: int = 80, timeout: int = None, delete_button: bool = False, child_mode: bool = True, **kwargs):
-
+        
+        self.player = ctx.author
         self.win_at = win_at
 
         await self.aki.start_game(child_mode=child_mode)
