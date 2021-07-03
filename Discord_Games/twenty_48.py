@@ -1,3 +1,5 @@
+import asyncio
+
 import discord
 from discord.ext import commands
 from typing import Dict
@@ -97,6 +99,7 @@ class Twenty48:
     async def start(
         self, 
         ctx: commands.Context, *, 
+        timeout: float = None,
         remove_reaction_after: bool = True, 
         delete_button: bool = False, 
         **kwargs
@@ -120,8 +123,11 @@ class Twenty48:
 
             def check(reaction, user):
                 return str(reaction.emoji) in self._controls and user == self.player and reaction.message == self.message
-
-            reaction, __ = await ctx.bot.wait_for("reaction_add", check=check)
+            
+            try:
+                reaction, _ = await ctx.bot.wait_for("reaction_add", timeout=timeout, check=check)
+            except asyncio.TimeoutError:
+                return False
 
             emoji = str(reaction.emoji)
 

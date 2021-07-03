@@ -1,32 +1,35 @@
-import akinator
+
 import asyncio
-from   akinator.async_aki import Akinator as _Akinator_
+from akinator.async_aki import Akinator as Akinator_
 
 import discord
-from   discord.ext import commands
+from discord.ext import commands
 
-YES  = "✅"
-NO   = "❌"
-IDK  = "🤷"
-P    = "🤔"
-PN   = "😔"
-STOP = "⏹️"
+
+class Options:
+    YES = "✅"
+    NO = "❌"
+    IDK = "🤷"
+    PY = "🤔"
+    PN  = "😔"
+    STOP = "⏹️"
 
 class Akinator:
 
     def __init__(self):
-        self.aki     = _Akinator_()
+        self.win_at = None
+        self.aki = Akinator_()
         self.bar_emojis = ("  ", "██")
-        self.guess   = None
-        self.bar     = ""
+        self.guess = None
+        self.bar = ""
         self.message = None
         self.questions = 0
         self.mapping = {
-            YES: "y", 
-            NO : "n", 
-            IDK: "i", 
-            P  : "p", 
-            PN : "pn"
+            Options.YES: "y", 
+            Options.NO : "n", 
+            Options.IDK: "i", 
+            Options.PY : "p", 
+            Options.PN : "pn"
         }
 
     def build_bar(self) -> str:
@@ -56,7 +59,7 @@ class Akinator:
         await self.aki.win()
         self.guess = self.aki.first_guess
 
-        embed       = discord.Embed()
+        embed = discord.Embed()
         embed.title = "Character Guesser Engine Results"
         embed.description = f"Total Questions: `{self.questions}`"
         embed.add_field(name= "Character Guessed", value=f"\n**Name:** {self.guess['name']}\n{self.guess['description']}")
@@ -65,7 +68,9 @@ class Akinator:
 
         return embed
 
-    async def start(self, ctx: commands.Context, remove_reaction_after: bool = False, win_at_: int = 80, timeout: int = None, delete_button: bool = False, child_mode: bool = True, **kwargs):
+    async def start(self, ctx: commands.Context, remove_reaction_after: bool = False, win_at: int = 80, timeout: int = None, delete_button: bool = False, child_mode: bool = True, **kwargs):
+
+        self.win_at = win_at
 
         await self.aki.start_game(child_mode=child_mode)
 
@@ -74,23 +79,24 @@ class Akinator:
 
         for button in self.mapping:
             await self.message.add_reaction(button)
-        if delete_button:
-            await self.message.add_reaction(STOP)
 
-        while self.aki.progression <= win_at_:
+        if delete_button:
+            await self.message.add_reaction(Options.STOP)
+
+        while self.aki.progression <= self.win_at:
 
             def check(reaction, user):
                 if reaction.message == self.message and user == ctx.author:
-                    return str(reaction.emoji) in self.mapping or str(reaction.emoji) == STOP
+                    return str(reaction.emoji) in self.mapping or str(reaction.emoji) == Options.STOP
 
             try:
-                reaction, __ = await ctx.bot.wait_for('reaction_add', timeout=timeout, check=check)
+                reaction, _ = await ctx.bot.wait_for('reaction_add', timeout=timeout, check=check)
             except asyncio.TimeoutError:
                 return
             
             emoji = str(reaction.emoji)
 
-            if emoji == STOP:
+            if emoji == Options.STOP:
                 await ctx.send("Session ended")
                 return await self.message.delete()
 
@@ -99,7 +105,7 @@ class Akinator:
             await self.aki.answer(self.mapping[emoji])
             try:
                 await self.message.remove_reaction(emoji, ctx.author)
-            except:
+            except discord.DiscordException:
                 pass
             
             embed = await self.build_embed()

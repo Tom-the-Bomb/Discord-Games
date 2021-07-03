@@ -3,6 +3,7 @@ Beta version of 2048
 made with discord.py v2.0 and buttons
 please do not use this until dpy 2.0 is offically released
 """
+from __future__ import annotations
 
 import random
 
@@ -12,8 +13,10 @@ from discord.ext import commands
 from .twenty_48 import Twenty48
 
 class Twenty48_Button(discord.ui.Button['Twenty48']):
+
+    view: discord.ui.View
     
-    def __init__(self, game, emoji: str):
+    def __init__(self, game: BetaTwenty48, emoji: str):
         self.game = game
         super().__init__(style=discord.ButtonStyle.primary, emoji=discord.PartialEmoji(name=emoji), label="\u200b")
 
@@ -21,7 +24,7 @@ class Twenty48_Button(discord.ui.Button['Twenty48']):
 
         assert self.view
 
-        if not interaction.user == self.game.player:
+        if interaction.user != self.game.player:
             return await interaction.response.send_message(content="This isn't your game!", ephemeral=True)
 
         emoji = str(self.emoji)
@@ -46,10 +49,10 @@ class Twenty48_Button(discord.ui.Button['Twenty48']):
 
 class BetaTwenty48(Twenty48):
 
-    async def start(self, ctx: commands.Context, **kwargs):
+    async def start(self, ctx: commands.Context, *, timeout: float = None, **kwargs):
         
         self.player = ctx.author
-        self.view = discord.ui.View()
+        self.view = discord.ui.View(timeout=timeout)
         self.board[random.randrange(4)][random.randrange(4)] = 2
         self.board[random.randrange(4)][random.randrange(4)] = 2
 
