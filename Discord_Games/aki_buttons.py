@@ -31,27 +31,27 @@ class AkiView(discord.ui.View):
                 if isinstance(obb, discord.ui.Button):
                     obb.disabled = True
 
-        embed = await game.win()
-        return await interaction.message.edit(embed=embed)
+            embed = await game.win()
+            return await interaction.message.edit(embed=embed)
 
     @discord.ui.button(label="yes", style=discord.ButtonStyle.green)
     async def yes_button(self, button: discord.ui.Button, interaction: discord.Interaction):
         return await self.process_input(interaction, "y")
 
     @discord.ui.button(label="no", style=discord.ButtonStyle.danger)
-    async def yes_button(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def no_button(self, button: discord.ui.Button, interaction: discord.Interaction):
         return await self.process_input(interaction, "n")
 
     @discord.ui.button(label="idk", style=discord.ButtonStyle.blurple)
-    async def yes_button(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def idk_button(self, button: discord.ui.Button, interaction: discord.Interaction):
         return await self.process_input(interaction, "i")
 
     @discord.ui.button(label="probably", style=discord.ButtonStyle.grey)
-    async def yes_button(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def py_button(self, button: discord.ui.Button, interaction: discord.Interaction):
         return await self.process_input(interaction, "p")
 
     @discord.ui.button(label="probably not", style=discord.ButtonStyle.grey)
-    async def yes_button(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def pn_button(self, button: discord.ui.Button, interaction: discord.Interaction):
         return await self.process_input(interaction, "pn")
         
 

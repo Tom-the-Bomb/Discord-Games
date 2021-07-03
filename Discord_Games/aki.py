@@ -59,7 +59,7 @@ class Akinator:
         await self.aki.win()
         self.guess = self.aki.first_guess
 
-        embed = discord.Embed()
+        embed = discord.Embed(color=0x2F3136)
         embed.title = "Character Guesser Engine Results"
         embed.description = f"Total Questions: `{self.questions}`"
         embed.add_field(name= "Character Guessed", value=f"\n**Name:** {self.guess['name']}\n{self.guess['description']}")
