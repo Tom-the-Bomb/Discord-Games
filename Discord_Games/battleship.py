@@ -1,5 +1,5 @@
 
-from typing import Tuple, List, Optional, Union, Callable
+from typing import Tuple, List, Optional, Union, Callable, Dict
 from itertools import chain
 from enum import Enum
 from io import BytesIO
@@ -15,6 +15,17 @@ from PIL import Image, ImageDraw
 
 Coords = Tuple[int, int]
 
+SHIPS: Dict[str, Tuple[int, Tuple[int, int, int]]] = {
+    "carrier": (5, 
+        (80, 80, 80)),
+    "battleship": (4, 
+        (110, 110, 110)),
+    "submarine": (3, 
+        (150, 150, 150)),
+    "cruiser": (2, 
+        (190, 190, 190)),
+}
+
 def executor():
 
     def decorator(func: Callable):
@@ -27,19 +38,14 @@ def executor():
         return wrapper
     return decorator
 
-class Ships(Enum):
-    CARRIER = 5
-    BATTLESHIP = 4
-    SUBMARINE = 3
-    CRUISER = 2
-
 class Ship:
 
     def __init__(self, 
         name: str, 
         size: int, 
         start: Coords,
-        vertical: bool = False
+        color: Tuple[int, int, int],
+        vertical: bool = False,
     ) -> None:
 
         self.name: str = name
@@ -47,6 +53,7 @@ class Ship:
 
         self.start: Coords = start
         self.vertical: bool = vertical
+        self.color: Tuple[int, int, int] = color
         
         self.end: Coords = (
             (self.start[0], self.start[1] + self.size) if self.vertical else
@@ -62,7 +69,6 @@ class Ship:
         )
 
         self.hits: List[bool] = [False] * self.size
-
 
 class Board:
 
@@ -95,24 +101,25 @@ class Board:
 
     def _place_ships(self) -> None:
 
-        def place_ship(ship: Ship) -> None:
+        def place_ship(ship: Ship, size: int, color: Tuple[int, int, int]) -> None:
             start = random.randint(1, 10), random.randint(1, 10)
             vertical = bool(random.randint(0, 1))
 
             new_ship = Ship(
-                name=ship.name, 
-                size=ship.value, 
+                name=ship, 
+                size=size, 
                 start=start, 
                 vertical=vertical,
+                color=color,
             )
 
             if self._is_valid(new_ship):
                 self.ships.append(new_ship)
             else:
-                place_ship(ship)
+                place_ship(ship, size, color)
 
-        for ship in Ships:
-            place_ship(ship)
+        for ship, (size, color) in SHIPS.items():
+            place_ship(ship, size, color)
 
     def won(self) -> bool:
         return all(all(ship.hits) for ship in self.ships)
@@ -130,12 +137,14 @@ class Board:
                 x2, y2 = x + 10, y + 10
                 cur.ellipse((x1, y1, x2, y2), fill=fill)
 
-            def draw_sq(x: int, y: int) -> None:
+            def draw_sq(x: int, y: int, fill: Union[int, Tuple[int, ...]] = GRAY) -> None:
                 x1, y1 = x - 24, y - 24
                 x2, y2 = x + 24, y + 24
-                cur.rectangle((x1, y1, x2, y2), fill=GRAY)
+                cur.rectangle((x1, y1, x2, y2), fill=fill)
 
-            all_spans = list(chain(*[s.span for s in self.ships]))
+            def get_ship(coord: Coords) -> Optional[Ship]:
+                if s := [ship for ship in self.ships if coord in ship.span]:
+                    return s[0]
             
             for i, y in zip(
                 range(1, 11), range(75, 530, 50)
@@ -151,12 +160,13 @@ class Board:
                         if hide:
                             draw_dot(x, y, fill=RED)
                         else:
-                            draw_sq(x, y)
+                            ship = get_ship(coord)
+                            draw_sq(x, y, fill=ship.color)
                             draw_dot(x, y, fill=RED)
 
-                    elif coord in all_spans:
+                    elif ship := get_ship(coord):
                         if not hide:
-                            draw_sq(x, y)
+                            draw_sq(x, y, fill=ship.color)
             return img
 
 class BattleShip:
@@ -300,3 +310,4 @@ class BattleShip:
                 other = self.player2 if winner == self.player1 else self.player1
                 await other.send('You lost, better luck next time :(')
                 return None
+                
