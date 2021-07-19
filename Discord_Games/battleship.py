@@ -123,6 +123,38 @@ class Board:
 
     def won(self) -> bool:
         return all(all(ship.hits) for ship in self.ships)
+
+    def draw_dot(self, cur: ImageDraw.Draw, x: int, y: int, fill: Union[int, Tuple[int, ...]]) -> None:
+        x1, y1 = x - 10, y - 10
+        x2, y2 = x + 10, y + 10
+        cur.ellipse((x1, y1, x2, y2), fill=fill)
+
+    def draw_sq(self, cur: ImageDraw.Draw, x: int, y: int, *, coord: Coords, ship: Ship) -> None:
+        vertical = ship.vertical
+        left_end = ship.span.index(coord) == 0
+        right_end = ship.span.index(coord) == ship.size - 1
+        
+        if vertical and left_end:
+            diffs = (18, 18, 25, 18)
+        elif vertical and right_end:
+            diffs = (25, 18, 18, 18)
+        elif not vertical and left_end:
+            diffs = (18, 18, 18, 25)
+        elif not vertical and right_end:
+            diffs = (18, 25, 18, 18)
+        elif vertical:
+            diffs = (25, 18, 25, 18)
+        else:
+            diffs = (18, 25, 18, 25)
+            
+        d1, d2, d3, d4 = diffs
+        x1, y1 = x - d1, y - d2
+        x2, y2 = x + d3, y + d4
+        cur.rectangle((x1, y1, x2, y2), fill=ship.color)
+
+    def get_ship(self, coord: Coords) -> Optional[Ship]:
+        if s := [ship for ship in self.ships if coord in ship.span]:
+            return s[0]
     
     @executor()
     def to_image(self, hide: bool = False) -> Image.Image:
@@ -131,20 +163,6 @@ class Board:
 
         with Image.open('./assets/battleship.png') as img:
             cur = ImageDraw.Draw(img)
-
-            def draw_dot(x: int, y: int, fill: Union[int, Tuple[int, ...]]) -> None:
-                x1, y1 = x - 10, y - 10
-                x2, y2 = x + 10, y + 10
-                cur.ellipse((x1, y1, x2, y2), fill=fill)
-
-            def draw_sq(x: int, y: int, fill: Union[int, Tuple[int, ...]] = GRAY) -> None:
-                x1, y1 = x - 24, y - 24
-                x2, y2 = x + 24, y + 24
-                cur.rectangle((x1, y1, x2, y2), fill=fill)
-
-            def get_ship(coord: Coords) -> Optional[Ship]:
-                if s := [ship for ship in self.ships if coord in ship.span]:
-                    return s[0]
             
             for i, y in zip(
                 range(1, 11), range(75, 530, 50)
@@ -154,19 +172,19 @@ class Board:
                 ):
                     coord = (i, j)
                     if coord in self.my_misses:
-                        draw_dot(x, y, fill=GRAY)
+                        self.draw_dot(cur, x, y, fill=GRAY)
 
                     elif coord in self.my_hits:
                         if hide:
-                            draw_dot(x, y, fill=RED)
+                            self.draw_dot(cur, x, y, fill=RED)
                         else:
-                            ship = get_ship(coord)
-                            draw_sq(x, y, fill=ship.color)
-                            draw_dot(x, y, fill=RED)
+                            ship = self.get_ship(coord)
+                            self.draw_sq(cur, x, y, coord=coord, ship=ship)
+                            self.draw_dot(cur, x, y, fill=RED)
 
-                    elif ship := get_ship(coord):
+                    elif ship := self.get_ship(coord):
                         if not hide:
-                            draw_sq(x, y, fill=ship.color)
+                            self.draw_sq(cur, x, y, coord=coord, ship=ship)
             return img
 
 class BattleShip:
@@ -310,4 +328,3 @@ class BattleShip:
                 other = self.player2 if winner == self.player1 else self.player1
                 await other.send('You lost, better luck next time :(')
                 return None
-                
