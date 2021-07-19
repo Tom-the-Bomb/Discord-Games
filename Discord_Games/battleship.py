@@ -297,7 +297,7 @@ class BattleShip:
             try:
                 message = await ctx.bot.wait_for('message', check=check, timeout=timeout)
             except asyncio.TimeoutError:
-                await ctx.send(f'The timeout of {timeout} has been reached. Aborting...')
+                await ctx.send(f'The timeout of {timeout} seconds, has been reached. Aborting...')
                 return None
 
             raw, coords = self.get_coords(message.content)
