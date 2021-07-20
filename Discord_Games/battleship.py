@@ -1,7 +1,5 @@
 
 from typing import Tuple, List, Optional, Union, Callable, Dict
-from itertools import chain
-from enum import Enum
 from io import BytesIO
 
 import asyncio
@@ -72,7 +70,7 @@ class Ship:
 
 class Board:
 
-    def __init__(self, player: discord.Member) -> None:
+    def __init__(self, player: discord.Member, random: bool = True) -> None:
         
         self.player: discord.Member = player
         self.ships: List[Ship] = []
@@ -83,7 +81,8 @@ class Board:
         self.op_hits: List[Coords] = []
         self.op_misses: List[Coords] = []
 
-        self._place_ships()
+        if random:
+            self._place_ships()
 
     @property
     def moves(self) -> List[Coords]:
@@ -101,7 +100,7 @@ class Board:
 
     def _place_ships(self) -> None:
 
-        def place_ship(ship: Ship, size: int, color: Tuple[int, int, int]) -> None:
+        def place_ship(ship: str, size: int, color: Tuple[int, int, int]) -> None:
             start = random.randint(1, 10), random.randint(1, 10)
             vertical = bool(random.randint(0, 1))
 
@@ -157,7 +156,7 @@ class Board:
             return s[0]
     
     @executor()
-    def to_image(self, hide: bool = False) -> Image.Image:
+    def to_image(self, hide: bool = False) -> BytesIO:
         RED = (255, 0, 0)
         GRAY = (128, 128, 128)
 
@@ -185,55 +184,48 @@ class Board:
                     elif ship := self.get_ship(coord):
                         if not hide:
                             self.draw_sq(cur, x, y, coord=coord, ship=ship)
-            return img
+            buffer = BytesIO()
+            img.save(buffer, 'PNG')
+
+        buffer.seek(0)
+        del img
+        return buffer
+
 
 class BattleShip:
 
     def __init__(self, 
         player1: discord.Member, 
         player2: discord.Member,
+        *,
+        random: bool = True,
     ) -> None:
 
         self.inputpat: re.Pattern = re.compile(r'([a-j])(10|[1-9])')
         self.player1: discord.Member = player1
         self.player2: discord.Member = player2
 
-        self.player1_board: Board = Board(player1)
-        self.player2_board: Board = Board(player2)
+        self.random: bool = random
+
+        self.player1_board: Board = Board(player1, random=self.random)
+        self.player2_board: Board = Board(player2, random=self.random)
 
         self.turn: discord.Member = self.player1
+        self.timeout: Optional[int] = None
 
         self.message1: Optional[discord.Message] = None
         self.message2: Optional[discord.Message] = None
 
-    @executor()
-    def stitch_image(self, left: Image.Image, right: Image.Image) -> BytesIO:
-        SPACE = 10
-        size = (
-            left.width + SPACE + right.width, 
-            max((left.height, right.height)),
-        )
-
-        with Image.new('RGB', size, color=(40, 40, 40)) as background:
-            background.paste(left, (0, 0))
-            background.paste(right, (left.width + SPACE, 0))
-
-            left.close()
-            right.close()
-            
-            buffer = BytesIO()
-            background.save(buffer, 'PNG')
-            buffer.seek(0)
-            return buffer
-
     def get_board(self, player: discord.Member, other: bool = False) -> Board:
         if other:
             return (
-                self.player2_board if player == self.player1 else self.player1_board
+                self.player2_board if player == self.player1 
+                else self.player1_board
             )
         else:
             return (
-                self.player1_board if player == self.player1 else self.player2_board
+                self.player1_board if player == self.player1 
+                else self.player2_board
             )
 
     def place_move(self, player: discord.Member, coords: Coords) -> bool:
@@ -254,15 +246,14 @@ class BattleShip:
     async def get_file(self, player: discord.Member) -> discord.File:
 
         board = self.get_board(player)
-        image = await board.to_image(hide=True)
+        image1 = await board.to_image(hide=True)
 
         board2 = self.get_board(player, other=True)
         image2 = await board2.to_image()
 
-        image = await self.stitch_image(image, image2)
-
-        file = discord.File(image, 'board.png')
-        return file
+        file1 = discord.File(image1, 'board1.png')
+        file2 = discord.File(image2, 'board2.png')
+        return file1, file2
 
     def get_coords(self, inp: str) -> Tuple[str, Coords]:
         inp = inp.replace(' ', '').lower()
@@ -278,15 +269,76 @@ class BattleShip:
         else:
             return None
 
+    async def get_ship_inputs(self, ctx: commands.Context, user: discord.Member) -> bool:
+        
+        board = self.get_board(user, other=True)
+
+        async def place_ship(ship: str, size: int, color: Tuple[int, int, int]) -> bool:
+            _, file = await self.get_file(user)
+            await user.send(f'Where do you want to place your `{ship}`?\nSend the start coordinate... e.g. (`a1`)', file=file)
+
+            def check(msg: discord.Message) -> bool:
+                if not msg.guild and msg.author == user:
+                    content = msg.content.replace(' ', '').lower()
+                    return bool(self.inputpat.match(content))
+            try:
+                message = await ctx.bot.wait_for('message', check=check, timeout=self.timeout)
+            except asyncio.TimeoutError:
+                await user.send(f'The timeout of {self.timeout} seconds, has been reached. Aborting...')
+                return False
+
+            _, start = self.get_coords(message.content)
+
+            await user.send('Do you want it to be vertical?\nSay `yes` or `no`')
+
+            def check(msg: discord.Message) -> bool:
+                if not msg.guild and msg.author == user:
+                    content = msg.content.replace(' ', '').lower()
+                    return content in ('yes', 'no')
+            try:
+                message = await ctx.bot.wait_for('message', check=check, timeout=self.timeout)
+            except asyncio.TimeoutError:
+                await user.send(f'The timeout of {self.timeout} seconds, has been reached. Aborting...')
+                return False
+
+            vertical = message.content.replace(' ', '').lower() != 'yes'
+
+            new_ship = Ship(
+                name=ship, 
+                size=size, 
+                start=start, 
+                vertical=vertical,
+                color=color,
+            )
+
+            if board._is_valid(new_ship):
+                board.ships.append(new_ship)
+            else:
+                await user.send('That is a not a valid location, please try again')
+                await place_ship(ship, size, color)
+
+        for ship, (size, color) in SHIPS.items():
+            await place_ship(ship, size, color)
+
+        await user.send('All setup! (Game will soon start after the opponent finishes)')
+        return True
+
     async def start(self, ctx: commands.Context, *, timeout: Optional[int] = None) -> None:
 
         await ctx.send('**Game Started!**\nI\'ve setup the boards in your dms!')
+
+        if not self.random:
+            await asyncio.gather(
+                self.get_ship_inputs(ctx, self.player1),
+                self.get_ship_inputs(ctx, self.player2),
+            )
+    
+        file1, file3 = await self.get_file(self.player1)
+        file2, file4 = await self.get_file(self.player2)
         
-        file1 = await self.get_file(self.player1)
-        file2 = await self.get_file(self.player2)
-        
-        self.message1 = await self.player1.send(file=file1)
-        self.message2 = await self.player2.send(file=file2)
+        self.message1 = await self.player1.send('Game starting!', files=[file1, file3])
+        self.message2 = await self.player2.send('Game starting!', files=[file2, file4])
+        self.timeout = timeout
 
         while True:
 
@@ -295,7 +347,7 @@ class BattleShip:
                     content = msg.content.replace(' ', '').lower()
                     return bool(self.inputpat.match(content))
             try:
-                message = await ctx.bot.wait_for('message', check=check, timeout=timeout)
+                message = await ctx.bot.wait_for('message', check=check, timeout=self.timeout)
             except asyncio.TimeoutError:
                 await ctx.send(f'The timeout of {timeout} seconds, has been reached. Aborting...')
                 return None
@@ -315,11 +367,11 @@ class BattleShip:
                 await self.turn.send(f'`{raw}` was a miss :(')
                 await next_turn.send(f'They went for `{raw}`, and it was a miss! :)')
 
-            file1 = await self.get_file(self.player1)
-            file2 = await self.get_file(self.player2)
+            file1, file3 = await self.get_file(self.player1)
+            file2, file4 = await self.get_file(self.player2)
             
-            await self.player1.send(file=file1)
-            await self.player2.send(file=file2)
+            await self.player1.send(files=[file1, file3])
+            await self.player2.send(files=[file2, file4])
             self.turn = next_turn
 
             if winner := self.who_won():
