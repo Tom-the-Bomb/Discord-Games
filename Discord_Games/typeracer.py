@@ -162,7 +162,11 @@ class TypeRacer:
         embed.set_image(url="attachment://tr.png")
 
         if show_author:
-            embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
+            if discord.__version__.startswith('2'):
+                av = ctx.author.avatar.url
+            else:
+                av = ctx.author.avatar_url
+            embed.set_author(name=ctx.author.name, icon_url=av)
 
         self._embed = embed
         self._message = await ctx.send(
