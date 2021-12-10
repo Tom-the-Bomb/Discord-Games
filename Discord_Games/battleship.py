@@ -1,4 +1,4 @@
-
+import pathlib
 from typing import Tuple, List, Optional, Union, Callable, Dict
 from io import BytesIO
 
@@ -160,7 +160,7 @@ class Board:
         RED = (255, 0, 0)
         GRAY = (128, 128, 128)
 
-        with Image.open('assets/battleship.png') as img:
+        with Image.open(f'{pathlib.Path(__file__).parent}/assets/thing.png') as img:
             cur = ImageDraw.Draw(img)
             
             for i, y in zip(
