@@ -25,7 +25,9 @@ GREEN = (105, 169, 99)
 class Wordle:
 
     def __init__(self) -> None:
-        self._valid_words = set(open(fr'{pathlib.Path(__file__).parent}\assets\words.txt'))
+        self._valid_words = tuple(
+            open(fr'{pathlib.Path(__file__).parent}\assets\words.txt', 'r').read().splitlines()
+        )
         self._font = ImageFont.truetype('arial.ttf', 70)
         self.guesses: list[list[dict[str, str]]] = []
         self.word = random.choice(self._valid_words)
