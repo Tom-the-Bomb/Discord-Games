@@ -95,7 +95,7 @@ class Wordle:
                 await message.delete()
                 message = await ctx.send(file=discord.File(buf, 'wordle.png'))
 
-            if won:
-                return await ctx.send('Game Over! You won!')
-            elif len(self.guesses) >= 6:
-                return await ctx.send(f'Game Over! You lose, the word was: **{self.word}**')
+                if won:
+                    return await ctx.send('Game Over! You won!')
+                elif len(self.guesses) >= 6:
+                    return await ctx.send(f'Game Over! You lose, the word was: **{self.word}**')
