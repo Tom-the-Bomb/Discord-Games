@@ -1,15 +1,16 @@
 import pathlib
-from typing import Tuple, List, Optional, Union, Callable, Dict
+from typing import Tuple, List, Optional, Union, Dict
 from io import BytesIO
 
 import asyncio
-import functools
 import random
 import re
 
 import discord
 from discord.ext import commands
 from PIL import Image, ImageDraw
+
+from .utils import executor
 
 Coords = Tuple[int, int]
 
@@ -23,18 +24,6 @@ SHIPS: Dict[str, Tuple[int, Tuple[int, int, int]]] = {
     "cruiser": (2, 
         (190, 190, 190)),
 }
-
-def executor():
-
-    def decorator(func: Callable):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            partial = functools.partial(func, *args, **kwargs)
-            loop = asyncio.get_event_loop()
-            return loop.run_in_executor(None, partial)
-
-        return wrapper
-    return decorator
 
 class Ship:
 
