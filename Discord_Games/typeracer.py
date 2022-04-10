@@ -12,6 +12,7 @@ from discord.ext import commands
 from typing import Union, Optional
 from datetime import datetime as dt
 
+from .utils import executor
 
 class TypeRacer:
 
@@ -51,6 +52,7 @@ class TypeRacer:
         'night', 'real', 'life', 'few', 'north'
     )
 
+    @executor()
     def _tr_img(self, text: str, font: str) -> BytesIO:
         text = "\n".join(textwrap.wrap(text, width=25))
         font = ImageFont.truetype(font, 30)
@@ -152,7 +154,7 @@ class TypeRacer:
         else:
             raise TypeError("Invalid game mode , must be either 'random' or 'sentence'")
 
-        buffer = await ctx.bot.loop.run_in_executor(None, self._tr_img, text, path_to_text_font)
+        buffer = await self._tr_img(text, path_to_text_font)
 
         embed = discord.Embed(
             title = embed_title,

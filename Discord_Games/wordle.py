@@ -30,7 +30,7 @@ class Wordle:
         )
         self._font = ImageFont.truetype('arial.ttf', 70)
         self.guesses: list[list[dict[str, str]]] = []
-        self.word = random.choice(self._valid_words)
+        self.word: str = random.choice(self._valid_words)
 
     def parse_guess(self, guess: str) -> bool:
         self.guesses.append([])
@@ -41,10 +41,7 @@ class Wordle:
                 color = GRAY
             self.guesses[-1].append({'letter': l, 'color': color})
 
-        if guess == self.word:
-            return True
-        else:
-            return False
+        return guess == self.word
 
     @executor()
     def render_image(self) -> BytesIO:
