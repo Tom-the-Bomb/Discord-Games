@@ -58,8 +58,8 @@ class WordInputButton(discord.ui.Button):
 class WordleView(discord.ui.View):
     
     def __init__(self, game: BetaWordle, *, timeout: float = None):
-        super().__init__(self, timeout=timeout)
-        
+        super().__init__(timeout=timeout)
+
         self.game = game
         self.add_item(WordInputButton())
         self.add_item(WordInputButton(cancel_button=True))
