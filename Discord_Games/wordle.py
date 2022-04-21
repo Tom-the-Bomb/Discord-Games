@@ -25,8 +25,6 @@ GREEN = (105, 169, 99)
 class Wordle:
 
     def __init__(self) -> None:
-        print(__file__)
-        print(pathlib.Path(__file__).parent)
         self._valid_words = tuple(
             open(fr'{pathlib.Path(__file__).parent}\assets\words.txt', 'r').read().splitlines()
         )
