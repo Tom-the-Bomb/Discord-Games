@@ -29,7 +29,7 @@ setup(
         'Topic :: Utilities'
     ],
     include_package_data=True,
-    package_data={'': ['data/*.png', 'assets/*.txt']}
+    package_data={'': ['data/*.png', 'assets/*.txt']},
     packages=['Discord_Games'],
     install_requires=['discord.py', 'english-words', 'chess', 'akinator.py', 'Pillow',],
     zip_safe=True,
