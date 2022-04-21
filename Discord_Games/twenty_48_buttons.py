@@ -48,6 +48,8 @@ class Twenty48_Button(discord.ui.Button['Twenty48']):
 
 
 class BetaTwenty48(Twenty48):
+    player: discord.Member
+    view: discord.ui.View
 
     async def start(self, ctx: commands.Context, *, timeout: float = None, **kwargs):
         
