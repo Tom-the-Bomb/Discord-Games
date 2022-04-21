@@ -57,7 +57,9 @@ class WordInputButton(discord.ui.Button):
 
 class WordleView(discord.ui.View):
     
-    def __init__(self, *, game: BetaWordle):
+    def __init__(self, game: BetaWordle, *, timeout: float = None):
+        super().__init__(self, timeout=timeout)
+        
         self.game = game
         self.add_item(WordInputButton())
         self.add_item(WordInputButton(cancel_button=True))
@@ -65,8 +67,8 @@ class WordleView(discord.ui.View):
 class BetaWordle(Wordle):
     player: discord.Member
 
-    async def start(self, ctx: commands.Context) -> discord.Message:
+    async def start(self, ctx: commands.Context, *, timeout: float = None) -> discord.Message:
         self.player = ctx.author
 
         buf = await self.render_image()
-        return await ctx.send(file=discord.File(buf, 'wordle.png'), view=WordleView(game=self))
+        return await ctx.send(file=discord.File(buf, 'wordle.png'), view=WordleView(self, timeout=timeout))

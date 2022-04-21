@@ -1,10 +1,10 @@
-from   setuptools import setup
+import setuptools
 import re
 
 with open("Discord_Games/__init__.py") as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
-setup(
+setuptools.setup(
     name="Discord_Games", 
     author="Tom-the-Bomb", 
     version= version, 
