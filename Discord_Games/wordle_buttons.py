@@ -19,7 +19,7 @@ class WordInput(discord.ui.Modal, title='Word Input'):
         self.view = view
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
-        content = self.word
+        content = self.word.value.lower()
         game = self.view.game
 
         if content not in game._valid_words:
