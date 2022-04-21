@@ -11,7 +11,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from .utils import executor
 
-BORDER = 30
+BORDER = 40
 SQ = 100  
 SPACE = 10
 

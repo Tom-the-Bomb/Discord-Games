@@ -27,13 +27,17 @@ class WordInput(discord.ui.Modal, title='Word Input'):
         else:
             won = game.parse_guess(content)
             buf = await game.render_image()
+
+            embed = discord.Embed(title='Wordle!')
+            embed.set_image(url='attachment://wordle.png')
+
             file = discord.File(buf, 'wordle.png')
-            await interaction.response.edit_message(attachments=[file])
+            await interaction.response.edit_message(embed=embed, attachments=[file])
 
             if won:
-                return await interaction.response.send_message('Game Over! You won!')
+                return await interaction.message.reply('Game Over! You won!', mention_author=True)
             elif len(game.guesses) >= 6:
-                return await interaction.response.send_message(f'Game Over! You lose, the word was: **{game.word}**')
+                return await interaction.message.reply(f'Game Over! You lose, the word was: **{game.word}**', mention_author=True)
 
 class WordInputButton(discord.ui.Button):
     view: WordleView
@@ -71,4 +75,11 @@ class BetaWordle(Wordle):
         self.player = ctx.author
 
         buf = await self.render_image()
-        return await ctx.send(file=discord.File(buf, 'wordle.png'), view=WordleView(self, timeout=timeout))
+        embed = discord.Embed(title='Wordle!')
+        embed.set_image(url='attachment://wordle.png')
+
+        return await ctx.send(
+            embed=embed,
+            file=discord.File(buf, 'wordle.png'), 
+            view=WordleView(self, timeout=timeout)
+        )
