@@ -6,7 +6,7 @@ from discord.ext import commands
 from .wordle import Wordle
 
 class WordInput(discord.ui.Modal, title='Word Input'):
-    word = discord.TextInput(
+    word = discord.ui.TextInput(
         label=f'Input your guess', 
         style=discord.TextStyle.short,
         required=True,
