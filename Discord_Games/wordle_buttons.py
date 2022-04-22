@@ -28,7 +28,7 @@ class WordInput(discord.ui.Modal, title='Word Input'):
             won = game.parse_guess(content)
             buf = await game.render_image()
 
-            embed = discord.Embed(title='Wordle!')
+            embed = discord.Embed(title='Wordle!', color=self.view.game.color)
             embed.set_image(url='attachment://wordle.png')
 
             file = discord.File(buf, 'wordle.png')
@@ -75,7 +75,7 @@ class BetaWordle(Wordle):
         self.player = ctx.author
 
         buf = await self.render_image()
-        embed = discord.Embed(title='Wordle!')
+        embed = discord.Embed(title='Wordle!', color=self.color)
         embed.set_image(url='attachment://wordle.png')
 
         return await ctx.send(

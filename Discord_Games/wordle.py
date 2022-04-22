@@ -1,5 +1,5 @@
 from __future__  import annotations
-from typing import Optional
+from typing import Optional, Union
 
 import pathlib
 import random
@@ -24,7 +24,8 @@ GREEN = (105, 169, 99)
 
 class Wordle:
 
-    def __init__(self) -> None:
+    def __init__(self, *, color: Union[discord.Color, int] = None) -> None:
+        self.color = color
         self._valid_words = tuple(
             open(fr'{pathlib.Path(__file__).parent}\assets\words.txt', 'r').read().splitlines()
         )
@@ -73,7 +74,11 @@ class Wordle:
     async def start(self, ctx: commands.Context) -> Optional[discord.Message]:
 
         buf = await self.render_image()
-        message = await ctx.send(file=discord.File(buf, 'wordle.png'))
+
+        embed = discord.Embed(title='Wordle!', color=self.color)
+        embed.set_image(url='attachment://wordle.png')
+
+        message = await ctx.send(embed=embed, file=discord.File(buf, 'wordle.png'))
         
         while True:
             
@@ -90,7 +95,11 @@ class Wordle:
                 buf = await self.render_image()
 
                 await message.delete()
-                message = await ctx.send(file=discord.File(buf, 'wordle.png'))
+
+                embed = discord.Embed(title='Wordle!', color=self.color)
+                embed.set_image(url='attachment://wordle.png')
+
+                message = await ctx.send(embed=embed, file=discord.File(buf, 'wordle.png'))
 
                 if won:
                     return await ctx.send('Game Over! You won!')
