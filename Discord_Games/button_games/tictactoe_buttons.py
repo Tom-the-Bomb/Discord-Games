@@ -17,7 +17,7 @@ class TTTButton(discord.ui.Button):
             style=discord.ButtonStyle.green
         )
 
-    async def callback(self, interaction: discord.Interaction):
+    async def callback(self, interaction: discord.Interaction) -> None:
         user = interaction.user
         game = self.view.game
 
@@ -34,10 +34,14 @@ class TTTButton(discord.ui.Button):
         game.board[self.row][column_idx] = self.label
         game.turn = game.circle if user == game.cross else game.cross
 
-        await interaction.response.edit_message(emebd=game.make_embed(), view=self.view)
+        await interaction.response.edit_message(embed=game.make_embed(), view=self.view)
 
         if game.is_game_over():
-            self.view.stop()
+            for button in self.view.children:
+                if isinstance(button, discord.ui.Button):
+                    button.disabled = True
+            await interaction.response.edit_message(view=self.view)
+            return self.view.stop()
 
 class TTTView(discord.ui.View):
 
