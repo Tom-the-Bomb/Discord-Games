@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pathlib
-from typing import tuple, list, Optional, Union, dict
+from typing import Optional, Union
 from io import BytesIO
 import asyncio
 import random
