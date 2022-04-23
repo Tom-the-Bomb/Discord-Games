@@ -1,7 +1,8 @@
-import pathlib
-from typing import Tuple, List, Optional, Union, Dict
-from io import BytesIO
+from __future__ import annotations
 
+import pathlib
+from typing import tuple, list, Optional, Union, dict
+from io import BytesIO
 import asyncio
 import random
 import re
@@ -12,9 +13,9 @@ from PIL import Image, ImageDraw
 
 from .utils import executor
 
-Coords = Tuple[int, int]
+Coords = tuple[int, int]
 
-SHIPS: Dict[str, Tuple[int, Tuple[int, int, int]]] = {
+SHIPS: dict[str, tuple[int, tuple[int, int, int]]] = {
     "carrier": (5, 
         (80, 80, 80)),
     "battleship": (4, 
@@ -31,7 +32,7 @@ class Ship:
         name: str, 
         size: int, 
         start: Coords,
-        color: Tuple[int, int, int],
+        color: tuple[int, int, int],
         vertical: bool = False,
     ) -> None:
 
@@ -40,14 +41,14 @@ class Ship:
 
         self.start: Coords = start
         self.vertical: bool = vertical
-        self.color: Tuple[int, int, int] = color
+        self.color: tuple[int, int, int] = color
         
         self.end: Coords = (
             (self.start[0], self.start[1] + self.size) if self.vertical else
             (self.start[0] + self.size, self.start[1])
         )
 
-        self.span: List[Coords] = (
+        self.span: list[Coords] = (
             [
                 (self.start[0], i) for i in range(self.start[1], self.end[1])
             ] if self.vertical else [
@@ -55,26 +56,26 @@ class Ship:
             ]
         )
 
-        self.hits: List[bool] = [False] * self.size
+        self.hits: list[bool] = [False] * self.size
 
 class Board:
 
     def __init__(self, player: discord.Member, random: bool = True) -> None:
         
         self.player: discord.Member = player
-        self.ships: List[Ship] = []
+        self.ships: list[Ship] = []
 
-        self.my_hits: List[Coords] = []
-        self.my_misses: List[Coords] = []
+        self.my_hits: list[Coords] = []
+        self.my_misses: list[Coords] = []
 
-        self.op_hits: List[Coords] = []
-        self.op_misses: List[Coords] = []
+        self.op_hits: list[Coords] = []
+        self.op_misses: list[Coords] = []
 
         if random:
             self._place_ships()
 
     @property
-    def moves(self) -> List[Coords]:
+    def moves(self) -> list[Coords]:
         return self.my_hits + self.my_misses
 
     def _is_valid(self, ship: Ship) -> bool:
@@ -89,7 +90,7 @@ class Board:
 
     def _place_ships(self) -> None:
 
-        def place_ship(ship: str, size: int, color: Tuple[int, int, int]) -> None:
+        def place_ship(ship: str, size: int, color: tuple[int, int, int]) -> None:
             start = random.randint(1, 10), random.randint(1, 10)
             vertical = bool(random.randint(0, 1))
 
@@ -112,7 +113,7 @@ class Board:
     def won(self) -> bool:
         return all(all(ship.hits) for ship in self.ships)
 
-    def draw_dot(self, cur: ImageDraw.Draw, x: int, y: int, fill: Union[int, Tuple[int, ...]]) -> None:
+    def draw_dot(self, cur: ImageDraw.Draw, x: int, y: int, fill: Union[int, tuple[int, ...]]) -> None:
         x1, y1 = x - 10, y - 10
         x2, y2 = x + 10, y + 10
         cur.ellipse((x1, y1, x2, y2), fill=fill)
@@ -244,7 +245,7 @@ class BattleShip:
         file2 = discord.File(image2, 'board2.png')
         return file1, file2
 
-    def get_coords(self, inp: str) -> Tuple[str, Coords]:
+    def get_coords(self, inp: str) -> tuple[str, Coords]:
         inp = inp.replace(' ', '').lower()
         match = self.inputpat.match(inp)
         x, y = match.group(1), match.group(2)
@@ -262,7 +263,7 @@ class BattleShip:
         
         board = self.get_board(user, other=True)
 
-        async def place_ship(ship: str, size: int, color: Tuple[int, int, int]) -> bool:
+        async def place_ship(ship: str, size: int, color: tuple[int, int, int]) -> bool:
             _, file = await self.get_file(user)
             await user.send(f'Where do you want to place your `{ship}`?\nSend the start coordinate... e.g. (`a1`)', file=file)
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 import discord
 from discord.ext import commands
 
-from .wordle import Wordle
+from ..wordle import Wordle
 
 class WordInput(discord.ui.Modal, title='Word Input'):
     word = discord.ui.TextInput(
@@ -18,6 +18,11 @@ class WordInput(discord.ui.Modal, title='Word Input'):
         super().__init__()
         self.view = view
 
+    def disable_all(self) -> None:
+        for button in self.view.children:
+            if isinstance(button, discord.ui.Button):
+                button.disabled = True
+
     async def on_submit(self, interaction: discord.Interaction) -> None:
         content = self.word.value.lower()
         game = self.view.game
@@ -30,14 +35,16 @@ class WordInput(discord.ui.Modal, title='Word Input'):
 
             embed = discord.Embed(title='Wordle!', color=self.view.game.color)
             embed.set_image(url='attachment://wordle.png')
-
             file = discord.File(buf, 'wordle.png')
-            await interaction.response.edit_message(embed=embed, attachments=[file])
 
             if won:
-                return await interaction.message.reply('Game Over! You won!', mention_author=True)
+                self.disable_all()
+                await interaction.message.reply('Game Over! You won!', mention_author=True)
             elif len(game.guesses) >= 6:
-                return await interaction.message.reply(f'Game Over! You lose, the word was: **{game.word}**', mention_author=True)
+                self.disable_all()
+                await interaction.message.reply(f'Game Over! You lose, the word was: **{game.word}**', mention_author=True)
+            
+            return await interaction.response.edit_message(embed=embed, attachments=[file], view=self.view)
 
 class WordInputButton(discord.ui.Button):
     view: WordleView

@@ -1,3 +1,7 @@
+from typing import Union, Optional, Any
+from datetime import datetime as dt
+from io import BytesIO
+
 import textwrap
 import time
 import random
@@ -5,17 +9,13 @@ import asyncio
 import aiohttp
 import difflib
 
-import discord
 from PIL import Image, ImageDraw, ImageFont
-from io import BytesIO
+import discord
 from discord.ext import commands
-from typing import Union, Optional
-from datetime import datetime as dt
 
 from .utils import executor
 
 class TypeRacer:
-
     SENTENCE_URL  = "https://api.quotable.io/random"
     GRAMMAR_WORDS = (
         'the', 'of', 'to', 'and', 'a', 'in', 'is', 'it',
@@ -67,14 +67,16 @@ class TypeRacer:
         buffer.seek(0)
         return buffer
 
-    async def wait_for_tr_response(self, ctx: commands.Context, text: str, *, timeout: int):
+    async def wait_for_tr_response(self, ctx: commands.Context, text: str, *, timeout: int) -> discord.Message:
         
         emoji_map = {
             1: "🥇", 2: "🥈", 3: "🥉"
         }
 
         self._embed.description = ""
-        format_line = lambda i, x: f" • {emoji_map[i]} | {x['user'].mention} in {x['time']:.2f}s | **WPM:** {x['wpm']:.2f} | **ACC:** {x['acc']:.2f}%"
+
+        def format_line(i: int, x: dict[str, Any]) -> str:
+            return f" • {emoji_map[i]} | {x['user'].mention} in {x['time']:.2f}s | **WPM:** {x['wpm']:.2f} | **ACC:** {x['acc']:.2f}%"
 
         text = text.lower().replace("\n", " ")
         winners = []
@@ -127,19 +129,19 @@ class TypeRacer:
         )
         embed.add_field(name="Winners", value="\n".join(desc))
 
-        await ctx.reply(embed=embed, allowed_mentions=discord.AllowedMentions.none())
-        return True
+        return await ctx.reply(embed=embed, allowed_mentions=discord.AllowedMentions.none())
 
     async def start(
         self, 
-        ctx: commands.Context, *, 
-        embed_title: Optional[str] = "Type the following sentence in the chat now!", 
-        embed_color: Optional[Union[discord.Color, int]] = discord.Color.greyple(), 
-        path_to_text_font: Optional[str] = "arial.ttf",
+        ctx: commands.Context, 
+        *, 
+        embed_title: str = "Type the following sentence in the chat now!", 
+        embed_color: Union[discord.Color, int] = discord.Color.greyple(), 
+        path_to_text_font: str = "arial.ttf",
         timeout: Optional[float] = None, 
-        mode: Optional[str] = "sentence",
-        show_author: Optional[bool] = True
-    ):
+        mode: str = "sentence",
+        show_author: bool = True,
+    ) -> discord.Message:
 
         if mode == "sentence":
             async with aiohttp.ClientSession() as session:
@@ -176,5 +178,4 @@ class TypeRacer:
             file = discord.File(buffer, "tr.png")
         )
 
-        await self.wait_for_tr_response(ctx, text, timeout=timeout)
-        return True
+        return await self.wait_for_tr_response(ctx, text, timeout=timeout)

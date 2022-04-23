@@ -1,9 +1,11 @@
+from __future__ import annotations
 
+from typing import Optional
 import asyncio
-from akinator.async_aki import Akinator as Akinator_
 
 import discord
 from discord.ext import commands
+from akinator.async_aki import Akinator as Akinator_
 
 
 class Options:
@@ -16,16 +18,17 @@ class Options:
 
 class Akinator:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.player = None
         self.win_at = None
-        self.aki = Akinator_()
-        self.bar_emojis = ("  ", "██")
+        self.aki: Akinator_ = Akinator_()
+        self.bar_emojis: tuple[str, str] = ("  ", "██")
         self.guess = None
-        self.bar = ""
-        self.message = None
-        self.questions = 0
-        self.mapping = {
+        self.bar: str = ""
+        self.message: Optional[discord.Message] = None
+        self.questions: int = 0
+
+        self.mapping: dict[str, str] = {
             Options.YES: "y", 
             Options.NO : "n", 
             Options.IDK: "i", 
@@ -36,7 +39,7 @@ class Akinator:
     def build_bar(self) -> str:
         prog = round(self.aki.progression/8)
         emp, full = self.bar_emojis
-        self.bar  = f"[`{full*prog}{emp*(10-prog)}`]"
+        self.bar = f"[`{full*prog}{emp*(10-prog)}`]"
         return self.bar
 
     async def build_embed(self) -> discord.Embed:
@@ -55,7 +58,7 @@ class Akinator:
         embed.set_footer(text= "Figuring out the next question | This may take a second")
         return embed
 
-    async def win(self):
+    async def win(self) -> discord.Embed:
 
         await self.aki.win()
         self.guess = self.aki.first_guess
@@ -69,7 +72,15 @@ class Akinator:
 
         return embed
 
-    async def start(self, ctx: commands.Context, remove_reaction_after: bool = False, win_at: int = 80, timeout: int = None, delete_button: bool = False, child_mode: bool = True, **kwargs):
+    async def start(
+        self, 
+        ctx: commands.Context, 
+        remove_reaction_after: bool = False, 
+        win_at: int = 80, 
+        timeout: int = None, 
+        delete_button: bool = False, 
+        child_mode: bool = True, 
+    ) -> Optional[discord.Message]:
         
         self.player = ctx.author
         self.win_at = win_at
@@ -87,15 +98,18 @@ class Akinator:
 
         while self.aki.progression <= self.win_at:
 
-            def check(reaction, user):
+            def check(reaction: discord.Reaction, user: discord.Member) -> bool:
                 if reaction.message == self.message and user == ctx.author:
                     return str(reaction.emoji) in self.mapping or str(reaction.emoji) == Options.STOP
 
             try:
-                reaction, _ = await ctx.bot.wait_for('reaction_add', timeout=timeout, check=check)
+                reaction, user = await ctx.bot.wait_for('reaction_add', timeout=timeout, check=check)
             except asyncio.TimeoutError:
                 return
-            
+
+            if remove_reaction_after:
+                await self.message.remove_reaction(reaction, user)
+
             emoji = str(reaction.emoji)
 
             if emoji == Options.STOP:

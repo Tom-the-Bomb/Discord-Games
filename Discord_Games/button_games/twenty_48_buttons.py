@@ -10,17 +10,21 @@ import random
 import discord
 from discord.ext import commands
 
-from .twenty_48 import Twenty48
+from ..twenty_48 import Twenty48
 
-class Twenty48_Button(discord.ui.Button['Twenty48']):
+class Twenty48_Button(discord.ui.Button):
 
     view: discord.ui.View
     
-    def __init__(self, game: BetaTwenty48, emoji: str):
+    def __init__(self, game: BetaTwenty48, emoji: str) -> None:
         self.game = game
-        super().__init__(style=discord.ButtonStyle.primary, emoji=discord.PartialEmoji(name=emoji), label="\u200b")
+        super().__init__(
+            style=discord.ButtonStyle.primary, 
+            emoji=discord.PartialEmoji(name=emoji), 
+            label="\u200b"
+        )
 
-    async def callback(self, interaction: discord.Interaction):
+    async def callback(self, interaction: discord.Interaction) -> discord.Message:
 
         assert self.view
 
@@ -30,36 +34,37 @@ class Twenty48_Button(discord.ui.Button['Twenty48']):
         emoji = str(self.emoji)
 
         if emoji == '➡️':
-            await self.game.MoveRight()
+            await self.game.move_right()
 
         elif emoji == '⬅️':
-            await self.game.MoveLeft()
+            await self.game.move_left()
 
         elif emoji == '⬇️':
-            await self.game.MoveDown()
+            await self.game.move_down()
 
         elif emoji == '⬆️':
-            await self.game.MoveUp()
+            await self.game.move_up()
 
         await self.game.spawn_new()
-        BoardString = await self.game.number_to_emoji()
+        board_string = await self.game.number_to_emoji()
 
-        await interaction.message.edit(content=BoardString)
+        return await interaction.response.edit_message(content=board_string)
 
 
 class BetaTwenty48(Twenty48):
     player: discord.Member
     view: discord.ui.View
 
-    async def start(self, ctx: commands.Context, *, timeout: float = None, **kwargs):
+    async def start(self, ctx: commands.Context, *, timeout: float = None, **kwargs) -> None:
         
         self.player = ctx.author
         self.view = discord.ui.View(timeout=timeout)
+
         self.board[random.randrange(4)][random.randrange(4)] = 2
         self.board[random.randrange(4)][random.randrange(4)] = 2
 
         for button in self._controls:
             self.view.add_item(Twenty48_Button(self, button))
         
-        BoardString = await self.number_to_emoji()
-        self.message = await ctx.send(content=BoardString, view=self.view, **kwargs)
+        board_string = await self.number_to_emoji()
+        self.message = await ctx.send(content=board_string, view=self.view, **kwargs)

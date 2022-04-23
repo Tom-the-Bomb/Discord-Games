@@ -48,13 +48,13 @@ class Twenty48:
                     pos += 1
         return new_board
 
-    async def MoveLeft(self) -> None:
+    async def move_left(self) -> None:
         stage = await self.compress(self.board)
         stage = await self.merge(stage)
         stage = await self.compress(stage)
         self.board = stage
         
-    async def MoveRight(self) -> None:
+    async def move_right(self) -> None:
         stage = await self.reverse(self.board)
         stage = await self.compress(stage)
         stage = await self.merge(stage)
@@ -62,7 +62,7 @@ class Twenty48:
         stage = await self.reverse(stage)
         self.board = stage
         
-    async def MoveUp(self) -> None:
+    async def move_up(self) -> None:
         stage = await self.transp(self.board)
         stage = await self.compress(stage)
         stage = await self.merge(stage)
@@ -70,7 +70,7 @@ class Twenty48:
         stage = await self.transp(stage)
         self.board = stage
         
-    async def MoveDown(self) -> None:
+    async def move_down(self) -> None:
         stage = await self.transp(self.board)
         stage = await self.reverse(stage)
         stage = await self.compress(stage)
@@ -135,16 +135,16 @@ class Twenty48:
                 return await self.message.delete()
 
             if emoji == '➡️':
-                await self.MoveRight()
+                await self.move_right()
 
             elif emoji == '⬅️':
-                await self.MoveLeft()
+                await self.move_left()
 
             elif emoji == '⬇️':
-                await self.MoveDown()
+                await self.move_down()
 
             elif emoji == '⬆️':
-                await self.MoveUp()
+                await self.move_up()
 
             await self.spawn_new()
             BoardString = await self.number_to_emoji()
