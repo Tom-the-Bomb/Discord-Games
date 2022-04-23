@@ -1,21 +1,22 @@
+from typing import Optional, ClassVar
+
 import discord
 from discord.ext import commands
 
-BLANK  = "⬛"
-CIRCLE = "⭕"
-CROSS  = "❌"
-
 class Tictactoe:
+    BLANK: ClassVar[str] = "⬛"
+    CIRCLE: ClassVar[str] = "⭕"
+    CROSS: ClassVar[str] = "❌"
 
     def __init__(self, cross: discord.Member, circle: discord.Member) -> None:
         self.cross = cross
         self.circle = circle
-        self.board = [[BLANK for __ in range(3)] for __ in range(3)]
-        self.turn  = self.cross
-        self.winner = None
-        self.message = None
-        self._controls = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
-        self._conversion = {
+        self.board: list[list[str]] = [[self.BLANK for _ in range(3)] for _ in range(3)]
+        self.turn: discord.Member  = self.cross
+        self.winner: Optional[discord.Member] = None
+        self.message: Optional[discord.Message] = None
+        self._controls: list[str] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
+        self._conversion: dict[str, tuple[int, int]] = {
             '1️⃣': (0, 0), 
             '2️⃣': (0, 1), 
             '3️⃣': (0, 2), 
@@ -27,12 +28,12 @@ class Tictactoe:
             '9️⃣': (2, 2), 
         }
         self.emoji_to_player = {
-            CIRCLE: self.circle, 
-            CROSS : self.cross, 
+            self.CIRCLE: self.circle, 
+            self.CROSS : self.cross, 
         }
         self.player_to_emoji = {
-            self.cross: CROSS, 
-            self.circle: CIRCLE, 
+            self.cross: self.CROSS, 
+            self.circle: self.CIRCLE, 
         }
 
     def board_string(self) -> str:
@@ -41,16 +42,16 @@ class Tictactoe:
             board += "".join(row) + "\n"
         return board
 
-    async def make_embed(self) -> discord.Embed:
+    def make_embed(self) -> discord.Embed:
         embed = discord.Embed()
-        if not await self.is_game_over():
+        if not self.is_game_over():
             embed.description = f"**Turn:** {self.turn.name}\n**Piece:** `{self.player_to_emoji[self.turn]}`"
         else:
             status = f"{self.winner} won!" if self.winner else "Tie"
             embed.description = f"**Game over**\n{status}"
         return embed
 
-    async def MakeMove(self, emoji: str, user: discord.Member) -> list:
+    def make_move(self, emoji: str, user: discord.Member) -> list:
 
         if emoji not in self._controls:
             raise KeyError("Provided emoji is not one of the valid controls")
@@ -64,32 +65,32 @@ class Tictactoe:
             self._controls.remove(emoji)
             return self.board
 
-    async def is_game_over(self) -> bool:
+    def is_game_over(self) -> bool:
 
         if not self._controls:
             return True
 
         for i in range(3):
 
-            if (self.board[i][0] == self.board[i][1] == self.board[i][2]) and self.board[i][0] != BLANK:
+            if (self.board[i][0] == self.board[i][1] == self.board[i][2]) and self.board[i][0] != self.BLANK:
                 self.winner = self.emoji_to_player[self.board[i][0]]
                 return True
-            if (self.board[0][i] == self.board[1][i] == self.board[2][i]) and self.board[0][i] != BLANK:
+            if (self.board[0][i] == self.board[1][i] == self.board[2][i]) and self.board[0][i] != self.BLANK:
                 self.winner = self.emoji_to_player[self.board[0][i]]
                 return True
 
-        if (self.board[0][0] == self.board[1][1] == self.board[2][2]) and self.board[0][0] != BLANK:
+        if (self.board[0][0] == self.board[1][1] == self.board[2][2]) and self.board[0][0] != self.BLANK:
             self.winner = self.emoji_to_player[self.board[0][0]]
             return True
            
-        if (self.board[0][2] == self.board[1][1] == self.board[2][0]) and self.board[0][2] != BLANK:
+        if (self.board[0][2] == self.board[1][1] == self.board[2][0]) and self.board[0][2] != self.BLANK:
             self.winner = self.emoji_to_player[self.board[0][2]]
             return True
            
         return False
 
     async def start(self, ctx: commands.Context, *, remove_reaction_after: bool = False, **kwargs) -> discord.Message:
-        embed = await self.make_embed()
+        embed = self.make_embed()
         self.message = await ctx.send(self.board_string(), embed=embed, **kwargs)
 
         for button in self._controls:
@@ -102,17 +103,17 @@ class Tictactoe:
 
             reaction, user = await ctx.bot.wait_for("reaction_add", check=check)
 
-            if await self.is_game_over():
+            if self.is_game_over():
                 break
             
             emoji = str(reaction.emoji)
-            await self.MakeMove(emoji, user)
-            embed = await self.make_embed()
+            self.make_move(emoji, user)
+            embed = self.make_embed()
 
             if remove_reaction_after:
                 await self.message.remove_reaction(emoji, user)
 
             await self.message.edit(content=self.board_string(), embed=embed)
         
-        embed = await self.make_embed()
+        embed = self.make_embed()
         return await self.message.edit(content=self.board_string(), embed=embed)
