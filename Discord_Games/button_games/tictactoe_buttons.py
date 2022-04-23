@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import ClassVar, Union
 
 import discord
 from discord.ext import commands
@@ -10,11 +10,11 @@ from ..tictactoe import Tictactoe
 class TTTButton(discord.ui.Button):
     view: TTTView
 
-    def __init__(self, label: str, row: int):
+    def __init__(self, label: str, style: discord.ButtonStyle, row: int):
         super().__init__(
             label=label, 
+            style=style,
             row=row,
-            style=discord.ButtonStyle.green
         )
 
     async def callback(self, interaction: discord.Interaction) -> None:
@@ -34,7 +34,7 @@ class TTTButton(discord.ui.Button):
         game.board[self.row][column_idx] = self.label
         game.turn = game.circle if user == game.cross else game.cross
 
-        await interaction.response.edit_message(embed=game.make_embed(), view=self.view)
+        await interaction.response.edit_message(embed=game.make_embed(self.view.embed_color), view=self.view)
 
         if game.is_game_over():
             for button in self.view.children:
@@ -44,35 +44,61 @@ class TTTButton(discord.ui.Button):
             for y, x in game.winning_indexes:
                 row = [button for button in self.view.children if button.row == y]
                 button = row[x]
-                button.style = discord.ButtonStyle.red
-                
+                button.style = self.view.win_button_style
+
             await interaction.message.edit(view=self.view)
             return self.view.stop()
 
+
 class TTTView(discord.ui.View):
 
-    def __init__(self, game: BetaTictactoe, *, timeout: float = None) -> None:
+    def __init__(self, 
+        game: BetaTictactoe, 
+        *,
+        embed_color: Union[discord.Color, int],
+        button_style: discord.ButtonStyle,
+        win_button_style: discord.ButtonStyle,
+        timeout: float = None
+    ) -> None:
+
         super().__init__(timeout=timeout)
 
         self.game = game
+        self.embed_color = embed_color
+        self.button_style = button_style
+        self.win_button_style = win_button_style
 
         for x, row in enumerate(game.board):
             for square in row:
-                self.add_item(TTTButton(square, row=x))
+                button = TTTButton(
+                    label=square, 
+                    style=self.button_style,
+                    row=x
+                )
+                self.add_item(button)
 
 
 class BetaTictactoe(Tictactoe):
-    BLANK: ClassVar[str] = "\u200b"
-    CIRCLE: ClassVar[str] = "O"
-    CROSS: ClassVar[str] = "X"
+    BLANK: ClassVar[str] = '\u200b'
+    CIRCLE: ClassVar[str] = 'O'
+    CROSS: ClassVar[str] = 'X'
 
-    def __init__(self, cross: discord.Member, circle: discord.Member) -> None:
-        super().__init__(cross, circle)
+    async def start(
+        self, 
+        ctx: commands.Context,
+        button_style: discord.ButtonStyle = discord.ButtonStyle.green,
+        *,
+        embed_color: Union[discord.Color, int] = 0x2F3136,
+        win_button_style: discord.ButtonStyle = discord.ButtonStyle.red,
+        timeout: float = None,
+    ) -> discord.Message:
 
-        self.board = [[self.BLANK for _ in range(3)] for _ in range(3)]
-
-    async def start(self, ctx: commands.Context, *, timeout: float = None) -> discord.Message:
-        return await ctx.send(
-            embed=self.make_embed(), 
-            view=TTTView(self, timeout=timeout)
+        view = TTTView(
+            self,
+            embed_color=embed_color,
+            button_style=button_style,
+            win_button_style=win_button_style,
+            timeout=timeout,
         )
+
+        return await ctx.send(embed=self.make_embed(embed_color), view=view)

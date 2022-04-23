@@ -1,4 +1,4 @@
-from typing import Optional, ClassVar
+from typing import Optional, ClassVar, Union
 
 import discord
 from discord.ext import commands
@@ -46,8 +46,8 @@ class Tictactoe:
             board += "".join(row) + "\n"
         return board
 
-    def make_embed(self) -> discord.Embed:
-        embed = discord.Embed()
+    def make_embed(self, color: Union[discord.Color, int] = 0x2F3136) -> discord.Embed:
+        embed = discord.Embed(color=color)
         if not self.is_game_over():
             embed.description = f"**Turn:** {self.turn.name}\n**Piece:** `{self.player_to_emoji[self.turn]}`"
         else:
@@ -102,8 +102,16 @@ class Tictactoe:
            
         return False
 
-    async def start(self, ctx: commands.Context, *, remove_reaction_after: bool = False, **kwargs) -> discord.Message:
-        embed = self.make_embed()
+    async def start(
+        self, 
+        ctx: commands.Context, 
+        *, 
+        embed_color: Union[discord.Color, int] = 0x2F3136, 
+        remove_reaction_after: bool = False, 
+        **kwargs,
+    ) -> discord.Message:
+
+        embed = self.make_embed(embed_color)
         self.message = await ctx.send(self.board_string(), embed=embed, **kwargs)
 
         for button in self._controls:
@@ -121,12 +129,12 @@ class Tictactoe:
             
             emoji = str(reaction.emoji)
             self.make_move(emoji, user)
-            embed = self.make_embed()
+            embed = self.make_embed(embed_color)
 
             if remove_reaction_after:
                 await self.message.remove_reaction(emoji, user)
 
             await self.message.edit(content=self.board_string(), embed=embed)
         
-        embed = self.make_embed()
+        embed = self.make_embed(embed_color)
         return await self.message.edit(content=self.board_string(), embed=embed)
