@@ -1,8 +1,3 @@
-"""
-Beta version of 2048
-made with discord.py v2.0 and buttons
-please do not use this until dpy 2.0 is offically released
-"""
 from __future__ import annotations
 
 import random

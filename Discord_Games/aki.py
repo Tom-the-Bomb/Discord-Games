@@ -19,8 +19,8 @@ class Options:
 class Akinator:
 
     def __init__(self) -> None:
-        self.player = None
-        self.win_at = None
+        self.player: Optional[discord.Member] = None
+        self.win_at: Optional[int] = None
         self.aki: Akinator_ = Akinator_()
         self.bar_emojis: tuple[str, str] = ("  ", "██")
         self.guess = None
@@ -74,7 +74,8 @@ class Akinator:
 
     async def start(
         self, 
-        ctx: commands.Context, 
+        ctx: commands.Context,
+        *, 
         remove_reaction_after: bool = False, 
         win_at: int = 80, 
         timeout: int = None, 

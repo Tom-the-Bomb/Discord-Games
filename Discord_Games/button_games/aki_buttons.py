@@ -1,9 +1,3 @@
-"""
-Beta version of akinator
-made with discord.py v2.0 and buttons
-please do not use this until dpy 2.0 is offically released
-"""
-
 from __future__ import annotations
 
 import discord
@@ -24,54 +18,63 @@ class AkiView(discord.ui.View):
         if interaction.user != game.player:
             return await interaction.response.send_message(content="This isn't your game", ephemeral=True)
         
-        if answer == "Close":
-            return await interaction.message.delete()
+        if answer == "Cancel":
+            await interaction.message.delete()
+            return await interaction.message.reply("Session ended", mention_author=True)
 
-        game.questions += 1
-        await game.aki.answer(answer)
+        else:
+            game.questions += 1
+            await game.aki.answer(answer)
 
-        embed = await game.build_embed()
-        await interaction.response.edit_message(embed=embed)
+            embed = await game.build_embed()
+            await interaction.response.edit_message(embed=embed)
 
-        if game.aki.progression >= game.win_at:
+            if game.aki.progression >= game.win_at:
 
-            for obb in self.children:
-                if isinstance(obb, discord.ui.Button):
-                    obb.disabled = True
+                for obb in self.children:
+                    if isinstance(obb, discord.ui.Button):
+                        obb.disabled = True
 
-            embed = await game.win()
-            await interaction.response.edit_message(embed=embed, view=self)
-            return self.stop()
+                embed = await game.win()
+                await interaction.response.edit_message(embed=embed, view=self)
+                return self.stop()
 
     @discord.ui.button(label="yes", style=discord.ButtonStyle.green)
-    async def yes_button(self, interaction: discord.Interaction, _):
+    async def yes_button(self, interaction: discord.Interaction, _) -> None:
         return await self.process_input(interaction, "y")
 
-    @discord.ui.button(label="no", style=discord.ButtonStyle.danger)
-    async def no_button(self, interaction: discord.Interaction, _):
+    @discord.ui.button(label="no", style=discord.ButtonStyle.red)
+    async def no_button(self, interaction: discord.Interaction, _) -> None:
         return await self.process_input(interaction, "n")
 
     @discord.ui.button(label="idk", style=discord.ButtonStyle.blurple)
-    async def idk_button(self, interaction: discord.Interaction, _):
+    async def idk_button(self, interaction: discord.Interaction, _) -> None:
         return await self.process_input(interaction, "i")
 
     @discord.ui.button(label="probably", style=discord.ButtonStyle.grey)
-    async def py_button(self, interaction: discord.Interaction, _):
+    async def py_button(self, interaction: discord.Interaction, _) -> None:
         return await self.process_input(interaction, "p")
 
     @discord.ui.button(label="probably not", style=discord.ButtonStyle.grey)
-    async def pn_button(self, interaction: discord.Interaction, _):
+    async def pn_button(self, interaction: discord.Interaction, _) -> None:
         return await self.process_input(interaction, "pn")
 
-    @discord.ui.button(label="Close", style=discord.ButtonStyle.grey)
-    async def pn_button(self, interaction: discord.Interaction, _):
-        return await self.process_input(interaction, "Close")
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=1)
+    async def del_button(self, interaction: discord.Interaction, _) -> None:
+        return await self.process_input(interaction, "Cancel")
         
 
 class BetaAkinator(Akinator):
-    player: discord.Member
 
-    async def start(self, ctx: commands.Context, win_at: int = 80, timeout: int = None, child_mode: bool = True):
+    async def start(
+        self, 
+        ctx: commands.Context,
+        *,
+        win_at: int = 80, 
+        timeout: int = None,
+        child_mode: bool = True,
+    ) -> None:
+
         self.player = ctx.author
         self.win_at = win_at
         self.view = AkiView(self, timeout=timeout)
