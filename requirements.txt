@@ -1,0 +1,5 @@
+discord.py
+english-words
+chess
+akinator.py
+Pillow

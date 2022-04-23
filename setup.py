@@ -1,6 +1,12 @@
 import setuptools
 import re
 
+requirements = []
+version = ''
+
+with open('requirements.txt') as r:
+    requirements = r.read().splitlines()
+
 with open("Discord_Games/__init__.py") as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
@@ -29,9 +35,14 @@ setuptools.setup(
         'Topic :: Utilities'
     ],
     include_package_data=True,
-    package_data={'': ['data/*.png', 'assets/*.txt']},
-    packages=['Discord_Games'],
-    install_requires=['discord.py', 'english-words', 'chess', 'akinator.py', 'Pillow',],
+    package_data={
+        '': ['data/*.png', 'assets/*.txt']
+    },
+    packages=[
+        'Discord_Games', 
+        'Discord_Games.button_games'
+    ],
+    install_requires=requirements,
     zip_safe=True,
     python_requires='>=3.7'
 )
