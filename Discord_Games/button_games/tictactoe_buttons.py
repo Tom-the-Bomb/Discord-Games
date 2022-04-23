@@ -40,7 +40,13 @@ class TTTButton(discord.ui.Button):
             for button in self.view.children:
                 if isinstance(button, discord.ui.Button):
                     button.disabled = True
-            await interaction.response.edit_message(view=self.view)
+            
+            for y, x in game.winning_indexes:
+                row = [button for button in self.view.children if button.row == y]
+                button = row[x]
+                button.style = discord.ButtonStyle.red
+                
+            await interaction.message.edit(view=self.view)
             return self.view.stop()
 
 class TTTView(discord.ui.View):
