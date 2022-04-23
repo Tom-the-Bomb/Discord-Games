@@ -63,6 +63,6 @@ class BetaTictactoe(Tictactoe):
 
     async def start(self, ctx: commands.Context, *, timeout: float = None) -> discord.Message:
         return await ctx.send(
-            embed=self.make_embed, 
+            embed=self.make_embed(), 
             view=TTTView(self, timeout=timeout)
         )
