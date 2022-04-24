@@ -36,7 +36,7 @@ setuptools.setup(
     ],
     include_package_data=True,
     package_data={
-        '': ['data/*.png', 'assets/*.txt']
+        '': ['assets/**']
     },
     packages=[
         'Discord_Games', 
