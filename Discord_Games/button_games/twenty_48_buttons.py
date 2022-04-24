@@ -46,13 +46,13 @@ class Twenty48_Button(discord.ui.Button):
         elif emoji == '⬆️':
             await self.game.move_up()
 
-        await self.game.spawn_new()
+        self.game.spawn_new()
 
         if self.game._render_image:
             image = await self.game.render_image()
             return await interaction.response.edit_message(attachments=[image])
         else:
-            board_string = await self.game.number_to_emoji()
+            board_string = self.game.number_to_emoji()
             return await interaction.response.edit_message(content=board_string)
 
 
@@ -84,5 +84,5 @@ class BetaTwenty48(Twenty48):
             image = await self.render_image()
             self.message = await ctx.send(file=image, view=self.view, **kwargs)
         else:
-            board_string = await self.number_to_emoji()
+            board_string = self.number_to_emoji()
             self.message = await ctx.send(content=board_string, view=self.view, **kwargs)
