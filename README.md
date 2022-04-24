@@ -15,6 +15,8 @@ __using it is fairly easy__
 
 ### Example
 
+- **read the examples!!** [here](https://github.com/Tom-the-Bomb/Discord-Games/blob/master/examples/examples.py)
+
 ```py
 from Discord_Games import ChessGame 
 

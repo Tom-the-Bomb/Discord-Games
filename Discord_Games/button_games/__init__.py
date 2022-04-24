@@ -7,10 +7,12 @@ from .aki_buttons import BetaAkinator
 from .twenty_48_buttons import BetaTwenty48
 from .wordle_buttons import BetaWordle
 from .tictactoe_buttons import BetaTictactoe
+from .memory_game import MemoryGame
 
 __all__ = (
     'BetaAkinator',
     'BetaTwenty48',
     'BetaWordle',
     'BetaTictactoe',
+    'MemoryGame',
 )

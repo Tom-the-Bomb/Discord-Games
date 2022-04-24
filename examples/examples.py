@@ -11,7 +11,7 @@ class Games(commands.Cog):
 
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        self.twenty_48_emojis = { # emoji mapping for 2048, replace values with your own emojis: <:name:id> ; can be obtained by sending \:emoji:
+        self.twenty_48_emojis = {
             '0':    '<:grey:821404552783855658>', 
             '2':    '<:twoo:821396924619161650>', 
             '4':    '<:fourr:821396936870723602>', 
@@ -27,6 +27,11 @@ class Games(commands.Cog):
             '4096': '<:4096:821397135043067915>',
             '8192': '<:8192:821397156127965274>',
         }
+        # emoji mapping for 2048, replace values with your own emojis: <:name:id> ; 
+        # can be obtained by sending \:emoji: 
+        # alternatively if you have v2.0, pass render_image=True into the class constructor instead
+        # the worst but easiest option would be to not pass anything into the constructor:
+        # it would then default to sending out the plain numbers instead, not fancy, but works. 
 
     @commands.command(name='connect4')
     async def connect4(self, ctx: commands.Context, member: discord.Member):
@@ -88,6 +93,12 @@ class Games(commands.Cog):
     async def twenty48(self, ctx: commands.Context):
 
         game = button_games.BetaTwenty48(self.twenty_48_emojis)
+        await game.start(ctx)
+
+    @commands.command(name='memory')
+    async def memory_game(self, ctx: commands.Context):
+
+        game = button_games.MemoryGame()
         await game.start(ctx)
 
 # add cog
