@@ -10,12 +10,12 @@ from discord.ext import commands
 class MemoryButton(discord.ui.Button):
     view: MemoryView
 
-    def __init__(self, emoji: str, *, row: int = 0) -> None:
+    def __init__(self, emoji: str, *, style: discord.ButtonStyle, row: int = 0) -> None:
         self.value = emoji
 
         super().__init__(
             label='\u200b',
-            style=self.view.button_style,
+            style=style,
             row=row,
         )
 
@@ -78,7 +78,8 @@ class MemoryView(discord.ui.View):
 
         for i, row in enumerate(self.board):
             for item in row:
-                self.add_item(MemoryButton(item, row=i))
+                button = MemoryButton(item, style=self.button_style, row=i)
+                self.add_item(button)
 
 class MemoryGame:
 
