@@ -31,7 +31,7 @@ class Twenty48:
         self._conversion = number_to_display_mapping
         self._render_image = render_image
 
-        if self._render_image and discord.VersionInfo.major < 2:
+        if self._render_image and discord.version_info.major < 2:
             raise ValueError('discord.py versions under v2.0.0 do not support rendering images since editing files is new in 2.0')
 
         if self._render_image:
@@ -143,11 +143,16 @@ class Twenty48:
 
     def number_to_emoji(self) -> str:
         board = self.board
-        GameString = ""
-        emoji_array = [[self._conversion.get(str(l), f'`{l}`') for l in row] for row in board]
+        game_string = ""
+
+        emoji_array = [
+            [self._conversion.get(str(l), f'`{l}`') for l in row] 
+            for row in board
+        ]
+
         for row in emoji_array:
-            GameString += "".join(row) + "\n"
-        return GameString
+            game_string += "".join(row) + "\n"
+        return game_string
 
     @executor()
     def render_image(self) -> discord.File:
