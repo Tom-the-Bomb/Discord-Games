@@ -34,7 +34,9 @@ class TTTButton(discord.ui.Button):
         game.board[self.row][column_idx] = self.label
         game.turn = game.circle if user == game.cross else game.cross
 
-        await interaction.response.edit_message(embed=game.make_embed(self.view.embed_color), view=self.view)
+        tie = all(button.disabled for button in self.view.children)
+
+        await interaction.response.edit_message(embed=game.make_embed(self.view.embed_color, tie=tie), view=self.view)
 
         if game.is_game_over():
             for button in self.view.children:

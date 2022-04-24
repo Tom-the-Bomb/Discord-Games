@@ -46,12 +46,12 @@ class Tictactoe:
             board += "".join(row) + "\n"
         return board
 
-    def make_embed(self, color: Union[discord.Color, int] = 0x2F3136) -> discord.Embed:
+    def make_embed(self, color: Union[discord.Color, int] = 0x2F3136, *, tie: bool = False) -> discord.Embed:
         embed = discord.Embed(color=color)
-        if not self.is_game_over():
-            embed.description = f"**Turn:** {self.turn.name}\n**Piece:** `{self.player_to_emoji[self.turn]}`"
+        if not self.is_game_over() or tie:
+            embed.description = f"**Turn:** {self.turn.mention}\n**Piece:** `{self.player_to_emoji[self.turn]}`"
         else:
-            status = f"{self.winner} won!" if self.winner else "Tie"
+            status = f"{self.winner.mention} won!" if self.winner else "Tie"
             embed.description = f"**Game over**\n{status}"
         return embed
 
