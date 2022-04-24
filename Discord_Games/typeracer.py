@@ -8,6 +8,7 @@ import random
 import asyncio
 import aiohttp
 import difflib
+import pathlib
 
 from PIL import Image, ImageDraw, ImageFont
 import discord
@@ -137,7 +138,7 @@ class TypeRacer:
         *, 
         embed_title: str = "Type the following sentence in the chat now!", 
         embed_color: Union[discord.Color, int] = discord.Color.greyple(), 
-        path_to_text_font: str = "arial.ttf",
+        path_to_text_font: Optional[str] = None,
         timeout: Optional[float] = None, 
         mode: str = "sentence",
         show_author: bool = True,
@@ -155,6 +156,9 @@ class TypeRacer:
             text = " ".join([random.choice(self.GRAMMAR_WORDS).lower() for _ in range(15)])
         else:
             raise TypeError("Invalid game mode , must be either 'random' or 'sentence'")
+
+        if not path_to_text_font:
+            path_to_text_font = fr'{pathlib.Path(__file__).parent}\assets\segoe-ui-semilight-411.ttf'
 
         buffer = await self._tr_img(text, path_to_text_font)
 

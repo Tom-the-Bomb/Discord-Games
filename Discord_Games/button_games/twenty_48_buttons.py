@@ -12,9 +12,12 @@ class Twenty48_Button(discord.ui.Button):
     view: discord.ui.View
     
     def __init__(self, game: BetaTwenty48, emoji: str) -> None:
+
+        style = discord.ButtonStyle.red if emoji == '⏹️' else discord.ButtonStyle.blurple
+
         self.game = game
         super().__init__(
-            style=discord.ButtonStyle.primary, 
+            style=style, 
             emoji=discord.PartialEmoji(name=emoji), 
             label="\u200b"
         )
@@ -28,7 +31,10 @@ class Twenty48_Button(discord.ui.Button):
 
         emoji = str(self.emoji)
 
-        if emoji == '➡️':
+        if emoji == '⏹️':
+            return await interaction.message.delete()
+
+        elif emoji == '➡️':
             await self.game.move_right()
 
         elif emoji == '⬅️':
@@ -41,16 +47,26 @@ class Twenty48_Button(discord.ui.Button):
             await self.game.move_up()
 
         await self.game.spawn_new()
-        board_string = await self.game.number_to_emoji()
 
-        return await interaction.response.edit_message(content=board_string)
+        if self.game._render_image:
+            image = await self.game.render_image()
+            return await interaction.response.edit_message(attachments=[image])
+        else:
+            board_string = await self.game.number_to_emoji()
+            return await interaction.response.edit_message(content=board_string)
 
 
 class BetaTwenty48(Twenty48):
-    player: discord.Member
     view: discord.ui.View
 
-    async def start(self, ctx: commands.Context, *, timeout: float = None, **kwargs) -> None:
+    async def start(
+        self, 
+        ctx: commands.Context, 
+        *,
+        timeout: float = None, 
+        delete_button: bool = False,
+        **kwargs,
+    ) -> None:
         
         self.player = ctx.author
         self.view = discord.ui.View(timeout=timeout)
@@ -58,8 +74,15 @@ class BetaTwenty48(Twenty48):
         self.board[random.randrange(4)][random.randrange(4)] = 2
         self.board[random.randrange(4)][random.randrange(4)] = 2
 
+        if delete_button:
+            self._controls.append("⏹️")
+
         for button in self._controls:
             self.view.add_item(Twenty48_Button(self, button))
         
-        board_string = await self.number_to_emoji()
-        self.message = await ctx.send(content=board_string, view=self.view, **kwargs)
+        if self._render_image:
+            image = await self.render_image()
+            self.message = await ctx.send(file=image, view=self.view, **kwargs)
+        else:
+            board_string = await self.number_to_emoji()
+            self.message = await ctx.send(content=board_string, view=self.view, **kwargs)
