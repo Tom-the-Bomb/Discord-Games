@@ -55,18 +55,20 @@ class TypeRacer:
 
     @executor()
     def _tr_img(self, text: str, font: str) -> BytesIO:
+
         text = "\n".join(textwrap.wrap(text, width=25))
+
         font = ImageFont.truetype(font, 30)
         x, y = font.getsize_multiline(text)
-        image = Image.new("RGBA", (x+20, y+30), (0, 0, 30))
 
-        cursor = ImageDraw.Draw(image)
-        cursor.multiline_text((10, 10), text, font=font, fill=(220, 200, 220))
+        with Image.new("RGBA", (x+20, y+30), (0, 0, 30)) as image:
+            cursor = ImageDraw.Draw(image)
+            cursor.multiline_text((10, 10), text, font=font, fill=(220, 200, 220))
 
-        buffer = BytesIO()
-        image.save(buffer, "png")
-        buffer.seek(0)
-        return buffer
+            buffer = BytesIO()
+            image.save(buffer, "PNG")
+            buffer.seek(0)
+            return buffer
 
     async def wait_for_tr_response(self, ctx: commands.Context, text: str, *, timeout: int) -> discord.Message:
         
@@ -85,7 +87,7 @@ class TypeRacer:
 
         while True:
 
-            def check(m):
+            def check(m: discord.Message) -> bool:
                 content = m.content.lower().replace("\n", " ")
                 if m.channel == ctx.channel and not m.author.bot and m.author not in map(lambda m: m["user"], winners):
                     sim = difflib.SequenceMatcher(None, content, text).ratio()

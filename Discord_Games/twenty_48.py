@@ -146,7 +146,7 @@ class Twenty48:
         game_string = ""
 
         emoji_array = [
-            [self._conversion.get(str(l), f'`{l}`') for l in row] 
+            [self._conversion.get(str(l), f'`{l}` ') for l in row] 
             for row in board
         ]
 

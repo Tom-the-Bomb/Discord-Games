@@ -61,7 +61,7 @@ class WordInputButton(discord.ui.Button):
             return await interaction.response.send_message("This isn't your game!", ephemeral=True)
         else:
             if self.label == 'Cancel':
-                await interaction.response.send_message(f'Game Over! the word was {game.word}')
+                await interaction.response.send_message(f'Game Over! the word was: **{game.word}**')
                 return await interaction.message.delete()
             else:
                 return await interaction.response.send_modal(WordInput(self.view))
