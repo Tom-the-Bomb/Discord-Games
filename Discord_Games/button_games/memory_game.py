@@ -50,7 +50,7 @@ class MemoryButton(discord.ui.Button):
 
 class MemoryView(discord.ui.View):
     board: list[list[str]]
-    DEFAULT_ITEMS = ['🥝', '🍓', '🍹', '🍋', '🥭', '🍎', '🍊', '🍍', '🍑', '🍇']
+    DEFAULT_ITEMS: list[str] = ['🥝', '🍓', '🍹', '🍋', '🥭', '🍎', '🍊', '🍍', '🍑', '🍇']
     
     def __init__(
         self, 
