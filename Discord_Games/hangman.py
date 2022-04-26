@@ -126,9 +126,11 @@ class Hangman:
             self._embed.set_field_at(0, name='Word', value=f"{' '.join(self.correct)}")
             await self._message.edit(embed=self._embed)
         else:
-            self._alpha.remove(guess)
+            if len(guess) == 1:
+                self._alpha.remove(guess)
+                self.wrong_letters.append(guess)
+
             self._counter -= 1
-            self.wrong_letters.append(guess)
 
             self._embed.set_field_at(1, name='Wrong letters', value=f"{', '.join(self.wrong_letters)}")
             self._embed.set_field_at(2, name='Lives left', value=self.lives(), inline=False)
