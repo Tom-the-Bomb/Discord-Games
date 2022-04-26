@@ -28,7 +28,7 @@ class RPSButton(discord.ui.Button):
         else:
             if not game.player2:
                 bot_choice = random.choice(game.OPTIONS)
-                user_choice = self.label
+                user_choice = self.emoji
 
                 if user_choice == bot_choice:
                     game.embed.description = f'**Tie!**\nWe both picked {user_choice}'  
@@ -47,12 +47,12 @@ class RPSButton(discord.ui.Button):
                 other_player_choice = game.player1_choice if interaction.user == game.player2 else game.player2_choice
 
                 if interaction.user == game.player1:
-                    game.player1_choice = self.label
+                    game.player1_choice = self.emoji
 
                     if not other_player_choice:
                         game.embed.description += f'\n\n*Waiting for {game.player2.mention} to choose...*'
                 else:
-                    game.player2_choice = self.label
+                    game.player2_choice = self.emoji
 
                     if not other_player_choice:
                         game.embed.description += f'\n\n*Waiting for {game.player1.mention} to choose...*'
@@ -106,7 +106,7 @@ class BetaRockPaperScissors(RockPaperScissors):
         self, 
         ctx: commands.Context, 
         *,
-        button_style: discord.ButtonStyle = discord.ButtonStyle.red,
+        button_style: discord.ButtonStyle = discord.ButtonStyle.blurple,
         embed_color: Union[discord.Color, int] = 0x2F3136,
         timeout: float = None,
     ) -> discord.Message:
