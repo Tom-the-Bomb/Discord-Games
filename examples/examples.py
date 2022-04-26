@@ -101,6 +101,12 @@ class Games(commands.Cog):
         game = button_games.MemoryGame()
         await game.start(ctx)
 
+    @commands.command(name='rps')
+    async def rps(self, ctx: commands.Context, player: discord.Member = None):
+
+        game = button_games.BetaRockPaperScissors(player) # defaults to playing with bot if player = None
+        await game.start(ctx)
+
 # add cog
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Games(bot))

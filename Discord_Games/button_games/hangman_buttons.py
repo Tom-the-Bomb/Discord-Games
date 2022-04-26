@@ -5,7 +5,7 @@ from typing import Union
 import discord
 from discord.ext import commands
 
-from .wordle_buttons import WordleInputButton
+from .wordle_buttons import WordInputButton
 from ..hangman import Hangman
 
 class HangmanInput(discord.ui.Modal, title='Make a guess!'):
@@ -40,7 +40,7 @@ class HangmanInput(discord.ui.Modal, title='Make a guess!'):
 
             return await interaction.response.edit_message(view=self.view)
 
-class HangmanButton(WordleInputButton):
+class HangmanButton(WordInputButton):
     view: HangmanView
 
     async def callback(self, interaction: discord.Interaction) -> None:
