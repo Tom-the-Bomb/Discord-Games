@@ -108,7 +108,7 @@ class Hangman:
         self.game_over: bool = False
 
     def lives(self) -> str:
-        return f"`{('❤️' * self._counter) or '-'}`"
+        return f"`{('❤️' * self._counter) or '-'} ({self._counter})`"
 
     async def make_guess(self, guess: str) -> None:
 
