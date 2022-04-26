@@ -28,7 +28,7 @@ class RPSButton(discord.ui.Button):
         else:
             if not game.player2:
                 bot_choice = random.choice(game.OPTIONS)
-                user_choice = self.emoji
+                user_choice = self.emoji.name
 
                 if user_choice == bot_choice:
                     game.embed.description = f'**Tie!**\nWe both picked {user_choice}'  
@@ -47,12 +47,12 @@ class RPSButton(discord.ui.Button):
                 other_player_choice = game.player1_choice if interaction.user == game.player2 else game.player2_choice
 
                 if interaction.user == game.player1:
-                    game.player1_choice = self.emoji
+                    game.player1_choice = self.emoji.name
 
                     if not other_player_choice:
                         game.embed.description += f'\n\n*Waiting for {game.player2.mention} to choose...*'
                 else:
-                    game.player2_choice = self.emoji
+                    game.player2_choice = self.emoji.name
 
                     if not other_player_choice:
                         game.embed.description += f'\n\n*Waiting for {game.player1.mention} to choose...*'
