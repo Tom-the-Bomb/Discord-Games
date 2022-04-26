@@ -18,6 +18,18 @@ class RPSButton(discord.ui.Button):
             style=style, 
         )
 
+    def disable_all(self) -> None:
+        for button in self.view.children:
+            if isinstance(button, discord.ui.Button):
+                button.disabled = True
+
+    def get_choice(self, user: discord.Member, other: bool = False) -> Optional[str]:
+        game = self.view.game
+        if other:
+            return game.player2_choice if user == game.player1 else game.player1_choice
+        else:
+            return game.player1_choice if user == game.player1 else game.player2_choice
+
     async def callback(self, interaction: discord.Interaction) -> None:
 
         game = self.view.game
@@ -38,24 +50,25 @@ class RPSButton(discord.ui.Button):
                     else:
                         game.embed.description = f'**You Lost!**\nI picked {bot_choice} and you picked {user_choice}.'
                 
-                for button in self.view.children:
-                    if isinstance(button, discord.ui.Button):
-                        button.disabled = True
+                self.disable_all()
 
                 return await interaction.response.edit_message(embed=game.embed, view=self.view)
             else:
-                other_player_choice = game.player1_choice if interaction.user == game.player2 else game.player2_choice
+                if self.get_choice(interaction.user):
+                    return await interaction.response.send_message('You have chosen already!', ephemeral=True)
+
+                other_player_choice = self.get_choice(interaction.user, other=True)
 
                 if interaction.user == game.player1:
                     game.player1_choice = self.emoji.name
 
                     if not other_player_choice:
-                        game.embed.description += f'\n\n*Waiting for {game.player2.mention} to choose...*'
+                        game.embed.description += f'\n\n{game.player1.mention} has chosen...\n*Waiting for {game.player2.mention} to choose...*'
                 else:
                     game.player2_choice = self.emoji.name
 
                     if not other_player_choice:
-                        game.embed.description += f'\n\n*Waiting for {game.player1.mention} to choose...*'
+                        game.embed.description += f'\n\n{game.player2.mention} has chosen...\n*Waiting for {game.player1.mention} to choose...*'
                     
                 if game.player1_choice and game.player2_choice:
                     who_won = game.player1 if game.BEATS[game.player1_choice] == game.player2_choice else game.player2
@@ -66,9 +79,7 @@ class RPSButton(discord.ui.Button):
                         f'\n{game.player2.mention} chose {game.player2_choice}.'
                     )
 
-                    for button in self.view.children:
-                        if isinstance(button, discord.ui.Button):
-                            button.disabled = True
+                    self.disable_all()
 
                 return await interaction.response.edit_message(embed=game.embed, view=self.view)
 
