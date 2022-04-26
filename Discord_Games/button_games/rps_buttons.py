@@ -58,7 +58,7 @@ class RPSButton(discord.ui.Button):
                         game.embed.description += f'\n\n*Waiting for {game.player1.mention} to choose...*'
                     
                 if game.player1_choice and game.player2_choice:
-                    who_won = game.player1 if game.BEATS[game.player1] == game.player2 else game.player2
+                    who_won = game.player1 if game.BEATS[game.player1_choice] == game.player2_choice else game.player2
 
                     game.embed.description = (
                         f'**{who_won.mention} Won!**'
