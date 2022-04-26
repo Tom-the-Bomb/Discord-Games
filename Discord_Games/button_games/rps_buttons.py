@@ -52,7 +52,6 @@ class RPSButton(discord.ui.Button):
                 
                 self.disable_all()
 
-                return await interaction.response.edit_message(embed=game.embed, view=self.view)
             else:
                 if self.get_choice(interaction.user):
                     return await interaction.response.send_message('You have chosen already!', ephemeral=True)
@@ -81,7 +80,7 @@ class RPSButton(discord.ui.Button):
 
                     self.disable_all()
 
-                return await interaction.response.edit_message(embed=game.embed, view=self.view)
+            return await interaction.response.edit_message(embed=game.embed, view=self.view)
 
 class RPSView(discord.ui.View):
     game: BetaRockPaperScissors
