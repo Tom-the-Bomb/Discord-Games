@@ -132,7 +132,7 @@ class Hangman:
 
             self._counter -= 1
 
-            self._embed.set_field_at(1, name='Wrong letters', value=f"{', '.join(self.wrong_letters)}")
+            self._embed.set_field_at(1, name='Wrong letters', value=f"{', '.join(self.wrong_letters) or '\u200b'}")
             self._embed.set_field_at(2, name='Lives left', value=self.lives(), inline=False)
             self._embed.description = f"```\n{STAGES[self._counter]}\n```"
             await self._message.edit(embed=self._embed)
