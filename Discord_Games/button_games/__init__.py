@@ -8,6 +8,7 @@ from .twenty_48_buttons import BetaTwenty48
 from .wordle_buttons import BetaWordle
 from .tictactoe_buttons import BetaTictactoe
 from .memory_game import MemoryGame
+from .rps_buttons import BetaRockPaperScissors
 
 __all__ = (
     'BetaAkinator',
@@ -15,4 +16,5 @@ __all__ = (
     'BetaWordle',
     'BetaTictactoe',
     'MemoryGame',
+    'BetaRockPaperScissors',
 )
