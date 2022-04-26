@@ -39,6 +39,8 @@ class HangmanInput(discord.ui.Modal, title='Make a guess!'):
             self.disable_all()
 
             return await interaction.response.edit_message(view=self.view)
+        else:
+            return await interaction.response.defer()
 
 class HangmanButton(WordInputButton):
     view: HangmanView
