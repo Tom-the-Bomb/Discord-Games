@@ -23,7 +23,7 @@ class ReactionButton(discord.ui.Button):
         if game.author_only and interaction.user != game.author:
             return await interaction.response.send_message('This game is only for the author!', ephemeral=True)
 
-        if not self.edited:
+        if (not self.edited) or (self.view.is_finished()):
             return await interaction.response.defer()
         else:
             end_time = time.perf_counter()
