@@ -5,7 +5,7 @@ import random
 
 import discord
 from discord.ext import commands
-from english_words import english_words_set
+from english_words import english_words_alpha_set
 
 BLANK = '  \u200b'
 STAGES: list[str] = ['''
@@ -95,7 +95,7 @@ class Hangman:
 
     def __init__(self) -> None:
         self._alpha: list[str] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
-        self._all_words = tuple(english_words_set)
+        self._all_words = tuple(english_words_alpha_set)
         self.word: str = random.choice(self._all_words).lower()
         self.letters: list[str] = list(self.word)
         
