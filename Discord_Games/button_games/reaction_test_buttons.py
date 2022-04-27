@@ -16,6 +16,7 @@ class ReactionButton(discord.ui.Button):
 
         self.edited: bool = False
         self.clicked: bool = False
+        self.is_finished: bool = False
     
     async def callback(self, interaction: discord.Interaction) -> None:
         game = self.view.game
@@ -23,7 +24,7 @@ class ReactionButton(discord.ui.Button):
         if game.author_only and interaction.user != game.author:
             return await interaction.response.send_message('This game is only for the author!', ephemeral=True)
 
-        if (not self.edited) or (self.view.is_finished()):
+        if (not self.edited) or self.is_finished:
             return await interaction.response.defer()
         else:
             end_time = time.perf_counter()
@@ -31,7 +32,9 @@ class ReactionButton(discord.ui.Button):
 
             game.embed.description = f'{interaction.user.mention} reacted first in `{elapsed:.2f}s` !'
             await interaction.response.edit_message(embed=game.embed)
-            return self.view.stop()
+            
+            self.view.stop()
+            self.is_finished = True
 
 class ReactionView(discord.ui.View):
     game: BetaReactionGame
