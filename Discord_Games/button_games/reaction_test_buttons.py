@@ -26,7 +26,7 @@ class ReactionButton(discord.ui.Button):
             return await interaction.response.defer()
         else:
             end_time = time.perf_counter()
-            elapsed = self.view.game.start_time - end_time
+            elapsed = end_time - self.view.game.start_time
 
             game.embed.description = f'{interaction.user.mention} reacted first in `{elapsed:.2f}s` !'
             await interaction.response.edit_message(embed=game.embed)
@@ -76,7 +76,8 @@ class BetaReactionGame:
         pause = random.uniform(1.0, 5.0)
         await asyncio.sleep(pause)
 
-        view.button.style = discord.ButtonStyle.red
-        await self.message.edit(view=view)
-
+        styles = (discord.ButtonStyle.green, discord.ButtonStyle.red)
+        view.button.style = random.choices(styles, weights=[1, 2])
         self.start_time = time.perf_counter()
+
+        return await self.message.edit(view=view)
