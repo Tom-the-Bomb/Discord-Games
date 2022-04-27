@@ -1,11 +1,9 @@
 # Discord-Games
 
-This is a very simple package for implementing games into your discord bot
-Dont expect too much from it
-You can install it with
-
-```
-$ pip install git+https://github.com/Tom-the-Bomb/Discord-Games.git
+This is a simple package for implementing **games** into your [discord.py](https://github.com/Rapptz/discord.py) bot<br/>
+You can install it with:
+```bash
+$ py -m pip install git+https://github.com/Tom-the-Bomb/Discord-Games.git
 ```
 ---
 ## The basic usage of the library goes like this
