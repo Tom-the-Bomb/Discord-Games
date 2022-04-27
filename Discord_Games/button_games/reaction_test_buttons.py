@@ -14,6 +14,7 @@ class ReactionButton(discord.ui.Button):
     def __init__(self, style: discord.ButtonStyle) -> None:
         super().__init__(label='\u200b', style=style)
 
+        self.edited: bool = False
         self.clicked: bool = False
     
     async def callback(self, interaction: discord.Interaction) -> None:
@@ -22,7 +23,7 @@ class ReactionButton(discord.ui.Button):
         if game.author_only and interaction.user != game.author:
             return await interaction.response.send_message('This game is only for the author!', ephemeral=True)
 
-        if self.style == discord.ButtonStyle.blurple:
+        if not self.edited:
             return await interaction.response.defer()
         else:
             end_time = time.perf_counter()
@@ -77,7 +78,8 @@ class BetaReactionGame:
         await asyncio.sleep(pause)
 
         styles = (discord.ButtonStyle.green, discord.ButtonStyle.red)
-        view.button.style = random.choices(styles, weights=[1, 2])
-        self.start_time = time.perf_counter()
+        view.button.style = random.choices(styles, weights=[1, 2])[0]
 
-        return await self.message.edit(view=view)
+        await self.message.edit(view=view)
+        view.button.edited = True
+        self.start_time = time.perf_counter()

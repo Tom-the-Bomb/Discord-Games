@@ -23,7 +23,7 @@ __all__ = (
 )
 
 __title__ = "Discord_Games"
-__version__  = "1.9.17"
+__version__  = "1.9.18"
 __author__   = "Tom-the-Bomb"
 __license__  = "MIT"
 __copyright__ = "Copyright 2021 Tom-the-Bomb"
