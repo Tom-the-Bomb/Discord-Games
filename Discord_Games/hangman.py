@@ -5,7 +5,7 @@ import random
 
 import discord
 from discord.ext import commands
-from english_words import english_words_alpha_set
+from english_words import english_words_lower_alpha_set
 
 BLANK = '  \u200b'
 STAGES: list[str] = ['''
@@ -95,8 +95,8 @@ class Hangman:
 
     def __init__(self) -> None:
         self._alpha: list[str] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
-        self._all_words = tuple(english_words_alpha_set)
-        self.word: str = random.choice(self._all_words).lower()
+        self._all_words = tuple(english_words_lower_alpha_set)
+        self.word = self.get_word()
         self.letters: list[str] = list(self.word)
         
         self.correct: list[str] = [r"\_" for _ in self.word]
@@ -107,6 +107,12 @@ class Hangman:
         self._counter: int = 8
 
         self.game_over: bool = False
+
+    def get_word(self) -> str:
+        word = random.choice(self._all_words).lower()
+        if len(word) == 1:
+            word = self.get_word()
+        return word
 
     def lives(self) -> str:
         return f"`{('❤️' * self._counter) or '💀'} ({self._counter})`"
