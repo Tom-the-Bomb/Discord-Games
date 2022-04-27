@@ -10,6 +10,7 @@ from .tictactoe_buttons import BetaTictactoe
 from .memory_game import MemoryGame
 from .rps_buttons import BetaRockPaperScissors
 from .hangman_buttons import BetaHangman
+from .reaction_test_buttons import BetaReactionGame
 
 __all__ = (
     'BetaAkinator',
@@ -19,4 +20,5 @@ __all__ = (
     'MemoryGame',
     'BetaRockPaperScissors',
     'BetaHangman',
+    'BetaReactionGame',
 )

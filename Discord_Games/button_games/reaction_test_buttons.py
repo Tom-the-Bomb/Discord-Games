@@ -8,8 +8,6 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from ..reaction_test import ReactionGame
-
 class ReactionButton(discord.ui.Button):
     view: ReactionView
 
@@ -28,18 +26,18 @@ class ReactionButton(discord.ui.Button):
             return await interaction.response.defer()
         else:
             end_time = time.perf_counter()
-            elapsed = self.view.game - end_time
+            elapsed = self.view.game.start_time - end_time
 
             game.embed.description = f'{interaction.user.mention} reacted first in `{elapsed:.2f}s` !'
             await interaction.response.edit_message(embed=game.embed)
             return self.view.stop()
 
 class ReactionView(discord.ui.View):
-    game: ReactionGame
+    game: BetaReactionGame
 
     def __init__(
         self, 
-        game: ReactionGame,
+        game: BetaReactionGame,
         *,
         button_style: discord.ButtonStyle,  
         timeout: float
@@ -52,7 +50,7 @@ class ReactionView(discord.ui.View):
         self.button = ReactionButton(self.button_style)
         self.add_item(self.button)
 
-class ReactionGame(ReactionGame):
+class BetaReactionGame:
     
     async def start(
         self, 
@@ -69,7 +67,7 @@ class ReactionGame(ReactionGame):
 
         self.embed = discord.Embed(
             title='Reaction Game',
-            description=f'React with {self.emoji} when the button changes color!',
+            description=f'Click the button below, when the button changes color!',
             color=embed_color,
         )
         view = ReactionView(self, button_style=button_style, timeout=timeout)
