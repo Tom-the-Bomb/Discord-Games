@@ -14,11 +14,10 @@ $ pip install git+https://github.com/Tom-the-Bomb/Discord-Games.git
 - Initialize the game class (with the appropriate arguments, normally none but varies from game to game)
     - Ex: `game = Wordle()`
 - Call the start method (with the appropriate arguments) to start the game
-    - Ex: `await game.start(ctx)` (ctx is always a required argument, rest are optional)
-<br/>
+    - Ex: `await game.start(ctx)` (ctx is always a required argument, rest are optional)<br/>
 - refer to the source for more info on the arguments you *could* pass
 
-#### read the examples [here](https://github.com/Tom-the-Bomb/Discord-Games/blob/master/examples/examples.py)<br/>
-
+- #### read the examples [here](https://github.com/Tom-the-Bomb/Discord-Games/blob/master/examples/examples.py)<br/>
+---
 ### Documentation
 Coming soon...!
