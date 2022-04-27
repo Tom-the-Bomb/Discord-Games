@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Union
 import asyncio
 
 import discord
@@ -49,7 +49,7 @@ class Akinator:
             description = (
                 "```swift\n"
                 f"Question-Number  : {self.questions}\n"
-                f"Progression-Level: {self.aki.progression}\n```\n"
+                f"Progression-Level: {self.aki.progression:.2f}\n```\n"
                 f"{self.build_bar()}"
             ), 
             color = discord.Color.random()
@@ -63,7 +63,7 @@ class Akinator:
         await self.aki.win()
         self.guess = self.aki.first_guess
 
-        embed = discord.Embed(color=0x2F3136)
+        embed = discord.Embed(color=self.embed_color)
         embed.title = "Character Guesser Engine Results"
         embed.description = f"Total Questions: `{self.questions}`"
         embed.add_field(name= "Character Guessed", value=f"\n**Name:** {self.guess['name']}\n{self.guess['description']}")
@@ -75,7 +75,8 @@ class Akinator:
     async def start(
         self, 
         ctx: commands.Context,
-        *, 
+        *,
+        embed_color: Union[discord.Color, int] = 0x2F3136,
         remove_reaction_after: bool = False, 
         win_at: int = 80, 
         timeout: int = None, 
@@ -83,6 +84,7 @@ class Akinator:
         child_mode: bool = True, 
     ) -> Optional[discord.Message]:
         
+        self.embed_color = embed_color
         self.player = ctx.author
         self.win_at = win_at
 
