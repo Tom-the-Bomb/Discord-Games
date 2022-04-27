@@ -138,7 +138,7 @@ class TypeRacer:
         ctx: commands.Context, 
         *, 
         embed_title: str = "Type the following sentence in the chat now!", 
-        embed_color: Union[discord.Color, int] = discord.Color.greyple(), 
+        embed_color: Union[discord.Color, int] = 0x2F3136, 
         path_to_text_font: Optional[str] = None,
         timeout: Optional[float] = None, 
         mode: str = "sentence",
