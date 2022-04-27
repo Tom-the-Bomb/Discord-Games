@@ -1,4 +1,6 @@
-from typing import Union, Optional, Any
+from __future__ import annotations
+
+from typing import Union, Optional, Any, ClassVar
 from datetime import datetime as dt
 from io import BytesIO
 
@@ -17,8 +19,8 @@ from discord.ext import commands
 from .utils import executor
 
 class TypeRacer:
-    SENTENCE_URL  = "https://api.quotable.io/random"
-    GRAMMAR_WORDS = (
+    SENTENCE_URL: ClassVar[str] = "https://api.quotable.io/random"
+    GRAMMAR_WORDS: ClassVar[tuple[str]] = (
         'the', 'of', 'to', 'and', 'a', 'in', 'is', 'it',
         'you', 'that', 'he', 'was', 'for', 'on', 'are',
         'with', 'as', 'his', 'they', 'be', 'at', 'one',
@@ -52,6 +54,11 @@ class TypeRacer:
         'sea', 'draw', 'left', 'late', 'run', "don't", 'while', 'press', 'close',
         'night', 'real', 'life', 'few', 'north'
     )
+    EMOJI_MAP: ClassVar[dict[int, str]] = {
+        1: "🥇", 
+        2: "🥈", 
+        3: "🥉",
+    }
 
     @executor()
     def _tr_img(self, text: str, font: str) -> BytesIO:
@@ -61,7 +68,7 @@ class TypeRacer:
         font = ImageFont.truetype(font, 30)
         x, y = font.getsize_multiline(text)
 
-        with Image.new("RGBA", (x+20, y+30), (0, 0, 30)) as image:
+        with Image.new("RGB", (x+20, y+30), (0, 0, 30)) as image:
             cursor = ImageDraw.Draw(image)
             cursor.multiline_text((10, 10), text, font=font, fill=(220, 200, 220))
 
@@ -70,16 +77,12 @@ class TypeRacer:
             buffer.seek(0)
             return buffer
 
+    def format_line(self, i: int, x: dict[str, Any]) -> str:
+        return f" • {self.EMOJI_MAP[i]} | {x['user'].mention} in {x['time']:.2f}s | **WPM:** {x['wpm']:.2f} | **ACC:** {x['acc']:.2f}%"
+
     async def wait_for_tr_response(self, ctx: commands.Context, text: str, *, timeout: int) -> discord.Message:
-        
-        emoji_map = {
-            1: "🥇", 2: "🥈", 3: "🥉"
-        }
 
         self._embed.description = ""
-
-        def format_line(i: int, x: dict[str, Any]) -> str:
-            return f" • {emoji_map[i]} | {x['user'].mention} in {x['time']:.2f}s | **WPM:** {x['wpm']:.2f} | **ACC:** {x['acc']:.2f}%"
 
         text = text.lower().replace("\n", " ")
         winners = []
@@ -94,11 +97,7 @@ class TypeRacer:
                     return sim >= 0.9
 
             try:
-                message = await ctx.bot.wait_for(
-                    "message", 
-                    timeout = timeout, 
-                    check = check
-                )
+                message: discord.Message = await ctx.bot.wait_for("message", timeout=timeout, check=check)
             except asyncio.TimeoutError:
                 if winners:
                     break
@@ -116,19 +115,19 @@ class TypeRacer:
                 "acc" : difflib.SequenceMatcher(None, content, text).ratio() * 100
             })
 
-            self._embed.description += format_line(len(winners), winners[len(winners)-1]) + "\n"
+            self._embed.description += self.format_line(len(winners), winners[len(winners) - 1]) + "\n"
             await self._message.edit(embed=self._embed)
 
-            await message.add_reaction(emoji_map[len(winners)])
+            await message.add_reaction(self.EMOJI_MAP[len(winners)])
 
             if len(winners) >= 3:
                 break
         
-        desc = [format_line(i, x) for i, x in enumerate(winners, 1)]
+        desc = [self.format_line(i, x) for i, x in enumerate(winners, 1)]
         embed = discord.Embed(
-            title = "Typerace results",
-            color = 0x2F3136, 
-            timestamp = dt.utcnow()
+            title="Typerace results",
+            color=self.embed_color, 
+            timestamp=dt.utcnow()
         )
         embed.add_field(name="Winners", value="\n".join(desc))
 
@@ -146,6 +145,8 @@ class TypeRacer:
         show_author: bool = True,
     ) -> discord.Message:
 
+        self.embed_color = embed_color
+
         if mode == "sentence":
             async with aiohttp.ClientSession() as session:
                 async with session.get(self.SENTENCE_URL) as r:
@@ -153,11 +154,12 @@ class TypeRacer:
                         text = await r.json()
                         text = text.get("content")
                     else:
-                        raise RuntimeError(f"ERROR: {r.status}, {r.reason}")
+                        raise RuntimeError(f"HTTP request raised an error: {r.status}; {r.reason}")
+
         elif mode == "random":
-            text = " ".join([random.choice(self.GRAMMAR_WORDS).lower() for _ in range(15)])
+            text = " ".join(random.choice(self.GRAMMAR_WORDS).lower() for _ in range(15))
         else:
-            raise TypeError("Invalid game mode , must be either 'random' or 'sentence'")
+            raise TypeError("Invalid game mode, must be either 'random' or 'sentence'")
 
         if not path_to_text_font:
             path_to_text_font = fr'{pathlib.Path(__file__).parent}\assets\segoe-ui-semilight-411.ttf'
@@ -165,14 +167,14 @@ class TypeRacer:
         buffer = await self._tr_img(text, path_to_text_font)
 
         embed = discord.Embed(
-            title = embed_title,
-            color = embed_color, 
-            timestamp = dt.utcnow()
+            title=embed_title,
+            color=self.embed_color, 
+            timestamp=dt.utcnow()
         )
         embed.set_image(url="attachment://tr.png")
 
         if show_author:
-            if discord.__version__.startswith('2'):
+            if discord.version_info.major >= 2:
                 av = ctx.author.avatar.url
             else:
                 av = ctx.author.avatar_url
@@ -180,8 +182,8 @@ class TypeRacer:
 
         self._embed = embed
         self._message = await ctx.send(
-            embed = embed,
-            file = discord.File(buffer, "tr.png")
+            embed=embed,
+            file=discord.File(buffer, "tr.png")
         )
 
         return await self.wait_for_tr_response(ctx, text, timeout=timeout)
