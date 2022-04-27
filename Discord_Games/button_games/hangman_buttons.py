@@ -33,7 +33,10 @@ class HangmanInput(discord.ui.Modal, title='Make a guess!'):
         content = self.word.value.lower()
         game = self.view.game
 
-        if len(content) > 1 and content not in game._all_words:
+        if len(content) == 1 and content not in game._alpha:
+            return await interaction.response.send_message("You've guessed this letter before!", ephemeral=True)
+
+        elif len(content) > 1 and content not in game._all_words:
             return await interaction.response.send_message('This is not a valid word!', ephemeral=True)
             
         else:
