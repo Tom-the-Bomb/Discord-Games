@@ -95,7 +95,8 @@ class Hangman:
 
     def __init__(self) -> None:
         self._alpha: list[str] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
-        self.word: str = random.choice(tuple(english_words_set)).lower()
+        self._all_words = tuple(english_words_set)
+        self.word: str = random.choice(self._all_words).lower()
         self.letters: list[str] = list(self.word)
         
         self.correct: list[str] = [r"\_" for _ in self.word]
@@ -108,7 +109,7 @@ class Hangman:
         self.game_over: bool = False
 
     def lives(self) -> str:
-        return f"`{('❤️' * self._counter) or '-'} ({self._counter})`"
+        return f"`{('❤️' * self._counter) or '💀'} ({self._counter})`"
 
     async def make_guess(self, guess: str) -> None:
 
