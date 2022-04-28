@@ -1,3 +1,9 @@
+"""
+Discord-Games
+"""
+
+from typing import NamedTuple
+
 from .aki import Akinator
 from .battleship import BattleShip
 from .chess_game import Chess
@@ -26,4 +32,17 @@ __title__ = "Discord_Games"
 __version__  = "1.9.18"
 __author__   = "Tom-the-Bomb"
 __license__  = "MIT"
-__copyright__ = "Copyright 2021 Tom-the-Bomb"
+__copyright__ = "Copyright 2021-present Tom-the-Bomb"
+
+class VersionInfo(NamedTuple):
+    major: int
+    minor: int
+    micro: int
+
+version_info: VersionInfo = VersionInfo(
+    major=1, 
+    minor=9, 
+    micro=18
+)
+
+del NamedTuple, VersionInfo
