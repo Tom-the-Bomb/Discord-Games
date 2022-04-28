@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, ClassVar
 import random
 import asyncio
 
@@ -50,7 +50,7 @@ class MemoryButton(discord.ui.Button):
 
 class MemoryView(discord.ui.View):
     board: list[list[str]]
-    DEFAULT_ITEMS: list[str] = ['🥝', '🍓', '🍹', '🍋', '🥭', '🍎', '🍊', '🍍', '🍑', '🍇']
+    DEFAULT_ITEMS: ClassVar[list[str]] = ['🥝', '🍓', '🍹', '🍋', '🥭', '🍎', '🍊', '🍍', '🍑', '🍇', '🍉', '🥬']
     
     def __init__(
         self, 
@@ -69,16 +69,21 @@ class MemoryView(discord.ui.View):
         
         if not items:
             items = self.DEFAULT_ITEMS
-        assert len(items) == 10
+        assert len(items) == 12
 
-        items = items * 2
+        items *= 2
         random.shuffle(items)
+        random.shuffle(items)
+        items.insert(12, None)
 
         self.board = [items[i:i + 5] for i in range(0, len(items), 5)]
 
         for i, row in enumerate(self.board):
             for item in row:
                 button = MemoryButton(item, style=self.button_style, row=i)
+                
+                if not item:
+                    button.disabled = True
                 self.add_item(button)
 
 class MemoryGame:
