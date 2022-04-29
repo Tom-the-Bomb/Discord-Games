@@ -36,7 +36,7 @@ setuptools.setup(
     ],
     include_package_data=True,
     package_data={
-        '': ['assets/**']
+        '': ['assets/**', 'assets/country-data/**']
     },
     packages=[
         'Discord_Games', 
@@ -44,5 +44,5 @@ setuptools.setup(
     ],
     install_requires=requirements,
     zip_safe=True,
-    python_requires='>=3.7'
+    python_requires='>=3.8',
 )
