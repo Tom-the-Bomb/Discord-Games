@@ -30,7 +30,7 @@ class CountryGuesser:
     def get_accuracy(self, guess: str) -> int:
         return difflib.SequenceMatcher(None, guess, self.country).ratio() * 100
 
-    async def wait_for_response(self, ctx: commands.Context, options: tuple[str, ...] = ()) -> Optional[str]:
+    async def wait_for_response(self, ctx: commands.Context, options: tuple[str, ...] = ()) -> Optional[tuple[discord.Message, str]]:
 
         def check(m: discord.Message) -> bool:
             return m.channel == ctx.channel and m.author == ctx.author
@@ -42,7 +42,7 @@ class CountryGuesser:
             if not content in options:
                 return
             
-        return content
+        return message, content
 
     async def start(self, ctx: commands.Context, *, embed_color: Union[discord.Color, int] = 0x2F3136) -> discord.Message:
         
@@ -63,23 +63,24 @@ class CountryGuesser:
 
         while self.guesses > 0:
 
-            response = await self.wait_for_response(ctx)
+            msg, response = await self.wait_for_response(ctx)
 
             if response == self.country:
-                return await ctx.send(f'That is correct! The country was {self.country.title()}')
+                return await msg.reply(f'That is correct! The country was {self.country.title()}')
             else:
                 self.guesses -= 1
                 acc = self.get_accuracy(response)
 
                 if self.hints:
-                    await ctx.send(f'That is incorrect! but you are `{acc}%` of the way there!\nWould you like a hint? type: `(y/n)`')
+                    await msg.reply(f'That is incorrect! but you are `{acc}%` of the way there!\nWould you like a hint? type: `(y/n)`', mention_author=False)
                 else:
-                    await ctx.send(f'That was incorrect! but you are `{acc}%` of the way there!\nYou have **{self.guesses}** guesses left.')
+                    await msg.reply(f'That was incorrect! but you are `{acc}%` of the way there!\nYou have **{self.guesses}** guesses left.', mention_author=False)
 
-                if await self.wait_for_response(ctx, options=('y', 'n')) == 'y':
+                hint_msg, resp = await self.wait_for_response(ctx, options=('y', 'n'))
+                if resp == 'y':
                     hint = self.get_hint()
-                    await ctx.send(f'Here is your hint: `{hint}`')
+                    await hint_msg.reply(f'Here is your hint: `{hint}`', mention_author=False)
                 else:
-                    await ctx.send(f'Okay continue guessing! You have **{self.guesses}** guesses left.')
+                    await hint_msg.reply(f'Okay continue guessing! You have **{self.guesses}** guesses left.', mention_author=False)
         
-        return await ctx.send(f'Game Over! you lost, The country wwas `{self.country}`')
+        return await msg.reply(f'Game Over! you lost, The country wwas `{self.country}`')
