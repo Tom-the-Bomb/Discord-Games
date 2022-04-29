@@ -1,3 +1,4 @@
+from __future__ import annotations
 
 from typing import Union, Optional
 import os
@@ -9,11 +10,16 @@ import discord
 from discord.ext import commands
 
 class CountryGuesser:
+    embed: discord.Embed
+    accepted_length: Optional[int]
     country: str
 
     def __init__(self, *, guesses: int = 5, hints: int = 1) -> None:
         self.hints = hints
         self.guesses = guesses
+
+        self._countries_path = fr'{pathlib.Path(__file__).parent}\assets\country-data'
+        self.all_countries = os.listdir(self._countries_path)
 
     def get_blanks(self) -> str:
         return ' '.join('_' if char != ' ' else ' ' for char in self.country)
@@ -60,34 +66,35 @@ class CountryGuesser:
         embed_color: Union[discord.Color, int] = 0x2F3136,
         ignore_diff_len: bool = False
     ) -> discord.Message:
-        
-        data_path = fr'{pathlib.Path(__file__).parent}\assets\country-data'
-        countries = os.listdir(data_path)
 
-        country_file = random.choice(countries)
+        country_file = random.choice(self.all_countries)
         self.country = country_file.strip().removesuffix('.png').lower()
 
-        country_file = discord.File(os.path.join(data_path, country_file), 'country.png')
+        country_file = discord.File(os.path.join(self._countries_path, country_file), 'country.png')
 
-        embed = discord.Embed(
+        self.embed = discord.Embed(
             title='Guess that country!',
-            description=f'```ansi\n\u001b[0;37m{self.get_blanks()}\n```',
+            description=f'```fix\n{self.get_blanks()}\n```',
             color=embed_color,
         )
-        embed.set_footer(text='send your guess into the chat now!')
-        embed.set_image(url='attachment://country.png')
-        await ctx.send(embed=embed, file=country_file)
+        self.embed.set_footer(text='send your guess into the chat now!')
+        self.embed.set_image(url='attachment://country.png')
+        await ctx.send(embed=self.embed, file=country_file)
 
-        length = len(self.country) if ignore_diff_len else None
+        self.accepted_length = len(self.country) if ignore_diff_len else None
 
-        while self.guesses > 0:
+        while True:
 
-            msg, response = await self.wait_for_response(ctx, length=length)
+            msg, response = await self.wait_for_response(ctx, length=self.accepted_length)
 
             if response == self.country:
                 return await msg.reply(f'That is correct! The country was `{self.country.title()}`')
             else:
                 self.guesses -= 1
+
+                if not self.guesses:
+                    return await msg.reply(f'Game Over! you lost, The country was `{self.country.title()}`')
+                
                 acc = self.get_accuracy(response)
 
                 if not self.hints:
@@ -102,5 +109,3 @@ class CountryGuesser:
                         await hint_msg.reply(f'Here is your hint: `{hint}`', mention_author=False)
                     else:
                         await hint_msg.reply(f'Okay continue guessing! You have **{self.guesses}** guesses left.', mention_author=False)
-        
-        return await msg.reply(f'Game Over! you lost, The country was `{self.country.title()}`')
