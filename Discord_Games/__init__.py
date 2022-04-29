@@ -14,6 +14,7 @@ from .twenty_48 import Twenty48
 from .typeracer import TypeRacer
 from .rps import RockPaperScissors
 from .reaction_test import ReactionGame
+from .country_guess import CountryGuesser
 
 __all__ = (
     'Akinator',
@@ -26,6 +27,7 @@ __all__ = (
     'TypeRacer',
     'RockPaperScissors',
     'ReactionGame',
+    'CountryGuesser',
 )
 
 __title__ = "Discord_Games"

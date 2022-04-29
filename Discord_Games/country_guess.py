@@ -8,7 +8,7 @@ import difflib
 import discord
 from discord.ext import commands
 
-class GuessCountry:
+class CountryGuesser:
     country: str
 
     def __init__(self) -> None:
