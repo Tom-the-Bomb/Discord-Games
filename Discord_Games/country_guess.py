@@ -11,8 +11,8 @@ from discord.ext import commands
 class CountryGuesser:
     country: str
 
-    def __init__(self, *, guesses: int = 5, hint: bool = True) -> None:
-        self.has_hint = hint
+    def __init__(self, *, guesses: int = 5, hints: int = 1) -> None:
+        self.hints = hints
         self.guesses = guesses
 
     def get_blanks(self) -> str:
@@ -71,7 +71,7 @@ class CountryGuesser:
 
         embed = discord.Embed(
             title='Guess that country!',
-            description=f'```\u001b[0;37m\n{self.get_blanks()}\n```',
+            description=f'```ansi\n\u001b[0;37m{self.get_blanks()}\n```',
             color=embed_color,
         )
         embed.set_footer(text='send your guess into the chat now!')
@@ -90,7 +90,7 @@ class CountryGuesser:
                 self.guesses -= 1
                 acc = self.get_accuracy(response)
 
-                if not self.has_hint:
+                if not self.hints:
                     await msg.reply(f'That was incorrect! but you are `{acc}%` of the way there!\nYou have **{self.guesses}** guesses left.', mention_author=False)
                 else:
                     await msg.reply(f'That is incorrect! but you are `{acc}%` of the way there!\nWould you like a hint? type: `(y/n)`', mention_author=False)
@@ -98,7 +98,7 @@ class CountryGuesser:
                     hint_msg, resp = await self.wait_for_response(ctx, options=('y', 'n'))
                     if resp == 'y':
                         hint = self.get_hint()
-                        self.has_hint = False
+                        self.hints -= 1
                         await hint_msg.reply(f'Here is your hint: `{hint}`', mention_author=False)
                     else:
                         await hint_msg.reply(f'Okay continue guessing! You have **{self.guesses}** guesses left.', mention_author=False)
