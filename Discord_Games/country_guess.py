@@ -56,9 +56,11 @@ class CountryGuesser:
 
         embed = discord.Embed(
             title='Guess that country!',
-            description=self.get_blanks(),
+            description=f'`{self.get_blanks()}`',
             color=embed_color,
         )
+        embed.set_footer(text='send your guess into the chat now!')
+        embed.set_image(url='attachment://country.png')
         message = await ctx.send(embed=embed, file=country_file)
 
         while self.guesses > 0:
