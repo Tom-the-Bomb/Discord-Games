@@ -21,19 +21,23 @@ class CountryGuesser:
     def get_hint(self) -> str:
         blanks = self.get_blanks()
         times = int(len(blanks.split()) / 3)
+        blanks = list(blanks)
 
-        for i in range(times):
+        for _ in range(times):
             idx = random.choice(range(len(self.country)))
             blanks[idx] = self.country[idx]
-        return blanks
+        return ''.join(blanks)
 
     def get_accuracy(self, guess: str) -> int:
-        return difflib.SequenceMatcher(None, guess, self.country).ratio() * 100
+        return round(difflib.SequenceMatcher(None, guess, self.country).ratio() * 100)
 
-    async def wait_for_response(self, ctx: commands.Context, options: tuple[str, ...] = ()) -> Optional[tuple[discord.Message, str]]:
+    async def wait_for_response(self, ctx: commands.Context, *, options: tuple[str, ...] = (), length: Optional[int] = None) -> Optional[tuple[discord.Message, str]]:
 
         def check(m: discord.Message) -> bool:
-            return m.channel == ctx.channel and m.author == ctx.author
+            if length:
+                return m.channel == ctx.channel and m.author == ctx.author and len(m.content) == length
+            else:
+                return m.channel == ctx.channel and m.author == ctx.author
 
         message: discord.Message = await ctx.bot.wait_for('message', check=check)
         content = message.content.strip().lower()
@@ -65,7 +69,7 @@ class CountryGuesser:
 
         while self.guesses > 0:
 
-            msg, response = await self.wait_for_response(ctx)
+            msg, response = await self.wait_for_response(ctx, length=len(self.country))
 
             if response == self.country:
                 return await msg.reply(f'That is correct! The country was {self.country.title()}')
