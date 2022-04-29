@@ -35,7 +35,7 @@ class CountryGuesser:
         ctx: commands.Context, 
         *, 
         options: tuple[str, ...] = (), 
-        length: Optional[int] = None
+        length: Optional[int] = None,
     ) -> Optional[tuple[discord.Message, str]]:
 
         def check(m: discord.Message) -> bool:
@@ -53,7 +53,13 @@ class CountryGuesser:
             
         return message, content
 
-    async def start(self, ctx: commands.Context, *, embed_color: Union[discord.Color, int] = 0x2F3136) -> discord.Message:
+    async def start(
+        self, 
+        ctx: commands.Context, 
+        *, 
+        embed_color: Union[discord.Color, int] = 0x2F3136,
+        ignore_diff_len: bool = False
+    ) -> discord.Message:
         
         data_path = fr'{pathlib.Path(__file__).parent}\assets\country-data'
         countries = os.listdir(data_path)
@@ -65,16 +71,18 @@ class CountryGuesser:
 
         embed = discord.Embed(
             title='Guess that country!',
-            description=f'`{self.get_blanks()}`',
+            description=f'```\u001b[0;37m\n{self.get_blanks()}\n```',
             color=embed_color,
         )
         embed.set_footer(text='send your guess into the chat now!')
         embed.set_image(url='attachment://country.png')
-        message = await ctx.send(embed=embed, file=country_file)
+        await ctx.send(embed=embed, file=country_file)
+
+        length = len(self.country) if ignore_diff_len else None
 
         while self.guesses > 0:
 
-            msg, response = await self.wait_for_response(ctx, length=len(self.country))
+            msg, response = await self.wait_for_response(ctx, length=length)
 
             if response == self.country:
                 return await msg.reply(f'That is correct! The country was `{self.country.title()}`')
