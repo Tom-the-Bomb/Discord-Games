@@ -29,26 +29,29 @@ class CountryInput(discord.ui.Modal, title='Input your guess!'):
         game = self.view.game
 
         if guess == game.country:
+            game.update_guesslog('+ GAME OVER, you won! +')
             await interaction.response.send_message(f'That is correct! The country was `{game.country.title()}`')
 
             self.view.disable_all()
-            game.embed.description = f'```fix\n{game.country}\n```'
+            game.embed.description = f'```fix\n{game.country.title()}\n```'
             return await interaction.message.edit(view=self.view, embed=game.embed)
         else:
             game.guesses -= 1
 
             if not game.guesses:
                 self.view.disable_all()
+                game.update_guesslog('- GAME OVER, you lost -')
 
-                return await interaction.response.send_message(
-                    f'Game Over! you lost, The country was `{game.country.title()}`'
-                )
+                await interaction.message.edit(embed=game.embed, view=self.view)
+                return await interaction.response.send_message(f'Game Over! you lost, The country was `{game.country.title()}`')
             else:
                 acc = game.get_accuracy(guess)
-
-                await interaction.response.send_message(
-                    f'That was incorrect! but you are `{acc}%` of the way there!\nYou have **{game.guesses}** guesses left.'
+                game.update_guesslog(
+                    f'- [{guess}] was incorrect! but you are ({acc}%) of the way there!'
+                    f'+ You have {game.guesses} guesses left.\n'
                 )
+
+                return await interaction.response.edit_message(embed=game.embed)
 
 class CountryView(discord.ui.View):
     
@@ -80,14 +83,20 @@ class CountryView(discord.ui.View):
     async def cancel_button(self, interaction: discord.Interaction, _) -> discord.Message:
         self.disable_all()
 
-        self.game.embed.description = f'```fix\n{self.game.country}\n```'
+        self.game.embed.description = f'```fix\n{self.game.country.title()}\n```'
+        self.game.update_guesslog('- GAME OVER, CANCELLED -')
 
         await interaction.response.send_message(f'Game Over! The country was `{self.game.country.title()}`')
         return await interaction.message.edit(view=self, embed=self.game.embed)
 
 class BetaCountryGuesser(CountryGuesser):
+    guesslog: str = ''
 
-     async def start(
+    def update_guesslog(self, log: str) -> None:
+        self.guesslog += log + '\n'
+        self.embed.set_field_at(0, name='Guess Log', value=f'```diff\n{self.guesslog}\n```')
+
+    async def start(
         self, 
         ctx: commands.Context, 
         *, 
@@ -108,7 +117,7 @@ class BetaCountryGuesser(CountryGuesser):
             description=f'```fix\n{self.get_blanks()}\n```',
             color=embed_color,
         )
-        self.embed.set_footer(text='send your guess into the chat now!')
+        self.embed.add_field(name='Guess Log', value='```diff\n\u200b\n```', inline=False)
         self.embed.set_image(url='attachment://country.png')
 
         view = CountryView(self, timeout=timeout)
