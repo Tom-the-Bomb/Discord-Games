@@ -12,7 +12,7 @@ class CountryGuesser:
     country: str
 
     def __init__(self) -> None:
-        self.hints: int = 0
+        self.has_hint: bool = True
         self.guesses: int = 5
 
     def get_blanks(self) -> str:
@@ -73,16 +73,17 @@ class CountryGuesser:
                 self.guesses -= 1
                 acc = self.get_accuracy(response)
 
-                if self.hints:
-                    await msg.reply(f'That is incorrect! but you are `{acc}%` of the way there!\nWould you like a hint? type: `(y/n)`', mention_author=False)
-                else:
+                if not self.has_hint:
                     await msg.reply(f'That was incorrect! but you are `{acc}%` of the way there!\nYou have **{self.guesses}** guesses left.', mention_author=False)
-
-                hint_msg, resp = await self.wait_for_response(ctx, options=('y', 'n'))
-                if resp == 'y':
-                    hint = self.get_hint()
-                    await hint_msg.reply(f'Here is your hint: `{hint}`', mention_author=False)
                 else:
-                    await hint_msg.reply(f'Okay continue guessing! You have **{self.guesses}** guesses left.', mention_author=False)
+                    await msg.reply(f'That is incorrect! but you are `{acc}%` of the way there!\nWould you like a hint? type: `(y/n)`', mention_author=False)
+
+                    hint_msg, resp = await self.wait_for_response(ctx, options=('y', 'n'))
+                    if resp == 'y':
+                        hint = self.get_hint()
+                        self.has_hint = False
+                        await hint_msg.reply(f'Here is your hint: `{hint}`', mention_author=False)
+                    else:
+                        await hint_msg.reply(f'Okay continue guessing! You have **{self.guesses}** guesses left.', mention_author=False)
         
         return await msg.reply(f'Game Over! you lost, The country wwas `{self.country}`')
