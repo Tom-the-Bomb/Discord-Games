@@ -47,7 +47,7 @@ class CountryInput(discord.ui.Modal, title='Input your guess!'):
             else:
                 acc = game.get_accuracy(guess)
                 game.update_guesslog(
-                    f'- [{guess}] was incorrect! but you are ({acc}%) of the way there!'
+                    f'- [{guess}] was incorrect! but you are ({acc}%) of the way there!\n'
                     f'+ You have {game.guesses} guesses left.\n'
                 )
 
