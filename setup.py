@@ -3,6 +3,10 @@ import re
 
 requirements = []
 version = ''
+readme = ''
+
+with open("README.md") as rm:
+    readme = rm.read()
 
 with open('requirements.txt') as r:
     requirements = r.read().splitlines()
@@ -15,7 +19,7 @@ setuptools.setup(
     author="Tom-the-Bomb", 
     version= version, 
     description="A library to help users easily implement games within their discord bot",
-    long_description=open("README.md").read(),
+    long_description=readme,
     long_description_content_type = "text/markdown",
     license="MIT",
     url="https://github.com/Tom-the-Bomb/Discord-Games",
