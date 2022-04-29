@@ -11,6 +11,7 @@ from .memory_game import MemoryGame
 from .rps_buttons import BetaRockPaperScissors
 from .hangman_buttons import BetaHangman
 from .reaction_test_buttons import BetaReactionGame
+from .country_guess_buttons import BetaCountryGuesser
 
 __all__ = (
     'BetaAkinator',
@@ -21,4 +22,5 @@ __all__ = (
     'BetaRockPaperScissors',
     'BetaHangman',
     'BetaReactionGame',
+    'BetaCountryGuesser',
 )
