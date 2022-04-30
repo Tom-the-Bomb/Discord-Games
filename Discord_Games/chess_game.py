@@ -37,13 +37,13 @@ class Chess:
         return embed
 
     async def place_move(self, uci: str) -> chess.Board:
-        self.board.push_uci(uci)
-        self.turn = self.white if self.turn == self.black else self.black
-
         self.last_move = {
             'color': self.get_color(),
             'move': f'{uci[:2]} -> {uci[2:]}'
         }
+        
+        self.board.push_uci(uci)
+        self.turn = self.white if self.turn == self.black else self.black
         return self.board
 
     async def fetch_results(self) -> discord.Embed:
