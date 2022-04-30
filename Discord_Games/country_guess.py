@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Union, Optional
+from io import BytesIO
 import os
 import pathlib
 import random
@@ -8,6 +9,9 @@ import difflib
 
 import discord
 from discord.ext import commands
+from PIL import Image, ImageFilter
+
+from .utils import executor
 
 class CountryGuesser:
     embed: discord.Embed
@@ -17,7 +21,8 @@ class CountryGuesser:
     def __init__(
         self, 
         *, 
-        is_flags: bool = False, 
+        is_flags: bool = False,
+        hard_mode: bool = False,
         guesses: int = 5, 
         hints: int = 1
     ) -> None:
@@ -25,10 +30,23 @@ class CountryGuesser:
         self.hints = hints
         self.guesses = guesses
 
+        self.hard_mode = hard_mode
+
         folder = r'\country-flags' if is_flags else r'\country-data'
         self._countries_path = fr'{pathlib.Path(__file__).parent}\assets{folder}'
 
         self.all_countries = os.listdir(self._countries_path)
+
+    @executor()
+    def blur_image(self, image_path: str) -> discord.File:
+        with Image.open(image_path) as img:
+            img = img.convert('RGBA')
+            img = img.filter(ImageFilter.GaussianBlur(10))
+
+            buf = BytesIO()
+            img.save(buf, 'PNG')
+            buf.seek(0)
+            return discord.File(buf, 'country.png')
 
     def get_blanks(self) -> str:
         return ' '.join('_' if char != ' ' else ' ' for char in self.country)
@@ -79,7 +97,12 @@ class CountryGuesser:
         country_file = random.choice(self.all_countries)
         self.country = country_file.strip().removesuffix('.png').lower()
 
-        country_file = discord.File(os.path.join(self._countries_path, country_file), 'country.png')
+        country_path = os.path.join(self._countries_path, country_file)
+
+        if self.hard_mode:
+            country_file = await self.blur_image(country_path)
+        else:
+            country_file = discord.File(country_path, 'country.png')
 
         self.embed = discord.Embed(
             title='Guess that country!',
