@@ -313,7 +313,7 @@ class BattleShip:
         await user.send('All setup! (Game will soon start after the opponent finishes)')
         return True
 
-    async def start(self, ctx: commands.Context, *, timeout: Optional[int] = None) -> None:
+    async def start(self, ctx: commands.Context, *, timeout: Optional[float] = None) -> discord.Message:
 
         await ctx.send('**Game Started!**\nI\'ve setup the boards in your dms!')
 
@@ -339,8 +339,7 @@ class BattleShip:
             try:
                 message = await ctx.bot.wait_for('message', check=check, timeout=self.timeout)
             except asyncio.TimeoutError:
-                await ctx.send(f'The timeout of {timeout} seconds, has been reached. Aborting...')
-                return None
+                return await ctx.send(f'The timeout of {timeout} seconds, has been reached. Aborting...')
 
             raw, coords = self.get_coords(message.content)
 
@@ -368,5 +367,4 @@ class BattleShip:
                 await winner.send('Congrats, you won! :)')
 
                 other = self.player2 if winner == self.player1 else self.player1
-                await other.send('You lost, better luck next time :(')
-                return None
+                return await other.send('You lost, better luck next time :(')
