@@ -29,13 +29,13 @@ class ChessInput(discord.ui.Modal, title='Make your move'):
             max_length=2,
         )
 
-        self.add_item(self.move_to)
         self.add_item(self.move_from)
+        self.add_item(self.move_to)
         
     async def on_submit(self, interaction: discord.Interaction) -> discord.Message:
         game = self.view.game
         from_coord = self.move_from.value.strip().lower()
-        to_coord = self.move_from.value.strip().lower()
+        to_coord = self.move_to.value.strip().lower()
 
         uci = from_coord + to_coord
 
@@ -70,7 +70,10 @@ class ChessButton(WordInputButton):
                 await interaction.message.edit(view=self.view)
                 return await interaction.response.send_message(f'**Game Over!** Cancelled')
             else:
-                return await interaction.response.send_modal(ChessInput(self.view))
+                if interaction.user != game.turn:
+                    return await interaction.response.send_message('It is not your turn yet!', ephemeral=True)
+                else:
+                    return await interaction.response.send_modal(ChessInput(self.view))
 
 class ChessView(discord.ui.View):
 

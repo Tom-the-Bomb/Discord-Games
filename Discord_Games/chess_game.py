@@ -1,4 +1,6 @@
-from typing import Union, Optional, ClassVar
+from __future__ import annotations
+
+from typing import Union, Optional, ClassVar, Literal
 import asyncio
 
 import discord
@@ -18,17 +20,27 @@ class Chess:
 
         self.board: chess.Board = chess.Board()
 
-    async def make_embed(self) -> discord.Embed:
-        color = "white" if self.turn == self.white else "black"
+        self.last_move: dict[str, str] = {}
 
+    def get_color(self) -> Literal['white', 'black']:
+        return "white" if self.turn == self.white else "black"
+
+    async def make_embed(self) -> discord.Embed:
         embed = discord.Embed(title="Chess Game", color=self.embed_color)
-        embed.description = f"**Turn:** `{self.turn.name}`\n**Color:** `{color}`\n**Check:** `{self.board.is_check()}`"
+        embed.description = f"**Turn:** `{self.turn}`\n**Color:** `{self.get_color()}`\n**Check:** `{self.board.is_check()}`"
+
+        embed.add_field(name='Last Move', value=f"```yml\n{self.last_move['color']}: {self.last_move['move']}\n```")
         embed.set_image(url=f"{self.BASE_URL}{self.board.board_fen()}")
         return embed
 
     async def place_move(self, uci: str) -> chess.Board:
         self.board.push_uci(uci)
         self.turn = self.white if self.turn == self.black else self.black
+
+        self.last_move = {
+            'color': self.get_color(),
+            'move': f'{uci[:2]} -> {uci[2:]}'
+        }
         return self.board
 
     async def fetch_results(self) -> discord.Embed:
