@@ -107,15 +107,7 @@ class BetaCountryGuesser(CountryGuesser):
 
         self.accepted_length = len(self.country) if ignore_diff_len else None
 
-        country_file = random.choice(self.all_countries)
-        self.country = country_file.strip().removesuffix('.png').lower()
-
-        country_path = os.path.join(self._countries_path, country_file)
-
-        if self.hard_mode:
-            country_file = await self.blur_image(country_path)
-        else:
-            country_file = discord.File(country_path, 'country.png')
+        file = await self.get_country()
 
         self.embed = discord.Embed(
             title='Guess that country!',
@@ -126,4 +118,4 @@ class BetaCountryGuesser(CountryGuesser):
         self.embed.set_image(url='attachment://country.png')
 
         view = CountryView(self, timeout=timeout)
-        return await ctx.send(embed=self.embed, file=country_file, view=view)
+        return await ctx.send(embed=self.embed, file=file, view=view)

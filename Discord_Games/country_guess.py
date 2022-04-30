@@ -9,7 +9,7 @@ import difflib
 
 import discord
 from discord.ext import commands
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFilter, ImageOps
 
 from .utils import executor
 
@@ -22,6 +22,7 @@ class CountryGuesser:
         self, 
         *, 
         is_flags: bool = False,
+        light_mode: bool = False,
         hard_mode: bool = False,
         guesses: int = 5, 
         hints: int = 1
@@ -30,6 +31,7 @@ class CountryGuesser:
         self.hints = hints
         self.guesses = guesses
 
+        self.light_mode = light_mode
         self.hard_mode = hard_mode
 
         folder = r'\country-flags' if is_flags else r'\country-data'
@@ -38,7 +40,22 @@ class CountryGuesser:
         self.all_countries = os.listdir(self._countries_path)
 
     @executor()
-    def blur_image(self, image_path: str) -> discord.File:
+    def invert_image(self, image_path: Union[BytesIO, str]) -> BytesIO:
+        with Image.open(image_path) as img:
+            img = img.convert('RGBA')
+            r, g, b, a = img.split()
+            rgb = Image.merge('RGB', (r, g, b))
+            rgb = ImageOps.invert(rgb)
+            rgb = rgb.split()
+            img = Image.merge('RGBA', rgb + (a,))
+
+            buf = BytesIO()
+            img.save(buf, 'PNG')
+            buf.seek(0)
+            return buf
+
+    @executor()
+    def blur_image(self, image_path: Union[BytesIO, str]) -> BytesIO:
         with Image.open(image_path) as img:
             img = img.convert('RGBA')
             img = img.filter(ImageFilter.GaussianBlur(10))
@@ -46,7 +63,21 @@ class CountryGuesser:
             buf = BytesIO()
             img.save(buf, 'PNG')
             buf.seek(0)
-            return discord.File(buf, 'country.png')
+            return buf
+
+    async def get_country(self) -> discord.File:
+        country_file = random.choice(self.all_countries)
+        self.country = country_file.strip().removesuffix('.png').lower()
+
+        file = os.path.join(self._countries_path, country_file)
+
+        if self.hard_mode:
+            file = await self.blur_image(file)
+        
+        if self.light_mode:
+            file = await self.invert_image(file)
+
+        file = discord.File(file, 'country.png')
 
     def get_blanks(self) -> str:
         return ' '.join('_' if char != ' ' else ' ' for char in self.country)
@@ -94,15 +125,7 @@ class CountryGuesser:
         ignore_diff_len: bool = False
     ) -> discord.Message:
 
-        country_file = random.choice(self.all_countries)
-        self.country = country_file.strip().removesuffix('.png').lower()
-
-        country_path = os.path.join(self._countries_path, country_file)
-
-        if self.hard_mode:
-            country_file = await self.blur_image(country_path)
-        else:
-            country_file = discord.File(country_path, 'country.png')
+        file = await self.get_country()
 
         self.embed = discord.Embed(
             title='Guess that country!',
@@ -111,7 +134,7 @@ class CountryGuesser:
         )
         self.embed.set_footer(text='send your guess into the chat now!')
         self.embed.set_image(url='attachment://country.png')
-        await ctx.send(embed=self.embed, file=country_file)
+        await ctx.send(embed=self.embed, file=file)
 
         self.accepted_length = len(self.country) if ignore_diff_len else None
 
