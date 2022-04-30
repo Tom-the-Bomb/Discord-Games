@@ -1,4 +1,4 @@
-from typing import Union, Optional
+from typing import Union, Optional, ClassVar
 import asyncio
 
 import discord
@@ -6,18 +6,21 @@ from discord.ext import commands
 import chess
 
 class Chess:
+    _base: ClassVar[str] = 'https://www.fen-to-image.com/image/64/double/coords/'
 
     def __init__(self, *, white: discord.Member, black: discord.Member) -> None:
-        self._base = "http://www.fen-to-image.com/image/64/double/coords/"
         self.white = white
         self.black = black
-        self.turn  = self.white
-        self.winner = None
-        self.board  = chess.Board()
-        self.message = None
+        self.turn = self.white
+
+        self.winner: Optional[discord.Member] = None
+        self.message: Optional[discord.Message] = None
+
+        self.board: chess.Board = chess.Board()
 
     async def make_embed(self) -> discord.Embed:
         color = "white" if self.turn == self.white else "black"
+        
         embed = discord.Embed(title="Chess Game")
         embed.description = f"**Turn:** `{self.turn.name}`\n**Color:** `{color}`\n**Check:** `{self.board.is_check()}`"
         embed.set_image(url=f"{self._base}{self.board.board_fen()}")
@@ -51,8 +54,8 @@ class Chess:
     async def start(self, 
         ctx: commands.Context, 
         *, 
-        timeout: Optional[int] = None, 
-        color: Union[int, discord.Color] = 0x2F3136, 
+        timeout: Optional[float] = None, 
+        color: Union[discord.Color, int] = 0x2F3136, 
         add_reaction_after_move: bool = False, 
         **kwargs,
     ) -> discord.Message:
@@ -73,7 +76,7 @@ class Chess:
                     return False
 
             try:
-                message: str = await ctx.bot.wait_for("message", timeout=timeout, check=check)
+                message: discord.Message = await ctx.bot.wait_for("message", timeout=timeout, check=check)
             except asyncio.TimeoutError:
                 return
 
