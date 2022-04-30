@@ -14,11 +14,20 @@ class CountryGuesser:
     accepted_length: Optional[int]
     country: str
 
-    def __init__(self, *, guesses: int = 5, hints: int = 1) -> None:
+    def __init__(
+        self, 
+        *, 
+        is_flags: bool = False, 
+        guesses: int = 5, 
+        hints: int = 1
+    ) -> None:
+
         self.hints = hints
         self.guesses = guesses
 
-        self._countries_path = fr'{pathlib.Path(__file__).parent}\assets\country-data'
+        folder = r'\country-flags' if is_flags else r'\country-data'
+        self._countries_path = fr'{pathlib.Path(__file__).parent}\assets{folder}'
+
         self.all_countries = os.listdir(self._countries_path)
 
     def get_blanks(self) -> str:
