@@ -31,10 +31,15 @@ class CountryGuesser:
         self.hints = hints
         self.guesses = guesses
 
-        self.light_mode = light_mode
+        self.is_flags = is_flags
         self.hard_mode = hard_mode
 
-        folder = r'\country-flags' if is_flags else r'\country-data'
+        if self.is_flags:
+            self.light_mode: bool = False
+        else:
+            self.light_mode: bool = light_mode
+
+        folder = r'\country-flags' if self.is_flags else r'\country-data'
         self._countries_path = fr'{pathlib.Path(__file__).parent}\assets{folder}'
 
         self.all_countries = os.listdir(self._countries_path)
