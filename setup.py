@@ -40,7 +40,11 @@ setuptools.setup(
     ],
     include_package_data=True,
     package_data={
-        '': ['assets/**', 'assets/country-data/**']
+        '': [
+            'assets/**', 
+            'assets/country-data/**',
+            'assets/country-flags/**',
+        ]
     },
     packages=[
         'Discord_Games', 
