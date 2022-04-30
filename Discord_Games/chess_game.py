@@ -51,7 +51,8 @@ class Chess:
         embed.set_image(url=f"{self.BASE_URL}{self.board.board_fen()}")
         return embed
 
-    async def start(self, 
+    async def start(
+        self, 
         ctx: commands.Context, 
         *, 
         timeout: Optional[float] = None, 
