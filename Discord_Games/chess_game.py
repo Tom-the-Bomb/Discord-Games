@@ -6,7 +6,7 @@ from discord.ext import commands
 import chess
 
 class Chess:
-    BASE_URL: ClassVar[str] = 'https://www.fen-to-image.com/image/64/double/coords/'
+    BASE_URL: ClassVar[str] = 'http://www.fen-to-image.com/image/64/double/coords/'
 
     def __init__(self, *, white: discord.Member, black: discord.Member) -> None:
         self.white = white

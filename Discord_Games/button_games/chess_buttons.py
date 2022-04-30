@@ -67,6 +67,7 @@ class ChessButton(WordInputButton):
         else:
             if self.label == 'Cancel':
                 self.view.disable_all()
+                await interaction.message.edit(view=self.view)
                 return await interaction.response.send_message(f'**Game Over!** Cancelled')
             else:
                 return await interaction.response.send_modal(ChessInput(self.view))
@@ -83,7 +84,10 @@ class ChessView(discord.ui.View):
 
         self.game = game
 
-        self.add_item(ChessButton())
+        inpbutton = ChessButton()
+        inpbutton.label = 'Make your move!'
+
+        self.add_item(inpbutton)
         self.add_item(ChessButton(cancel_button=True))
 
 class BetaChess(Chess):
