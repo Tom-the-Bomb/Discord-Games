@@ -77,7 +77,7 @@ class CountryGuesser:
         if self.light_mode:
             file = await self.invert_image(file)
 
-        file = discord.File(file, 'country.png')
+        return discord.File(file, 'country.png')
 
     def get_blanks(self) -> str:
         return ' '.join('_' if char != ' ' else ' ' for char in self.country)
