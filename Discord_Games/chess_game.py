@@ -21,7 +21,7 @@ class Chess:
     async def make_embed(self) -> discord.Embed:
         color = "white" if self.turn == self.white else "black"
 
-        embed = discord.Embed(title="Chess Game")
+        embed = discord.Embed(title="Chess Game", color=self.embed_color)
         embed.description = f"**Turn:** `{self.turn.name}`\n**Color:** `{color}`\n**Check:** `{self.board.is_check()}`"
         embed.set_image(url=f"{self.BASE_URL}{self.board.board_fen()}")
         return embed
@@ -61,8 +61,9 @@ class Chess:
         **kwargs,
     ) -> Optional[discord.Message]:
 
+        self.embed_color = embed_color
+
         embed = await self.make_embed()
-        embed.color = embed_color
         self.message = await ctx.send(embed=embed, **kwargs)
 
         while True:
@@ -83,7 +84,6 @@ class Chess:
 
             await self.place_move(message.content.lower())
             embed = await self.make_embed()
-            embed.color = embed_color
 
             if add_reaction_after_move:
                 await message.add_reaction("✅")
@@ -94,7 +94,6 @@ class Chess:
             await self.message.edit(embed=embed)
 
         embed = await self.fetch_results()
-        embed.color = embed_color
         await self.message.edit(embed=embed)
 
         return await ctx.send("~ Game Over ~")
