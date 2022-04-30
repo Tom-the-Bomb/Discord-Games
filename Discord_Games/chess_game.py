@@ -6,7 +6,7 @@ from discord.ext import commands
 import chess
 
 class Chess:
-    _base: ClassVar[str] = 'https://www.fen-to-image.com/image/64/double/coords/'
+    BASE_URL: ClassVar[str] = 'https://www.fen-to-image.com/image/64/double/coords/'
 
     def __init__(self, *, white: discord.Member, black: discord.Member) -> None:
         self.white = white
@@ -20,10 +20,10 @@ class Chess:
 
     async def make_embed(self) -> discord.Embed:
         color = "white" if self.turn == self.white else "black"
-        
+
         embed = discord.Embed(title="Chess Game")
         embed.description = f"**Turn:** `{self.turn.name}`\n**Color:** `{color}`\n**Check:** `{self.board.is_check()}`"
-        embed.set_image(url=f"{self._base}{self.board.board_fen()}")
+        embed.set_image(url=f"{self.BASE_URL}{self.board.board_fen()}")
         return embed
 
     async def place_move(self, uci: str) -> chess.Board:
@@ -48,20 +48,20 @@ class Chess:
         else:
             embed.description = f"Game over\nVariant end condition. | Score: `{results}`"
 
-        embed.set_image(url=f"{self._base}{self.board.board_fen()}")
+        embed.set_image(url=f"{self.BASE_URL}{self.board.board_fen()}")
         return embed
 
     async def start(self, 
         ctx: commands.Context, 
         *, 
         timeout: Optional[float] = None, 
-        color: Union[discord.Color, int] = 0x2F3136, 
+        embed_color: Union[discord.Color, int] = 0x2F3136, 
         add_reaction_after_move: bool = False, 
         **kwargs,
-    ) -> discord.Message:
+    ) -> Optional[discord.Message]:
 
         embed = await self.make_embed()
-        embed.color = color
+        embed.color = embed_color
         self.message = await ctx.send(embed=embed, **kwargs)
 
         while True:
@@ -82,7 +82,7 @@ class Chess:
 
             await self.place_move(message.content.lower())
             embed = await self.make_embed()
-            embed.color = color
+            embed.color = embed_color
 
             if add_reaction_after_move:
                 await message.add_reaction("✅")
@@ -93,7 +93,7 @@ class Chess:
             await self.message.edit(embed=embed)
 
         embed = await self.fetch_results()
-        embed.color = color
+        embed.color = embed_color
         await self.message.edit(embed=embed)
 
         return await ctx.send("~ Game Over ~")
