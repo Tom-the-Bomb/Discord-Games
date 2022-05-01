@@ -274,7 +274,12 @@ class BetaBattleShip(BattleShip):
             )
 
     async def get_ship_inputs(self, user: Player) -> Coroutine:
-        file, _ = await self.get_file(user) 
+        file, _ = await self.get_file(user)
+
+        embed = discord.Embed(
+            description='**Press the buttons to place your ships!**',,
+            color=self.embed_color,
+        ) 
 
         view = SetupView(self, timeout=self.timeout)
         await user.send(file=file, view=view)
@@ -290,6 +295,7 @@ class BetaBattleShip(BattleShip):
     ) -> tuple[discord.Message, discord.Message]:
 
         self.timeout = timeout
+        self.embed_color = embed_color
 
         await ctx.send('**Game Started!**\nI\'ve setup the boards in your dms!')
 
@@ -299,8 +305,8 @@ class BetaBattleShip(BattleShip):
                 await self.get_ship_inputs(self.player2),
             )
 
-        self.player1.embed.color = embed_color
-        self.player2.embed.color = embed_color
+        self.player1.embed.color = self.embed_color
+        self.player2.embed.color = self.embed_color
 
         file1, file3 = await self.get_file(self.player1)
         file2, file4 = await self.get_file(self.player2)
