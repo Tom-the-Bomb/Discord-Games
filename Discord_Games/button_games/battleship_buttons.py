@@ -277,7 +277,7 @@ class BetaBattleShip(BattleShip):
         file, _ = await self.get_file(user)
 
         embed = discord.Embed(
-            description='**Press the buttons to place your ships!**',,
+            description='**Press the buttons to place your ships!**',
             color=self.embed_color,
         ) 
 
