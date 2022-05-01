@@ -4,6 +4,7 @@ import pathlib
 import discord
 from discord.ext import commands
 
+import Discord_Games as games
 from Discord_Games import button_games
 
 bot = commands.Bot(command_prefix='!!', intents=discord.Intents.all())
@@ -11,7 +12,7 @@ bot = commands.Bot(command_prefix='!!', intents=discord.Intents.all())
 @bot.command(name='test')
 async def test(ctx: commands.Context, member: discord.Member):
 
-    game = button_games.BetaBattleShip(ctx.author, member)
+    game = button_games.BetaBattleShip(ctx.author, member, random=True)
     await game.start(ctx)
 
 if __name__ == '__main__':

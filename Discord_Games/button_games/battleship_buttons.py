@@ -1,13 +1,20 @@
 from __future__ import annotations
 
-from typing import Optional, Union, Any
+from typing import Optional, Union, Any, Coroutine
 
+import asyncio
 import discord
 from discord.ext import commands
 
-from ..battleship import BattleShip
+from ..battleship import (
+    BattleShip, 
+    SHIPS,
+    Ship,
+    Board,
+)
+
 from .wordle_buttons import WordInputButton
-from .chess_buttons import ChessView
+
 
 class Player:
 
@@ -25,8 +32,10 @@ class Player:
     def update_guesslog(self, log: str) -> None:
         self._logs.append(log)
         log_str = '\n\n'.join(self._logs[-17:])
+
         if len(self._logs) > 17:
             log_str = '...\n\n' + log_str
+
         self.embed.description = f'```diff\n{log_str}\n```'
 
     def __getattribute__(self, name: str) -> Any:
@@ -78,8 +87,8 @@ class BattleshipInput(discord.ui.Modal, title='Input a coordinate'):
             file1, file3 = await game.get_file(game.player1)
             file2, file4 = await game.get_file(game.player2)
             
-            await game.message1.edit(content='BattleShip', embed=game.player1.embed, attachments=[file1, file3])
-            await game.message2.edit(content='BattleShip', embed=game.player2.embed, attachments=[file2, file4])
+            await game.message1.edit(content='BattleShip', embed=game.player1.embed, attachments=[file3, file1])
+            await game.message2.edit(content='BattleShip', embed=game.player2.embed, attachments=[file4, file2])
             game.turn = next_turn
 
             if winner := game.who_won():
@@ -142,6 +151,98 @@ class BattleshipView(discord.ui.View):
         self.add_item(inpbutton)
         self.add_item(BattleshipButton(cancel_button=True))
 
+class SetupInput(discord.ui.Modal):
+
+    def __init__(self, button: SetupButton) -> None:
+        self.button = button
+        self.ship = self.button.label
+    
+        super().__init__(title=f'{self.ship} Setup')
+
+        self.start_coord = discord.ui.TextInput(
+            label=f'Enter the starting coordinate',
+            style=discord.TextStyle.short,
+            required=True,
+            min_length=2,
+            max_length=3,
+        )
+
+        self.is_vertical = discord.ui.TextInput(
+            label=f'Do you want it to be vertical? (y/n)',
+            style=discord.TextStyle.short,
+            required=True,
+            min_length=1,
+            max_length=1,
+        )
+
+        self.add_item(self.start_coord)
+        self.add_item(self.is_vertical)
+
+    async def on_submit(self, interaction: discord.Interaction) -> None:
+        game = self.button.view.game
+
+        start = self.start_coord.value.strip().lower()
+        vertical = self.is_vertical.value.strip().lower()
+
+        board = game.get_board(interaction.user)
+
+        if not game.inputpat.match(start):
+            return await interaction.response.send_message(f'{start} is not a valid coordinate!', ephemeral=True)
+
+        if vertical not in ('y', 'n'):
+            return await interaction.response.send_message(f'Response for `vertical` must be either `y` or `n`', ephemeral=True)
+
+        vertical = vertical != 'y'
+
+        _, start = game.get_coords(start)
+
+        new_ship = Ship(
+            name=self.ship, 
+            size=self.button.ship_size, 
+            start=start, 
+            vertical=vertical,
+            color=self.button.ship_color,
+        )
+
+        if board._is_valid(new_ship):
+            self.button.disabled = True
+            board.ships.append(new_ship)
+
+            file, _ = await game.get_file(interaction.user, hide=False) 
+
+            await interaction.response.edit_message(attachments=[file], view=self.button.view)
+
+            if all(button.disabled for button in self.button.view.children):
+                await interaction.user.send('**All setup!** (Game will soon start after the opponent finishes)')
+                return self.button.view.stop()
+        else:
+            return await interaction.response.send_message('Ship placement was detected to be invalid, please try again.', ephemeral=True)
+
+class SetupButton(discord.ui.Button):
+    view: SetupView
+
+    def __init__(self, label: str, ship_size: int, ship_color: tuple[int, int, int]) -> None:
+        super().__init__(
+            label=label,
+            style=discord.ButtonStyle.green,
+        )
+
+        self.ship_size = ship_size
+        self.ship_color = ship_color
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        await interaction.response.send_modal(SetupInput(self))
+
+class SetupView(discord.ui.View):
+
+    def __init__(self, game: BetaBattleShip, timeout: float) -> None:
+        super().__init__(timeout=timeout)
+
+        self.game = game
+
+        for ship, (size, color) in SHIPS.items():
+            self.add_item(SetupButton(ship, size, color))
+
 class BetaBattleShip(BattleShip):
     embed: discord.Embed
 
@@ -159,6 +260,27 @@ class BetaBattleShip(BattleShip):
 
         self.turn: Player = self.player1
 
+    def get_board(self, player: discord.Member, other: bool = False) -> Board:
+        player = getattr(player, 'player', player)
+        if other:
+            return (
+                self.player2_board if player == self.player1.player 
+                else self.player1_board
+            )
+        else:
+            return (
+                self.player1_board if player == self.player1.player
+                else self.player2_board
+            )
+
+    async def get_ship_inputs(self, user: Player) -> Coroutine:
+        file, _ = await self.get_file(user) 
+
+        view = SetupView(self, timeout=self.timeout)
+        await user.send(file=file, view=view)
+
+        return view.wait()
+        
     async def start(
         self, 
         ctx: commands.Context, 
@@ -167,7 +289,15 @@ class BetaBattleShip(BattleShip):
         timeout: Optional[float] = None,
     ) -> tuple[discord.Message, discord.Message]:
 
+        self.timeout = timeout
+
         await ctx.send('**Game Started!**\nI\'ve setup the boards in your dms!')
+
+        if not self.random:
+            await asyncio.gather(
+                await self.get_ship_inputs(self.player1),
+                await self.get_ship_inputs(self.player2),
+            )
 
         self.player1.embed.color = embed_color
         self.player2.embed.color = embed_color
@@ -178,8 +308,7 @@ class BetaBattleShip(BattleShip):
         self.view1 = BattleshipView(self, user=self.player1, timeout=timeout)
         self.view2 = BattleshipView(self, user=self.player1, timeout=timeout)
         
-        self.message1 = await self.player1.send('Game starting!', view=self.view1, files=[file1, file3])
-        self.message2 = await self.player2.send('Game starting!', view=self.view2, files=[file2, file4])
-        self.timeout = timeout
+        self.message1 = await self.player1.send('Game starting!', view=self.view1, files=[file3, file1])
+        self.message2 = await self.player2.send('Game starting!', view=self.view2, files=[file4, file2])
 
         return self.message1, self.message2
