@@ -282,7 +282,7 @@ class BetaBattleShip(BattleShip):
         ) 
 
         view = SetupView(self, timeout=self.timeout)
-        await user.send(file=file, view=view)
+        await user.send(file=file, embed=embed, view=view)
 
         return view.wait()
         
