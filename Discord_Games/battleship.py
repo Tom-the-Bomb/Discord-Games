@@ -139,7 +139,7 @@ class Board:
         d1, d2, d3, d4 = diffs
         x1, y1 = x - d1, y - d2
         x2, y2 = x + d3, y + d4
-        cur.rectangle((x1, y1, x2, y2), fill=ship.color)
+        cur.rounded_rectangle((x1, y1, x2, y2), radius=5, fill=ship.color)
 
     def get_ship(self, coord: Coords) -> Optional[Ship]:
         if s := [ship for ship in self.ships if coord in ship.span]:
