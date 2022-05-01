@@ -10,9 +10,10 @@ from Discord_Games import button_games
 bot = commands.Bot(command_prefix='!!', intents=discord.Intents.all())
 
 @bot.command(name='test')
+@commands.is_owner()
 async def test(ctx: commands.Context, member: discord.Member):
 
-    game = button_games.BetaBattleShip(ctx.author, member, random=True)
+    game = button_games.BetaBattleShip(ctx.author, member, random=False)
     await game.start(ctx)
 
 if __name__ == '__main__':
