@@ -44,15 +44,15 @@ class Ship:
         self.color: tuple[int, int, int] = color
         
         self.end: Coords = (
-            (self.start[0], self.start[1] + self.size) if self.vertical else
-            (self.start[0] + self.size, self.start[1])
+            (self.start[0], self.start[1] + self.size - 1) if self.vertical else
+            (self.start[0] + self.size - 1, self.start[1])
         )
 
         self.span: list[Coords] = (
             [
-                (self.start[0], i) for i in range(self.start[1], self.end[1])
+                (self.start[0], i) for i in range(self.start[1], self.end[1] + 1)
             ] if self.vertical else [
-                (i, self.start[1]) for i in range(self.start[0], self.end[0])
+                (i, self.start[1]) for i in range(self.start[0], self.end[0] + 1)
             ]
         )
 

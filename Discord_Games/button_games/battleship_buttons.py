@@ -87,8 +87,8 @@ class BattleshipInput(discord.ui.Modal, title='Input a coordinate'):
             file1, file3 = await game.get_file(game.player1)
             file2, file4 = await game.get_file(game.player2)
             
-            await game.message1.edit(content='BattleShip', embed=game.player1.embed, attachments=[file3, file1])
-            await game.message2.edit(content='BattleShip', embed=game.player2.embed, attachments=[file4, file2])
+            await game.message1.edit(content='**Battleship**', embed=game.player1.embed, attachments=[file3, file1])
+            await game.message2.edit(content='**Battleship**', embed=game.player2.embed, attachments=[file4, file2])
             game.turn = next_turn
 
             if winner := game.who_won():
