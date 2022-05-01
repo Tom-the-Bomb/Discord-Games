@@ -314,7 +314,7 @@ class BetaBattleShip(BattleShip):
         self.view1 = BattleshipView(self, user=self.player1, timeout=timeout)
         self.view2 = BattleshipView(self, user=self.player1, timeout=timeout)
         
-        self.message1 = await self.player1.send('Game starting!', view=self.view1, files=[file3, file1])
-        self.message2 = await self.player2.send('Game starting!', view=self.view2, files=[file4, file2])
+        self.message1 = await self.player1.send('**Game starting!**', view=self.view1, files=[file3, file1])
+        self.message2 = await self.player2.send('**Game starting!**', view=self.view2, files=[file4, file2])
 
         return self.message1, self.message2

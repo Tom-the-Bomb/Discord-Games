@@ -327,8 +327,8 @@ class BattleShip:
         self_file, op_file = await self.get_file(self.player1)
         self_file2, op_file2 = await self.get_file(self.player2)
         
-        self.message1 = await self.player1.send('Game starting!', files=[op_file, self_file])
-        self.message2 = await self.player2.send('Game starting!', files=[op_file2, self_file2])
+        self.message1 = await self.player1.send('**Game starting!**', files=[op_file, self_file])
+        self.message2 = await self.player2.send('**Game starting!**', files=[op_file2, self_file2])
         self.timeout = timeout
 
         while True:
