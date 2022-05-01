@@ -160,10 +160,10 @@ class Board:
                     range(1, 11), range(75, 530, 50)
                 ):
                     coord = (i, j)
-                    if coord in self.my_misses:
+                    if coord in self.op_misses:
                         self.draw_dot(cur, x, y, fill=GRAY)
 
-                    elif coord in self.my_hits:
+                    elif coord in self.op_hits:
                         if hide:
                             self.draw_dot(cur, x, y, fill=RED)
                         else:
@@ -218,28 +218,29 @@ class BattleShip:
                 else self.player2_board
             )
 
-    def place_move(self, player: discord.Member, coords: Coords) -> bool:
+    def place_move(self, player: discord.Member, coords: Coords) -> tuple[bool, bool]:
         board = self.get_board(player)
         op_board = self.get_board(player, other=True)
         
-        for i, ship in enumerate(board.ships):
+        for i, ship in enumerate(op_board.ships):
             for j, coord in enumerate(ship.span):
                 if coords == coord:
                     op_board.ships[i].hits[j] = True
                     board.my_hits.append(coords)
+                    op_board.op_hits.append(coords)
                     return all(op_board.ships[i].hits), True
 
         board.my_misses.append(coords)
         op_board.op_misses.append(coords)
         return False, False
 
-    async def get_file(self, player: discord.Member) -> discord.File:
+    async def get_file(self, player: discord.Member, *, hide: bool = True) -> discord.File:
 
         board = self.get_board(player)
-        image1 = await board.to_image(hide=True)
+        image1 = await board.to_image()
 
         board2 = self.get_board(player, other=True)
-        image2 = await board2.to_image()
+        image2 = await board2.to_image(hide=hide)
 
         file1 = discord.File(image1, 'board1.png')
         file2 = discord.File(image2, 'board2.png')
@@ -261,10 +262,10 @@ class BattleShip:
 
     async def get_ship_inputs(self, ctx: commands.Context, user: discord.Member) -> bool:
         
-        board = self.get_board(user, other=True)
+        board = self.get_board(user)
 
         async def place_ship(ship: str, size: int, color: tuple[int, int, int]) -> bool:
-            _, file = await self.get_file(user)
+            file, _ = await self.get_file(user)
             await user.send(f'Where do you want to place your `{ship}`?\nSend the start coordinate... e.g. (`a1`)', file=file)
 
             def check(msg: discord.Message) -> bool:
@@ -272,12 +273,12 @@ class BattleShip:
                     content = msg.content.replace(' ', '').lower()
                     return bool(self.inputpat.match(content))
             try:
-                message = await ctx.bot.wait_for('message', check=check, timeout=self.timeout)
+                message: discord.Message = await ctx.bot.wait_for('message', check=check, timeout=self.timeout)
             except asyncio.TimeoutError:
                 await user.send(f'The timeout of {self.timeout} seconds, has been reached. Aborting...')
                 return False
 
-            _, start = self.get_coords(message.content)
+            _, start = self.get_coords(message.content.replace(' ', '').lower())
 
             await user.send('Do you want it to be vertical?\nSay `yes` or `no`')
 
@@ -286,7 +287,7 @@ class BattleShip:
                     content = msg.content.replace(' ', '').lower()
                     return content in ('yes', 'no')
             try:
-                message = await ctx.bot.wait_for('message', check=check, timeout=self.timeout)
+                message: discord.Message = await ctx.bot.wait_for('message', check=check, timeout=self.timeout)
             except asyncio.TimeoutError:
                 await user.send(f'The timeout of {self.timeout} seconds, has been reached. Aborting...')
                 return False
@@ -323,11 +324,11 @@ class BattleShip:
                 self.get_ship_inputs(ctx, self.player2),
             )
     
-        file1, file3 = await self.get_file(self.player1)
-        file2, file4 = await self.get_file(self.player2)
+        self_file, op_file = await self.get_file(self.player1)
+        self_file2, op_file2 = await self.get_file(self.player2)
         
-        self.message1 = await self.player1.send('Game starting!', files=[file1, file3])
-        self.message2 = await self.player2.send('Game starting!', files=[file2, file4])
+        self.message1 = await self.player1.send('Game starting!', files=[op_file, self_file])
+        self.message2 = await self.player2.send('Game starting!', files=[op_file2, self_file2])
         self.timeout = timeout
 
         while True:
@@ -356,11 +357,11 @@ class BattleShip:
                 await self.turn.send(f'`{raw}` was a miss :(')
                 await next_turn.send(f'They went for `{raw}`, and it was a miss! :)')
 
-            file1, file3 = await self.get_file(self.player1)
-            file2, file4 = await self.get_file(self.player2)
+            self_file, op_file = await self.get_file(self.player1)
+            self_file2, op_file2 = await self.get_file(self.player2)
             
-            await self.player1.send(files=[file1, file3])
-            await self.player2.send(files=[file2, file4])
+            await self.player1.send(files=[op_file, self_file])
+            await self.player2.send(files=[op_file2, self_file2])
             self.turn = next_turn
 
             if winner := self.who_won():
