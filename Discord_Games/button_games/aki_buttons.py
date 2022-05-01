@@ -37,7 +37,6 @@ class AkiView(discord.ui.View):
 
                 embed = await game.win()
                 await interaction.response.edit_message(embed=embed, view=self)
-                return self.stop()
 
     @discord.ui.button(label="yes", style=discord.ButtonStyle.green)
     async def yes_button(self, interaction: discord.Interaction, _) -> None:
