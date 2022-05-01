@@ -17,11 +17,11 @@ Coords = tuple[int, int]
 
 SHIPS: dict[str, tuple[int, tuple[int, int, int]]] = {
     "carrier": (5, 
-        (80, 80, 80)),
+        (52, 152, 219)),
     "battleship": (4, 
-        (110, 110, 110)),
+        (246, 246, 112)),
     "submarine": (3, 
-        (150, 150, 150)),
+        (95, 245, 80)),
     "cruiser": (2, 
         (190, 190, 190)),
 }

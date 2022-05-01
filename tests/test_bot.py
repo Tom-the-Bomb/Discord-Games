@@ -13,7 +13,7 @@ bot = commands.Bot(command_prefix='!!', intents=discord.Intents.all())
 @commands.is_owner()
 async def test(ctx: commands.Context, member: discord.Member):
 
-    game = button_games.BetaBattleShip(ctx.author, member, random=False)
+    game = button_games.BetaBattleShip(ctx.author, member)
     await game.start(ctx)
 
 if __name__ == '__main__':
