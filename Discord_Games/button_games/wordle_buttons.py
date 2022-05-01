@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from typing import Optional
+
 import discord
 from discord.ext import commands
+from sympy import Float
 
 from ..wordle import Wordle
 
@@ -68,7 +71,7 @@ class WordInputButton(discord.ui.Button):
 
 class WordleView(discord.ui.View):
     
-    def __init__(self, game: BetaWordle, *, timeout: float = None):
+    def __init__(self, game: BetaWordle, *, timeout: float):
         super().__init__(timeout=timeout)
 
         self.game = game
@@ -78,7 +81,7 @@ class WordleView(discord.ui.View):
 class BetaWordle(Wordle):
     player: discord.Member
 
-    async def start(self, ctx: commands.Context, *, timeout: float = None) -> discord.Message:
+    async def start(self, ctx: commands.Context, *, timeout: Optional[float] = None) -> discord.Message:
         self.player = ctx.author
 
         buf = await self.render_image()

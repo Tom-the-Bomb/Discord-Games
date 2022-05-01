@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Union
+from typing import Union, Optional
 
 import discord
 from discord.ext import commands
@@ -80,7 +80,7 @@ class BetaHangman(Hangman):
         ctx: commands.Context,
         *,
         embed_color: Union[discord.Color, int] = 0x2F3136,
-        timeout: float = None,
+        timeout: Optional[float] = None,
         **kwargs,
     ) -> discord.Message:
 

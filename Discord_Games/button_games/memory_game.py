@@ -58,7 +58,7 @@ class MemoryView(discord.ui.View):
         *, 
         button_style: discord.ButtonStyle,
         pause_time: float,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> None:
 
         super().__init__(timeout=timeout)
@@ -95,7 +95,7 @@ class MemoryGame:
         items: list[str] = [],
         pause_time: float = 0.7,
         button_style: discord.ButtonStyle = discord.ButtonStyle.red,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> discord.Message:
 
         view = MemoryView(

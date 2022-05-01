@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Optional
 import random
 
 import discord
@@ -63,7 +64,7 @@ class BetaTwenty48(Twenty48):
         self, 
         ctx: commands.Context, 
         *,
-        timeout: float = None, 
+        timeout: Optional[float] = None, 
         delete_button: bool = False,
         **kwargs,
     ) -> None:

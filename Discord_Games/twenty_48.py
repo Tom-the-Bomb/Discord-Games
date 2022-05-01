@@ -185,7 +185,7 @@ class Twenty48:
         self, 
         ctx: commands.Context, 
         *, 
-        timeout: float = None,
+        timeout: Optional[float] = None,
         remove_reaction_after: bool = True, 
         delete_button: bool = False, 
         **kwargs,

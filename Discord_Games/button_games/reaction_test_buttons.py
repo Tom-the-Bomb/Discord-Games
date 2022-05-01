@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Union
+from typing import Union, Optional
 import time
 import random
 import asyncio
@@ -62,7 +62,7 @@ class BetaReactionGame:
         author_only: bool = False,
         button_style: discord.ButtonStyle = discord.ButtonStyle.blurple, 
         embed_color: Union[discord.Color, int] = 0x2F3136,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> discord.Message:
 
         self.author_only = author_only

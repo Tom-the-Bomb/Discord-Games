@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import ClassVar, Union
+from typing import ClassVar, Union, Optional
 
 import discord
 from discord.ext import commands
@@ -60,7 +60,7 @@ class TTTView(discord.ui.View):
         embed_color: Union[discord.Color, int],
         button_style: discord.ButtonStyle,
         win_button_style: discord.ButtonStyle,
-        timeout: float = None
+        timeout: Optional[float] = None
     ) -> None:
 
         super().__init__(timeout=timeout)
@@ -92,7 +92,7 @@ class BetaTictactoe(Tictactoe):
         *,
         embed_color: Union[discord.Color, int] = 0x2F3136,
         win_button_style: discord.ButtonStyle = discord.ButtonStyle.red,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> discord.Message:
 
         view = TTTView(

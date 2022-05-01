@@ -118,7 +118,7 @@ class BetaRockPaperScissors(RockPaperScissors):
         *,
         button_style: discord.ButtonStyle = discord.ButtonStyle.blurple,
         embed_color: Union[discord.Color, int] = 0x2F3136,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> discord.Message:
 
         self.player1 = ctx.author
