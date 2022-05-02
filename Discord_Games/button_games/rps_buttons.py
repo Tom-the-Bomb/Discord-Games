@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import Optional, Union
+from typing import Optional
 import random
 
 import discord
 from discord.ext import commands
 
 from ..rps import RockPaperScissors
+from ..utils import DiscordColor
 
 class RPSButton(discord.ui.Button):
     view: RPSView
@@ -117,7 +118,7 @@ class BetaRockPaperScissors(RockPaperScissors):
         ctx: commands.Context, 
         *,
         button_style: discord.ButtonStyle = discord.ButtonStyle.blurple,
-        embed_color: Union[discord.Color, int] = 0x2F3136,
+        embed_color: DiscordColor = 0x2F3136,
         timeout: Optional[float] = None,
     ) -> discord.Message:
 

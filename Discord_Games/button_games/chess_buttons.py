@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from typing import Optional, Union
+from typing import Optional
 import discord
 from discord.ext import commands
 
+from ..utils import DiscordColor
 from ..chess_game import Chess
 from .wordle_buttons import WordInputButton
 
@@ -99,7 +100,7 @@ class BetaChess(Chess):
         self, 
         ctx: commands.Context, 
         *, 
-        embed_color: Union[discord.Color, int] = 0x2F3136, 
+        embed_color: DiscordColor = 0x2F3136, 
         timeout: Optional[float] = None, 
     ) -> None:
 

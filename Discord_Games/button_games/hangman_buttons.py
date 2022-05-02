@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import Union, Optional
+from typing import Optional
 
 import discord
 from discord.ext import commands
 
 from .wordle_buttons import WordInputButton
 from ..hangman import Hangman
+from ..utils import DiscordColor
 
 class HangmanInput(discord.ui.Modal, title='Make a guess!'):
     
@@ -79,7 +80,7 @@ class BetaHangman(Hangman):
         self, 
         ctx: commands.Context,
         *,
-        embed_color: Union[discord.Color, int] = 0x2F3136,
+        embed_color: DiscordColor = 0x2F3136,
         timeout: Optional[float] = None,
         **kwargs,
     ) -> discord.Message:

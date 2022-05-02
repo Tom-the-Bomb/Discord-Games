@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-from typing import Union
 import random
 
 import discord
 from discord.ext import commands
+
+from .utils import DiscordColor
+
 
 class RockPaperScissors:
     message: discord.Message
@@ -30,7 +32,7 @@ class RockPaperScissors:
         reaction, _ = await ctx.bot.wait_for('reaction_add', check=check)
         return str(reaction.emoji)
 
-    async def start(self, ctx: commands.Context, *, embed_color: Union[discord.Color, int] = 0x2F3136) -> discord.Message:
+    async def start(self, ctx: commands.Context, *, embed_color: DiscordColor = 0x2F3136) -> discord.Message:
         embed = discord.Embed(
             title='Rock Paper Scissors',
             description='React to play!',

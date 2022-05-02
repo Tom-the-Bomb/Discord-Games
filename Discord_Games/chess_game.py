@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from typing import Union, Optional, ClassVar, Literal
+from typing import Optional, ClassVar, Literal
 import asyncio
 
 import discord
 from discord.ext import commands
 import chess
+
+from .utils import DiscordColor
 
 class Chess:
     BASE_URL: ClassVar[str] = 'http://www.fen-to-image.com/image/64/double/coords/'
@@ -71,7 +73,7 @@ class Chess:
         ctx: commands.Context, 
         *, 
         timeout: Optional[float] = None, 
-        embed_color: Union[discord.Color, int] = 0x2F3136, 
+        embed_color: DiscordColor = 0x2F3136, 
         add_reaction_after_move: bool = False, 
         **kwargs,
     ) -> Optional[discord.Message]:

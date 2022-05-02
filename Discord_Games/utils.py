@@ -1,6 +1,11 @@
-from typing import Callable
+from typing import Callable, Union
+
 import functools
 import asyncio
+
+import discord
+
+DiscordColor = Union[discord.Color, int]
 
 def executor():
 

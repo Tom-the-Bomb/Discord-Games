@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Union, Any, Coroutine
+from typing import Optional, Any, Coroutine
 
 import asyncio
 import discord
@@ -14,7 +14,7 @@ from ..battleship import (
 )
 
 from .wordle_buttons import WordInputButton
-
+from ..utils import DiscordColor
 
 class Player:
 
@@ -290,7 +290,7 @@ class BetaBattleShip(BattleShip):
         self, 
         ctx: commands.Context, 
         *,
-        embed_color: Union[discord.Color, int] = 0x2F3136,
+        embed_color: DiscordColor = 0x2F3136,
         timeout: Optional[float] = None,
     ) -> tuple[discord.Message, discord.Message]:
 

@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from typing import Union, Optional
+from typing import Optional
 import random
 
 import discord
 from discord.ext import commands
 from english_words import english_words_lower_alpha_set
+
+from .utils import DiscordColor
 
 BLANK = '  \u200b'
 STAGES: list[str] = ['''
@@ -169,7 +171,7 @@ class Hangman:
         self._embed.add_field(name='Lives left', value=self.lives(), inline=False)
         return self._embed
 
-    async def start(self, ctx: commands.Context, *, delete_after_guess: bool = False, embed_color: Union[discord.Color, int] = 0x2F3136, **kwargs):
+    async def start(self, ctx: commands.Context, *, delete_after_guess: bool = False, embed_color: DiscordColor = 0x2F3136, **kwargs):
         
         self.player = ctx.author
         self.embed_color = embed_color

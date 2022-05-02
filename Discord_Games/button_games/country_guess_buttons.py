@@ -1,13 +1,12 @@
 from __future__ import annotations
 
-from typing import Union, Optional
-import random
-import os
+from typing import Optional
 
 import discord
 from discord.ext import commands
 
 from ..country_guess import CountryGuesser
+from ..utils import DiscordColor
 
 class CountryInput(discord.ui.Modal, title='Input your guess!'):
     
@@ -100,7 +99,7 @@ class BetaCountryGuesser(CountryGuesser):
         self, 
         ctx: commands.Context, 
         *, 
-        embed_color: Union[discord.Color, int] = 0x2F3136,
+        embed_color: DiscordColor = 0x2F3136,
         ignore_diff_len: bool = False,
         timeout: Optional[float] = None,
     ) -> discord.Message:

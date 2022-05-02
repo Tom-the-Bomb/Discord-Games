@@ -1,7 +1,9 @@
-from typing import Optional, ClassVar, Union
+from typing import Optional, ClassVar
 
 import discord
 from discord.ext import commands
+
+from .utils import DiscordColor
 
 class Tictactoe:
     BLANK: ClassVar[str] = "⬛"
@@ -46,7 +48,7 @@ class Tictactoe:
             board += "".join(row) + "\n"
         return board
 
-    def make_embed(self, color: Union[discord.Color, int] = 0x2F3136, *, tie: bool = False) -> discord.Embed:
+    def make_embed(self, color: DiscordColor = 0x2F3136, *, tie: bool = False) -> discord.Embed:
         embed = discord.Embed(color=color)
         if self.is_game_over() or tie:
             status = f"{self.winner.mention} won!" if self.winner else "Tie"
@@ -106,7 +108,7 @@ class Tictactoe:
         self, 
         ctx: commands.Context, 
         *, 
-        embed_color: Union[discord.Color, int] = 0x2F3136, 
+        embed_color: DiscordColor = 0x2F3136, 
         remove_reaction_after: bool = False, 
         **kwargs,
     ) -> discord.Message:

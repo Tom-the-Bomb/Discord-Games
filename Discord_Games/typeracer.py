@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Union, Optional, Any, ClassVar
+from typing import Optional, ClassVar, Any
 from datetime import datetime as dt
 from io import BytesIO
 
@@ -16,7 +16,8 @@ from PIL import Image, ImageDraw, ImageFont
 import discord
 from discord.ext import commands
 
-from .utils import executor
+from .utils import executor, DiscordColor
+
 
 class TypeRacer:
     SENTENCE_URL: ClassVar[str] = "https://api.quotable.io/random"
@@ -138,7 +139,7 @@ class TypeRacer:
         ctx: commands.Context, 
         *, 
         embed_title: str = "Type the following sentence in the chat now!", 
-        embed_color: Union[discord.Color, int] = 0x2F3136, 
+        embed_color: DiscordColor = 0x2F3136, 
         path_to_text_font: Optional[str] = None,
         timeout: Optional[float] = None, 
         words_mode: bool = False,

@@ -1,12 +1,14 @@
 from __future__ import annotations
 
-from typing import Union, Optional
+from typing import Optional
 import time
 import random
 import asyncio
 
 import discord
 from discord.ext import commands
+
+from ..utils import DiscordColor
 
 class ReactionButton(discord.ui.Button):
     view: ReactionView
@@ -61,7 +63,7 @@ class BetaReactionGame:
         *,
         author_only: bool = False,
         button_style: discord.ButtonStyle = discord.ButtonStyle.blurple, 
-        embed_color: Union[discord.Color, int] = 0x2F3136,
+        embed_color: DiscordColor = 0x2F3136,
         timeout: Optional[float] = None,
     ) -> discord.Message:
 

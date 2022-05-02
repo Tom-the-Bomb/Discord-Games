@@ -1,5 +1,5 @@
 from __future__  import annotations
-from typing import Optional, Union
+from typing import Optional
 
 import pathlib
 import random
@@ -9,7 +9,7 @@ import discord
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 
-from .utils import executor
+from .utils import executor, DiscordColor
 
 BORDER = 40
 SQ = 100  
@@ -24,7 +24,7 @@ GREEN = (105, 169, 99)
 
 class Wordle:
 
-    def __init__(self, *, color: Union[discord.Color, int] = None) -> None:
+    def __init__(self, *, color: DiscordColor = None) -> None:
         self.color = color
         self._valid_words = tuple(
             open(fr'{pathlib.Path(__file__).parent}\assets\words.txt', 'r').read().splitlines()

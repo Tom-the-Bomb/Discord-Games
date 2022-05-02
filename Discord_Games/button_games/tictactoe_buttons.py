@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import ClassVar, Union, Optional
+from typing import ClassVar, Optional
 
 import discord
 from discord.ext import commands
 
 from ..tictactoe import Tictactoe
+from ..utils import DiscordColor
 
 class TTTButton(discord.ui.Button):
     view: TTTView
@@ -57,7 +58,7 @@ class TTTView(discord.ui.View):
     def __init__(self, 
         game: BetaTictactoe, 
         *,
-        embed_color: Union[discord.Color, int],
+        embed_color: DiscordColor,
         button_style: discord.ButtonStyle,
         win_button_style: discord.ButtonStyle,
         timeout: Optional[float] = None
@@ -90,7 +91,7 @@ class BetaTictactoe(Tictactoe):
         ctx: commands.Context,
         button_style: discord.ButtonStyle = discord.ButtonStyle.green,
         *,
-        embed_color: Union[discord.Color, int] = 0x2F3136,
+        embed_color: DiscordColor = 0x2F3136,
         win_button_style: discord.ButtonStyle = discord.ButtonStyle.red,
         timeout: Optional[float] = None,
     ) -> discord.Message:

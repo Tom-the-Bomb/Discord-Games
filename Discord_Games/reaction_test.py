@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import Union
 import time
 import random
 import asyncio
 
 import discord
 from discord.ext import commands
+
+from .utils import DiscordColor
 
 class ReactionGame:
 
@@ -28,7 +29,7 @@ class ReactionGame:
         self, 
         ctx: commands.Context, 
         *,
-        embed_color: Union[discord.Color, int] = 0x2F3136,
+        embed_color: DiscordColor = 0x2F3136,
     ) -> discord.Message:
 
         embed = discord.Embed(
