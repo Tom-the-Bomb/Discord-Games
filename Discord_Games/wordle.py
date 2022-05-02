@@ -9,7 +9,7 @@ import discord
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 
-from .utils import executor, DiscordColor
+from .utils import *
 
 BORDER = 40
 SQ = 100  
@@ -24,8 +24,9 @@ GREEN = (105, 169, 99)
 
 class Wordle:
 
-    def __init__(self, *, color: DiscordColor = None) -> None:
-        self.color = color
+    def __init__(self) -> None:
+        self.embed_color: Optional[DiscordColor] = None
+
         self._valid_words = tuple(
             open(fr'{pathlib.Path(__file__).parent}\assets\words.txt', 'r').read().splitlines()
         )
@@ -71,7 +72,9 @@ class Wordle:
         buf.seek(0)
         return buf
 
-    async def start(self, ctx: commands.Context) -> Optional[discord.Message]:
+    async def start(self, ctx: commands.Context, *, embed_color: DiscordColor = DEFAULT_COLOR) -> Optional[discord.Message]:
+
+        self.emebd_color = embed_color
 
         buf = await self.render_image()
 
@@ -85,7 +88,7 @@ class Wordle:
             def check(m):
                 return len(m.content) == 5 and m.author == ctx.author and m.channel == ctx.channel
             
-            guess = await ctx.bot.wait_for('message', check=check)
+            guess: discord.Message = await ctx.bot.wait_for('message', check=check)
             content = guess.content.lower()
 
             if content not in self._valid_words:
@@ -96,7 +99,7 @@ class Wordle:
 
                 await message.delete()
 
-                embed = discord.Embed(title='Wordle!', color=self.color)
+                embed = discord.Embed(title='Wordle!', color=self.embed_color)
                 embed.set_image(url='attachment://wordle.png')
 
                 message = await ctx.send(embed=embed, file=discord.File(buf, 'wordle.png'))

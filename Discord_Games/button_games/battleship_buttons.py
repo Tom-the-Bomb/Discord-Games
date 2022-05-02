@@ -14,7 +14,7 @@ from ..battleship import (
 )
 
 from .wordle_buttons import WordInputButton
-from ..utils import DiscordColor
+from ..utils import DiscordColor, DEFAULT_COLOR
 
 class Player:
 
@@ -290,7 +290,7 @@ class BetaBattleShip(BattleShip):
         self, 
         ctx: commands.Context, 
         *,
-        embed_color: DiscordColor = 0x2F3136,
+        embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None,
     ) -> tuple[discord.Message, discord.Message]:
 

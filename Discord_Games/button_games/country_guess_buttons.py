@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 
 from ..country_guess import CountryGuesser
-from ..utils import DiscordColor
+from ..utils import DiscordColor, DEFAULT_COLOR
 
 class CountryInput(discord.ui.Modal, title='Input your guess!'):
     
@@ -99,7 +99,7 @@ class BetaCountryGuesser(CountryGuesser):
         self, 
         ctx: commands.Context, 
         *, 
-        embed_color: DiscordColor = 0x2F3136,
+        embed_color: DiscordColor = DEFAULT_COLOR,
         ignore_diff_len: bool = False,
         timeout: Optional[float] = None,
     ) -> discord.Message:

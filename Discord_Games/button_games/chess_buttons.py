@@ -4,7 +4,7 @@ from typing import Optional
 import discord
 from discord.ext import commands
 
-from ..utils import DiscordColor
+from ..utils import DiscordColor, DEFAULT_COLOR
 from ..chess_game import Chess
 from .wordle_buttons import WordInputButton
 
@@ -100,7 +100,7 @@ class BetaChess(Chess):
         self, 
         ctx: commands.Context, 
         *, 
-        embed_color: DiscordColor = 0x2F3136, 
+        embed_color: DiscordColor = DEFAULT_COLOR, 
         timeout: Optional[float] = None, 
     ) -> None:
 

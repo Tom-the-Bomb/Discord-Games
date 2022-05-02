@@ -11,7 +11,7 @@ import discord
 from discord.ext import commands
 from PIL import Image, ImageFilter, ImageOps
 
-from .utils import executor, DiscordColor
+from .utils import *
 
 class CountryGuesser:
     embed: discord.Embed
@@ -126,7 +126,7 @@ class CountryGuesser:
         self, 
         ctx: commands.Context, 
         *, 
-        embed_color: DiscordColor = 0x2F3136,
+        embed_color: DiscordColor = DEFAULT_COLOR,
         ignore_diff_len: bool = False
     ) -> discord.Message:
 

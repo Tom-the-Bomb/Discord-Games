@@ -5,7 +5,15 @@ import asyncio
 
 import discord
 
+__all__ = (
+    'DiscordColor',
+    'DEFAULT_COLOR',
+    'executor',
+)
+
 DiscordColor = Union[discord.Color, int]
+
+DEFAULT_COLOR: discord.Color = discord.Color(DEFAULT_COLOR)
 
 def executor():
 

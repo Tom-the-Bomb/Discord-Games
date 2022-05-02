@@ -7,7 +7,7 @@ from discord.ext import commands
 
 from .wordle_buttons import WordInputButton
 from ..hangman import Hangman
-from ..utils import DiscordColor
+from ..utils import DiscordColor, DEFAULT_COLOR
 
 class HangmanInput(discord.ui.Modal, title='Make a guess!'):
     
@@ -80,7 +80,7 @@ class BetaHangman(Hangman):
         self, 
         ctx: commands.Context,
         *,
-        embed_color: DiscordColor = 0x2F3136,
+        embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None,
         **kwargs,
     ) -> discord.Message:

@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands
 import chess
 
-from .utils import DiscordColor
+from .utils import DiscordColor, DEFAULT_COLOR
 
 class Chess:
     BASE_URL: ClassVar[str] = 'http://www.fen-to-image.com/image/64/double/coords/'
@@ -73,7 +73,7 @@ class Chess:
         ctx: commands.Context, 
         *, 
         timeout: Optional[float] = None, 
-        embed_color: DiscordColor = 0x2F3136, 
+        embed_color: DiscordColor = DEFAULT_COLOR, 
         add_reaction_after_move: bool = False, 
         **kwargs,
     ) -> Optional[discord.Message]:

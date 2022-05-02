@@ -7,7 +7,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from .utils import DiscordColor
+from .utils import DiscordColor, DEFAULT_COLOR
 
 class ReactionGame:
 
@@ -29,7 +29,7 @@ class ReactionGame:
         self, 
         ctx: commands.Context, 
         *,
-        embed_color: DiscordColor = 0x2F3136,
+        embed_color: DiscordColor = DEFAULT_COLOR,
     ) -> discord.Message:
 
         embed = discord.Embed(

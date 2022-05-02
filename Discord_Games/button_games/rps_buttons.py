@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands
 
 from ..rps import RockPaperScissors
-from ..utils import DiscordColor
+from ..utils import DiscordColor, DEFAULT_COLOR
 
 class RPSButton(discord.ui.Button):
     view: RPSView
@@ -118,7 +118,7 @@ class BetaRockPaperScissors(RockPaperScissors):
         ctx: commands.Context, 
         *,
         button_style: discord.ButtonStyle = discord.ButtonStyle.blurple,
-        embed_color: DiscordColor = 0x2F3136,
+        embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None,
     ) -> discord.Message:
 

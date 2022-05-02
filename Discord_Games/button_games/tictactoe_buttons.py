@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 
 from ..tictactoe import Tictactoe
-from ..utils import DiscordColor
+from ..utils import DiscordColor, DEFAULT_COLOR
 
 class TTTButton(discord.ui.Button):
     view: TTTView
@@ -91,7 +91,7 @@ class BetaTictactoe(Tictactoe):
         ctx: commands.Context,
         button_style: discord.ButtonStyle = discord.ButtonStyle.green,
         *,
-        embed_color: DiscordColor = 0x2F3136,
+        embed_color: DiscordColor = DEFAULT_COLOR,
         win_button_style: discord.ButtonStyle = discord.ButtonStyle.red,
         timeout: Optional[float] = None,
     ) -> discord.Message:

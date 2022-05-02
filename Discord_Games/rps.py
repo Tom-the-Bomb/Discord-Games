@@ -5,7 +5,7 @@ import random
 import discord
 from discord.ext import commands
 
-from .utils import DiscordColor
+from .utils import DiscordColor, DEFAULT_COLOR
 
 
 class RockPaperScissors:
@@ -32,7 +32,7 @@ class RockPaperScissors:
         reaction, _ = await ctx.bot.wait_for('reaction_add', check=check)
         return str(reaction.emoji)
 
-    async def start(self, ctx: commands.Context, *, embed_color: DiscordColor = 0x2F3136) -> discord.Message:
+    async def start(self, ctx: commands.Context, *, embed_color: DiscordColor = DEFAULT_COLOR) -> discord.Message:
         embed = discord.Embed(
             title='Rock Paper Scissors',
             description='React to play!',
