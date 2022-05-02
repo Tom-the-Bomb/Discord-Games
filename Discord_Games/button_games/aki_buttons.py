@@ -52,7 +52,7 @@ class AkiView(discord.ui.View):
         if interaction.user != game.player:
             return await interaction.response.send_message(content="This isn't your game", ephemeral=True)
         
-        if answer == "Cancel":
+        if answer == "cancel":
             await interaction.message.delete()
             return await interaction.message.reply("Session ended", mention_author=True)
 
