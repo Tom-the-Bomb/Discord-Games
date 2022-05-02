@@ -28,7 +28,8 @@ SHIPS: dict[str, tuple[int, tuple[int, int, int]]] = {
 
 class Ship:
 
-    def __init__(self, 
+    def __init__(
+        self, 
         name: str, 
         size: int, 
         start: Coords,
