@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from typing import Optional, Union
 import asyncio
+from typing import Optional, Union
 
 import discord
-from discord.ext import commands
 from akinator.async_aki import Akinator as Akinator_
+from discord.ext import commands
 
 
 class Options:
@@ -13,11 +13,11 @@ class Options:
     NO = "❌"
     IDK = "🤷"
     PY = "🤔"
-    PN  = "😔"
+    PN = "😔"
     STOP = "⏹️"
 
-class Akinator:
 
+class Akinator:
     def __init__(self) -> None:
         self.player: Optional[discord.Member] = None
         self.win_at: Optional[int] = None
@@ -29,15 +29,15 @@ class Akinator:
         self.questions: int = 0
 
         self.mapping: dict[str, str] = {
-            Options.YES: "y", 
-            Options.NO : "n", 
-            Options.IDK: "i", 
-            Options.PY : "p", 
-            Options.PN : "pn"
+            Options.YES: "y",
+            Options.NO: "n",
+            Options.IDK: "i",
+            Options.PY: "p",
+            Options.PN: "pn",
         }
 
     def build_bar(self) -> str:
-        prog = round(self.aki.progression/8)
+        prog = round(self.aki.progression / 8)
         emp, full = self.bar_emojis
         self.bar = f"[`{full*prog}{emp*(10-prog)}`]"
         return self.bar
@@ -45,17 +45,17 @@ class Akinator:
     async def build_embed(self) -> discord.Embed:
 
         embed = discord.Embed(
-            title = "Guess your character!", 
-            description = (
+            title="Guess your character!",
+            description=(
                 "```swift\n"
                 f"Question-Number  : {self.questions}\n"
                 f"Progression-Level: {self.aki.progression:.2f}\n```\n"
                 f"{self.build_bar()}"
-            ), 
-            color = discord.Color.random()
+            ),
+            color=discord.Color.random(),
         )
-        embed.add_field(name= "- Question -", value= self.aki.question)
-        embed.set_footer(text= "Figuring out the next question | This may take a second")
+        embed.add_field(name="- Question -", value=self.aki.question)
+        embed.set_footer(text="Figuring out the next question | This may take a second")
         return embed
 
     async def win(self) -> discord.Embed:
@@ -66,24 +66,26 @@ class Akinator:
         embed = discord.Embed(color=self.embed_color)
         embed.title = "Character Guesser Engine Results"
         embed.description = f"Total Questions: `{self.questions}`"
-        embed.add_field(name= "Character Guessed", value=f"\n**Name:** {self.guess['name']}\n{self.guess['description']}")
-        embed.set_image(url=  self.guess['absolute_picture_path'])
+        embed.add_field(
+            name="Character Guessed", value=f"\n**Name:** {self.guess['name']}\n{self.guess['description']}"
+        )
+        embed.set_image(url=self.guess['absolute_picture_path'])
         embed.set_footer(text="Was I correct?")
 
         return embed
 
     async def start(
-        self, 
+        self,
         ctx: commands.Context,
         *,
         embed_color: Union[discord.Color, int] = 0x2F3136,
-        remove_reaction_after: bool = False, 
-        win_at: int = 80, 
-        timeout: int = None, 
-        delete_button: bool = False, 
-        child_mode: bool = True, 
+        remove_reaction_after: bool = False,
+        win_at: int = 80,
+        timeout: int = None,
+        delete_button: bool = False,
+        child_mode: bool = True,
     ) -> Optional[discord.Message]:
-        
+
         self.embed_color = embed_color
         self.player = ctx.author
         self.win_at = win_at
@@ -126,9 +128,9 @@ class Akinator:
                 await self.message.remove_reaction(emoji, ctx.author)
             except discord.DiscordException:
                 pass
-            
+
             embed = await self.build_embed()
             await self.message.edit(embed=embed)
-            
+
         embed = await self.win()
         return await self.message.edit(embed=embed)

@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import Optional, Union
 import random
+from typing import Optional, Union
 
 import discord
 from discord.ext import commands
 
 from ..rps import RockPaperScissors
+
 
 class RPSButton(discord.ui.Button):
     view: RPSView
@@ -15,7 +16,7 @@ class RPSButton(discord.ui.Button):
         super().__init__(
             label='\u200b',
             emoji=emoji,
-            style=style, 
+            style=style,
         )
 
     def disable_all(self) -> None:
@@ -43,13 +44,13 @@ class RPSButton(discord.ui.Button):
                 user_choice = self.emoji.name
 
                 if user_choice == bot_choice:
-                    game.embed.description = f'**Tie!**\nWe both picked {user_choice}'  
+                    game.embed.description = f'**Tie!**\nWe both picked {user_choice}'
                 else:
                     if game.check_win(bot_choice, user_choice):
                         game.embed.description = f'**You Won!**\nYou picked {user_choice} and I picked {bot_choice}.'
                     else:
                         game.embed.description = f'**You Lost!**\nI picked {bot_choice} and you picked {user_choice}.'
-                
+
                 self.disable_all()
 
             else:
@@ -68,7 +69,7 @@ class RPSButton(discord.ui.Button):
 
                     if not other_player_choice:
                         game.embed.description += f'\n\n{game.player2.mention} has chosen...\n*Waiting for {game.player1.mention} to choose...*'
-                    
+
                 if game.player1_choice and game.player2_choice:
                     who_won = game.player1 if game.BEATS[game.player1_choice] == game.player2_choice else game.player2
 
@@ -82,12 +83,13 @@ class RPSButton(discord.ui.Button):
 
             return await interaction.response.edit_message(embed=game.embed, view=self.view)
 
+
 class RPSView(discord.ui.View):
     game: BetaRockPaperScissors
 
     def __init__(
-        self, 
-        game: BetaRockPaperScissors, 
+        self,
+        game: BetaRockPaperScissors,
         *,
         button_style: discord.ButtonStyle,
         timeout: float,
@@ -101,6 +103,7 @@ class RPSView(discord.ui.View):
         for option in self.game.OPTIONS:
             self.add_item(RPSButton(option, style=self.button_style))
 
+
 class BetaRockPaperScissors(RockPaperScissors):
     player1: discord.Member
     embed: discord.Embed
@@ -113,8 +116,8 @@ class BetaRockPaperScissors(RockPaperScissors):
             self.player2_choice: Optional[str] = None
 
     async def start(
-        self, 
-        ctx: commands.Context, 
+        self,
+        ctx: commands.Context,
         *,
         button_style: discord.ButtonStyle = discord.ButtonStyle.blurple,
         embed_color: Union[discord.Color, int] = 0x2F3136,

@@ -8,15 +8,16 @@ from sympy import Float
 
 from ..wordle import Wordle
 
+
 class WordInput(discord.ui.Modal, title='Word Input'):
     word = discord.ui.TextInput(
-        label=f'Input your guess', 
+        label=f'Input your guess',
         style=discord.TextStyle.short,
         required=True,
-        min_length=5, 
+        min_length=5,
         max_length=5,
     )
-    
+
     def __init__(self, view: WordleView) -> None:
         super().__init__()
         self.view = view
@@ -45,9 +46,12 @@ class WordInput(discord.ui.Modal, title='Word Input'):
                 await interaction.message.reply('Game Over! You won!', mention_author=True)
             elif len(game.guesses) >= 6:
                 self.disable_all()
-                await interaction.message.reply(f'Game Over! You lose, the word was: **{game.word}**', mention_author=True)
-            
+                await interaction.message.reply(
+                    f'Game Over! You lose, the word was: **{game.word}**', mention_author=True
+                )
+
             return await interaction.response.edit_message(embed=embed, attachments=[file], view=self.view)
+
 
 class WordInputButton(discord.ui.Button):
     view: WordleView
@@ -57,7 +61,7 @@ class WordInputButton(discord.ui.Button):
             label='Cancel' if cancel_button else 'Make a guess!',
             style=discord.ButtonStyle.red if cancel_button else discord.ButtonStyle.blurple,
         )
-    
+
     async def callback(self, interaction: discord.Interaction) -> None:
         game = self.view.game
         if interaction.user != game.player:
@@ -69,15 +73,16 @@ class WordInputButton(discord.ui.Button):
             else:
                 return await interaction.response.send_modal(WordInput(self.view))
 
+
 class WordleView(discord.ui.View):
-    
     def __init__(self, game: BetaWordle, *, timeout: float):
         super().__init__(timeout=timeout)
 
         self.game = game
         self.add_item(WordInputButton())
         self.add_item(WordInputButton(cancel_button=True))
-    
+
+
 class BetaWordle(Wordle):
     player: discord.Member
 
@@ -88,8 +93,4 @@ class BetaWordle(Wordle):
         embed = discord.Embed(title='Wordle!', color=self.color)
         embed.set_image(url='attachment://wordle.png')
 
-        return await ctx.send(
-            embed=embed,
-            file=discord.File(buf, 'wordle.png'), 
-            view=WordleView(self, timeout=timeout)
-        )
+        return await ctx.send(embed=embed, file=discord.File(buf, 'wordle.png'), view=WordleView(self, timeout=timeout))

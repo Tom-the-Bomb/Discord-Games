@@ -1,7 +1,8 @@
-from typing import Optional, ClassVar, Union
+from typing import ClassVar, Optional, Union
 
 import discord
 from discord.ext import commands
+
 
 class Tictactoe:
     BLANK: ClassVar[str] = "⬛"
@@ -13,7 +14,7 @@ class Tictactoe:
         self.circle = circle
 
         self.board: list[list[str]] = [[self.BLANK for _ in range(3)] for _ in range(3)]
-        self.turn: discord.Member  = self.cross
+        self.turn: discord.Member = self.cross
 
         self.winner: Optional[discord.Member] = None
         self.winning_indexes: list = []
@@ -21,23 +22,23 @@ class Tictactoe:
 
         self._controls: list[str] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
         self._conversion: dict[str, tuple[int, int]] = {
-            '1️⃣': (0, 0), 
-            '2️⃣': (0, 1), 
-            '3️⃣': (0, 2), 
-            '4️⃣': (1, 0), 
-            '5️⃣': (1, 1), 
-            '6️⃣': (1, 2), 
-            '7️⃣': (2, 0), 
-            '8️⃣': (2, 1), 
-            '9️⃣': (2, 2), 
+            '1️⃣': (0, 0),
+            '2️⃣': (0, 1),
+            '3️⃣': (0, 2),
+            '4️⃣': (1, 0),
+            '5️⃣': (1, 1),
+            '6️⃣': (1, 2),
+            '7️⃣': (2, 0),
+            '8️⃣': (2, 1),
+            '9️⃣': (2, 2),
         }
         self.emoji_to_player = {
-            self.CIRCLE: self.circle, 
-            self.CROSS : self.cross, 
+            self.CIRCLE: self.circle,
+            self.CROSS: self.cross,
         }
         self.player_to_emoji = {
-            self.cross: self.CROSS, 
-            self.circle: self.CIRCLE, 
+            self.cross: self.CROSS,
+            self.circle: self.CIRCLE,
         }
 
     def board_string(self) -> str:
@@ -93,21 +94,21 @@ class Tictactoe:
             self.winning_indexes = [(0, 0), (1, 1), (2, 2)]
 
             return True
-           
+
         if (self.board[0][2] == self.board[1][1] == self.board[2][0]) and self.board[0][2] != self.BLANK:
             self.winner = self.emoji_to_player[self.board[0][2]]
             self.winning_indexes = [(0, 2), (1, 1), (2, 0)]
 
             return True
-           
+
         return False
 
     async def start(
-        self, 
-        ctx: commands.Context, 
-        *, 
-        embed_color: Union[discord.Color, int] = 0x2F3136, 
-        remove_reaction_after: bool = False, 
+        self,
+        ctx: commands.Context,
+        *,
+        embed_color: Union[discord.Color, int] = 0x2F3136,
+        remove_reaction_after: bool = False,
         **kwargs,
     ) -> discord.Message:
 
@@ -126,7 +127,7 @@ class Tictactoe:
 
             if self.is_game_over():
                 break
-            
+
             emoji = str(reaction.emoji)
             self.make_move(emoji, user)
             embed = self.make_embed(embed_color)
@@ -135,6 +136,6 @@ class Tictactoe:
                 await self.message.remove_reaction(emoji, user)
 
             await self.message.edit(content=self.board_string(), embed=embed)
-        
+
         embed = self.make_embed(embed_color)
         return await self.message.edit(content=self.board_string(), embed=embed)

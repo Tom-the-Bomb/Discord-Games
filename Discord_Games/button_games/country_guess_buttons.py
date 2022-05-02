@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-from typing import Union, Optional
-import random
 import os
+import random
+from typing import Optional, Union
 
 import discord
 from discord.ext import commands
 
 from ..country_guess import CountryGuesser
 
+
 class CountryInput(discord.ui.Modal, title='Input your guess!'):
-    
     def __init__(self, view: CountryView) -> None:
         super().__init__()
         self.view = view
@@ -23,7 +23,7 @@ class CountryInput(discord.ui.Modal, title='Input your guess!'):
         )
 
         self.add_item(self.guess)
-        
+
     async def on_submit(self, interaction: discord.Interaction) -> discord.Message:
         guess = self.guess.value.strip().lower()
         game = self.view.game
@@ -43,7 +43,9 @@ class CountryInput(discord.ui.Modal, title='Input your guess!'):
                 game.update_guesslog('- GAME OVER, you lost -')
 
                 await interaction.message.edit(embed=game.embed, view=self.view)
-                return await interaction.response.send_message(f'Game Over! you lost, The country was `{game.country.title()}`')
+                return await interaction.response.send_message(
+                    f'Game Over! you lost, The country was `{game.country.title()}`'
+                )
             else:
                 acc = game.get_accuracy(guess)
                 game.update_guesslog(
@@ -53,13 +55,13 @@ class CountryInput(discord.ui.Modal, title='Input your guess!'):
 
                 return await interaction.response.edit_message(embed=game.embed)
 
+
 class CountryView(discord.ui.View):
-    
     def __init__(self, game: BetaCountryGuesser, *, timeout: float) -> None:
         super().__init__(timeout=timeout)
 
         self.game = game
-    
+
     def disable_all(self) -> None:
         for button in self.children:
             if isinstance(button, discord.ui.Button):
@@ -78,7 +80,7 @@ class CountryView(discord.ui.View):
         if not self.game.hints:
             button.disabled = True
             await interaction.message.edit(view=self)
-            
+
     @discord.ui.button(label='Cancel', style=discord.ButtonStyle.red)
     async def cancel_button(self, interaction: discord.Interaction, _) -> discord.Message:
         self.disable_all()
@@ -89,6 +91,7 @@ class CountryView(discord.ui.View):
         await interaction.response.send_message(f'Game Over! The country was `{self.game.country.title()}`')
         return await interaction.message.edit(view=self, embed=self.game.embed)
 
+
 class BetaCountryGuesser(CountryGuesser):
     guesslog: str = ''
 
@@ -97,9 +100,9 @@ class BetaCountryGuesser(CountryGuesser):
         self.embed.set_field_at(0, name='Guess Log', value=f'```diff\n{self.guesslog}\n```')
 
     async def start(
-        self, 
-        ctx: commands.Context, 
-        *, 
+        self,
+        ctx: commands.Context,
+        *,
         embed_color: Union[discord.Color, int] = 0x2F3136,
         ignore_diff_len: bool = False,
         timeout: Optional[float] = None,

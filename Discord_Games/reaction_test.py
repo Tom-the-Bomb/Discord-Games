@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from typing import Union
-import time
-import random
 import asyncio
+import random
+import time
+from typing import Union
 
 import discord
 from discord.ext import commands
 
-class ReactionGame:
 
+class ReactionGame:
     def __init__(self, emoji: str = '🖱️') -> None:
         self.emoji = emoji
 
@@ -23,10 +23,10 @@ class ReactionGame:
         end = time.perf_counter()
 
         return user, (end - start)
-    
+
     async def start(
-        self, 
-        ctx: commands.Context, 
+        self,
+        ctx: commands.Context,
         *,
         embed_color: Union[discord.Color, int] = 0x2F3136,
     ) -> discord.Message:

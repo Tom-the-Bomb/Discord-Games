@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import Union, Optional
-import time
-import random
 import asyncio
+import random
+import time
+from typing import Optional, Union
 
 import discord
 from discord.ext import commands
+
 
 class ReactionButton(discord.ui.Button):
     view: ReactionView
@@ -16,7 +17,7 @@ class ReactionButton(discord.ui.Button):
 
         self.edited: bool = False
         self.clicked: bool = False
-    
+
     async def callback(self, interaction: discord.Interaction) -> None:
         game = self.view.game
 
@@ -31,20 +32,15 @@ class ReactionButton(discord.ui.Button):
 
             game.embed.description = f'{interaction.user.mention} reacted first in `{elapsed:.2f}s` !'
             await interaction.response.edit_message(embed=game.embed)
-            
+
             self.view.stop()
             self.clicked = True
+
 
 class ReactionView(discord.ui.View):
     game: BetaReactionGame
 
-    def __init__(
-        self, 
-        game: BetaReactionGame,
-        *,
-        button_style: discord.ButtonStyle,  
-        timeout: float
-    ) -> None:
+    def __init__(self, game: BetaReactionGame, *, button_style: discord.ButtonStyle, timeout: float) -> None:
 
         super().__init__(timeout=timeout)
 
@@ -53,14 +49,14 @@ class ReactionView(discord.ui.View):
         self.button = ReactionButton(self.button_style)
         self.add_item(self.button)
 
+
 class BetaReactionGame:
-    
     async def start(
-        self, 
-        ctx: commands.Context, 
+        self,
+        ctx: commands.Context,
         *,
         author_only: bool = False,
-        button_style: discord.ButtonStyle = discord.ButtonStyle.blurple, 
+        button_style: discord.ButtonStyle = discord.ButtonStyle.blurple,
         embed_color: Union[discord.Color, int] = 0x2F3136,
         timeout: Optional[float] = None,
     ) -> discord.Message:
@@ -75,7 +71,7 @@ class BetaReactionGame:
         )
         view = ReactionView(self, button_style=button_style, timeout=timeout)
         self.message = await ctx.send(embed=self.embed, view=view)
-        
+
         pause = random.uniform(1.0, 5.0)
         await asyncio.sleep(pause)
 

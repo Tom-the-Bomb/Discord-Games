@@ -1,9 +1,9 @@
-from __future__  import annotations
-from typing import Optional, Union
+from __future__ import annotations
 
 import pathlib
 import random
 from io import BytesIO
+from typing import Optional, Union
 
 import discord
 from discord.ext import commands
@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw, ImageFont
 from .utils import executor
 
 BORDER = 40
-SQ = 100  
+SQ = 100
 SPACE = 10
 
 WIDTH = BORDER * 2 + SQ * 5 + SPACE * 4
@@ -22,13 +22,11 @@ GRAY = (119, 123, 125)
 ORANGE = (200, 179, 87)
 GREEN = (105, 169, 99)
 
-class Wordle:
 
+class Wordle:
     def __init__(self, *, color: Union[discord.Color, int] = None) -> None:
         self.color = color
-        self._valid_words = tuple(
-            open(fr'{pathlib.Path(__file__).parent}\assets\words.txt', 'r').read().splitlines()
-        )
+        self._valid_words = tuple(open(fr'{pathlib.Path(__file__).parent}\assets\words.txt', 'r').read().splitlines())
         self._font = ImageFont.truetype('arial.ttf', 70)
         self.guesses: list[list[dict[str, str]]] = []
         self.word: str = random.choice(self._valid_words)
@@ -57,15 +55,17 @@ class Wordle:
                         color = letter['color']
                         act_letter = letter['letter']
                     except (IndexError, KeyError):
-                        cursor.rectangle((x, y, x+SQ, y+SQ), outline='gray', width=2)
+                        cursor.rectangle((x, y, x + SQ, y + SQ), outline='gray', width=2)
                     else:
-                        cursor.rectangle((x, y, x+SQ, y+SQ), width=0, fill=color)
-                        cursor.text((x+SQ/2, y+SQ/2), act_letter, font=self._font, anchor='mm', fill=(255, 255, 255))
+                        cursor.rectangle((x, y, x + SQ, y + SQ), width=0, fill=color)
+                        cursor.text(
+                            (x + SQ / 2, y + SQ / 2), act_letter, font=self._font, anchor='mm', fill=(255, 255, 255)
+                        )
 
                     x += SQ + SPACE
                 x = BORDER
                 y += SQ + SPACE
-        
+
             buf = BytesIO()
             img.save(buf, 'PNG')
         buf.seek(0)
@@ -79,12 +79,12 @@ class Wordle:
         embed.set_image(url='attachment://wordle.png')
 
         message = await ctx.send(embed=embed, file=discord.File(buf, 'wordle.png'))
-        
+
         while True:
-            
+
             def check(m):
                 return len(m.content) == 5 and m.author == ctx.author and m.channel == ctx.channel
-            
+
             guess = await ctx.bot.wait_for('message', check=check)
             content = guess.content.lower()
 

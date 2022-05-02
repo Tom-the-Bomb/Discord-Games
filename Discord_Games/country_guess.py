@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from typing import Union, Optional
-from io import BytesIO
+import difflib
 import os
 import pathlib
 import random
-import difflib
+from io import BytesIO
+from typing import Optional, Union
 
 import discord
 from discord.ext import commands
@@ -13,19 +13,20 @@ from PIL import Image, ImageFilter, ImageOps
 
 from .utils import executor
 
+
 class CountryGuesser:
     embed: discord.Embed
     accepted_length: Optional[int]
     country: str
 
     def __init__(
-        self, 
-        *, 
+        self,
+        *,
         is_flags: bool = False,
         light_mode: bool = False,
         hard_mode: bool = False,
-        guesses: int = 5, 
-        hints: int = 1
+        guesses: int = 5,
+        hints: int = 1,
     ) -> None:
 
         self.hints = hints
@@ -78,7 +79,7 @@ class CountryGuesser:
 
         if self.hard_mode:
             file = await self.blur_image(file)
-        
+
         if self.light_mode:
             file = await self.invert_image(file)
 
@@ -100,13 +101,12 @@ class CountryGuesser:
         return round(difflib.SequenceMatcher(None, guess, self.country).ratio() * 100)
 
     async def wait_for_response(
-        self, 
-        ctx: commands.Context, 
-        *, 
-        options: tuple[str, ...] = (), 
+        self,
+        ctx: commands.Context,
+        *,
+        options: tuple[str, ...] = (),
         length: Optional[int] = None,
     ) -> Optional[tuple[discord.Message, str]]:
-
         def check(m: discord.Message) -> bool:
             if length:
                 return m.channel == ctx.channel and m.author == ctx.author and len(m.content) == length
@@ -119,15 +119,11 @@ class CountryGuesser:
         if options:
             if not content in options:
                 return
-            
+
         return message, content
 
     async def start(
-        self, 
-        ctx: commands.Context, 
-        *, 
-        embed_color: Union[discord.Color, int] = 0x2F3136,
-        ignore_diff_len: bool = False
+        self, ctx: commands.Context, *, embed_color: Union[discord.Color, int] = 0x2F3136, ignore_diff_len: bool = False
     ) -> discord.Message:
 
         file = await self.get_country()
@@ -154,13 +150,19 @@ class CountryGuesser:
 
                 if not self.guesses:
                     return await msg.reply(f'Game Over! you lost, The country was `{self.country.title()}`')
-                
+
                 acc = self.get_accuracy(response)
 
                 if not self.hints:
-                    await msg.reply(f'That was incorrect! but you are `{acc}%` of the way there!\nYou have **{self.guesses}** guesses left.', mention_author=False)
+                    await msg.reply(
+                        f'That was incorrect! but you are `{acc}%` of the way there!\nYou have **{self.guesses}** guesses left.',
+                        mention_author=False,
+                    )
                 else:
-                    await msg.reply(f'That is incorrect! but you are `{acc}%` of the way there!\nWould you like a hint? type: `(y/n)`', mention_author=False)
+                    await msg.reply(
+                        f'That is incorrect! but you are `{acc}%` of the way there!\nWould you like a hint? type: `(y/n)`',
+                        mention_author=False,
+                    )
 
                     hint_msg, resp = await self.wait_for_response(ctx, options=('y', 'n'))
                     if resp == 'y':
@@ -168,4 +170,6 @@ class CountryGuesser:
                         self.hints -= 1
                         await hint_msg.reply(f'Here is your hint: `{hint}`', mention_author=False)
                     else:
-                        await hint_msg.reply(f'Okay continue guessing! You have **{self.guesses}** guesses left.', mention_author=False)
+                        await hint_msg.reply(
+                            f'Okay continue guessing! You have **{self.guesses}** guesses left.', mention_author=False
+                        )

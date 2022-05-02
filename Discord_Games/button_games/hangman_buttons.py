@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from typing import Union, Optional
+from typing import Optional, Union
 
 import discord
 from discord.ext import commands
 
-from .wordle_buttons import WordInputButton
 from ..hangman import Hangman
+from .wordle_buttons import WordInputButton
+
 
 class HangmanInput(discord.ui.Modal, title='Make a guess!'):
-    
     def __init__(self, view: HangmanView) -> None:
         super().__init__()
         self.view = view
@@ -38,7 +38,7 @@ class HangmanInput(discord.ui.Modal, title='Make a guess!'):
 
         elif len(content) > 1 and content not in game._all_words:
             return await interaction.response.send_message('This is not a valid word!', ephemeral=True)
-            
+
         else:
             await game.make_guess(content)
 
@@ -48,6 +48,7 @@ class HangmanInput(discord.ui.Modal, title='Make a guess!'):
                 return await interaction.response.edit_message(view=self.view)
             else:
                 return await interaction.response.defer()
+
 
 class HangmanButton(WordInputButton):
     view: HangmanView
@@ -63,8 +64,8 @@ class HangmanButton(WordInputButton):
             else:
                 return await interaction.response.send_modal(HangmanInput(self.view))
 
-class HangmanView(discord.ui.View):
 
+class HangmanView(discord.ui.View):
     def __init__(self, game: BetaHangman, *, timeout: float) -> None:
         super().__init__(timeout=timeout)
 
@@ -73,10 +74,10 @@ class HangmanView(discord.ui.View):
         self.add_item(HangmanButton())
         self.add_item(HangmanButton(cancel_button=True))
 
-class BetaHangman(Hangman):
 
+class BetaHangman(Hangman):
     async def start(
-        self, 
+        self,
         ctx: commands.Context,
         *,
         embed_color: Union[discord.Color, int] = 0x2F3136,

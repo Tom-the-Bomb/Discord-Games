@@ -1,5 +1,6 @@
-import setuptools
 import re
+
+import setuptools
 
 requirements = []
 version = ''
@@ -15,12 +16,12 @@ with open("Discord_Games/__init__.py") as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
 setuptools.setup(
-    name="Discord_Games", 
-    author="Tom-the-Bomb", 
-    version= version, 
+    name="Discord_Games",
+    author="Tom-the-Bomb",
+    version=version,
     description="A library to help users easily implement games within their discord bot",
     long_description=readme,
-    long_description_content_type = "text/markdown",
+    long_description_content_type="text/markdown",
     license="MIT",
     url="https://github.com/Tom-the-Bomb/Discord-Games",
     project_urls={
@@ -36,20 +37,17 @@ setuptools.setup(
         "Programming Language :: Python :: 3.9",
         'Topic :: Software Development :: Libraries',
         'Topic :: Software Development :: Libraries :: Python Modules',
-        'Topic :: Utilities'
+        'Topic :: Utilities',
     ],
     include_package_data=True,
     package_data={
         '': [
-            'assets/**', 
+            'assets/**',
             'assets/country-data/**',
             'assets/country-flags/**',
         ]
     },
-    packages=[
-        'Discord_Games', 
-        'Discord_Games.button_games'
-    ],
+    packages=['Discord_Games', 'Discord_Games.button_games'],
     install_requires=requirements,
     zip_safe=True,
     python_requires='>=3.8',

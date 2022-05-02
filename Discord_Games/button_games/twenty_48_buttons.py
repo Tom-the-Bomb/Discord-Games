@@ -1,27 +1,24 @@
 from __future__ import annotations
 
-from typing import Optional
 import random
+from typing import Optional
 
 import discord
 from discord.ext import commands
 
 from ..twenty_48 import Twenty48
 
+
 class Twenty48_Button(discord.ui.Button):
 
     view: discord.ui.View
-    
+
     def __init__(self, game: BetaTwenty48, emoji: str) -> None:
 
         style = discord.ButtonStyle.red if emoji == '⏹️' else discord.ButtonStyle.blurple
 
         self.game = game
-        super().__init__(
-            style=style, 
-            emoji=discord.PartialEmoji(name=emoji), 
-            label="\u200b"
-        )
+        super().__init__(style=style, emoji=discord.PartialEmoji(name=emoji), label="\u200b")
 
     async def callback(self, interaction: discord.Interaction) -> discord.Message:
 
@@ -61,14 +58,14 @@ class BetaTwenty48(Twenty48):
     view: discord.ui.View
 
     async def start(
-        self, 
-        ctx: commands.Context, 
+        self,
+        ctx: commands.Context,
         *,
-        timeout: Optional[float] = None, 
+        timeout: Optional[float] = None,
         delete_button: bool = False,
         **kwargs,
     ) -> None:
-        
+
         self.player = ctx.author
         self.view = discord.ui.View(timeout=timeout)
 
@@ -80,7 +77,7 @@ class BetaTwenty48(Twenty48):
 
         for button in self._controls:
             self.view.add_item(Twenty48_Button(self, button))
-        
+
         if self._render_image:
             image = await self.render_image()
             self.message = await ctx.send(file=image, view=self.view, **kwargs)

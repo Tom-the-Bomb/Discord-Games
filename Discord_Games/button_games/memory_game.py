@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import Optional, ClassVar
-import random
 import asyncio
+import random
+from typing import ClassVar, Optional
 
 import discord
 from discord.ext import commands
+
 
 class MemoryButton(discord.ui.Button):
     view: MemoryView
@@ -20,7 +21,7 @@ class MemoryButton(discord.ui.Button):
         )
 
     async def callback(self, interaction: discord.Interaction) -> None:
-        
+
         if opened := self.view.opened:
             self.emoji = self.value
             self.disabled = True
@@ -48,14 +49,15 @@ class MemoryButton(discord.ui.Button):
             self.disabled = True
             return await interaction.response.edit_message(view=self.view)
 
+
 class MemoryView(discord.ui.View):
     board: list[list[str]]
     DEFAULT_ITEMS: ClassVar[list[str]] = ['🥝', '🍓', '🍹', '🍋', '🥭', '🍎', '🍊', '🍍', '🍑', '🍇', '🍉', '🥬']
-    
+
     def __init__(
-        self, 
-        items: list[str], 
-        *, 
+        self,
+        items: list[str],
+        *,
         button_style: discord.ButtonStyle,
         pause_time: float,
         timeout: Optional[float] = None,
@@ -66,7 +68,7 @@ class MemoryView(discord.ui.View):
         self.button_style = button_style
         self.pause_time = pause_time
         self.opened: Optional[MemoryButton] = None
-        
+
         if not items:
             items = self.DEFAULT_ITEMS
         assert len(items) == 12
@@ -76,20 +78,20 @@ class MemoryView(discord.ui.View):
         random.shuffle(items)
         items.insert(12, None)
 
-        self.board = [items[i:i + 5] for i in range(0, len(items), 5)]
+        self.board = [items[i : i + 5] for i in range(0, len(items), 5)]
 
         for i, row in enumerate(self.board):
             for item in row:
                 button = MemoryButton(item, style=self.button_style, row=i)
-                
+
                 if not item:
                     button.disabled = True
                 self.add_item(button)
 
-class MemoryGame:
 
+class MemoryGame:
     async def start(
-        self, 
+        self,
         ctx: commands.Context,
         *,
         items: list[str] = [],
@@ -98,10 +100,5 @@ class MemoryGame:
         timeout: Optional[float] = None,
     ) -> discord.Message:
 
-        view = MemoryView(
-            items=items, 
-            button_style=button_style, 
-            pause_time=pause_time,
-            timeout=timeout
-        )
+        view = MemoryView(items=items, button_style=button_style, pause_time=pause_time, timeout=timeout)
         return await ctx.send(view=view)

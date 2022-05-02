@@ -5,8 +5,8 @@ from discord.ext import commands
 
 from ..aki import Akinator
 
-class AkiView(discord.ui.View):
 
+class AkiView(discord.ui.View):
     def __init__(self, game: BetaAkinator, *, timeout: float) -> None:
         self.game = game
         super().__init__(timeout=timeout)
@@ -17,7 +17,7 @@ class AkiView(discord.ui.View):
 
         if interaction.user != game.player:
             return await interaction.response.send_message(content="This isn't your game", ephemeral=True)
-        
+
         if answer == "Cancel":
             await interaction.message.delete()
             return await interaction.message.reply("Session ended", mention_author=True)
@@ -62,15 +62,14 @@ class AkiView(discord.ui.View):
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=1)
     async def del_button(self, interaction: discord.Interaction, _) -> None:
         return await self.process_input(interaction, "Cancel")
-        
+
 
 class BetaAkinator(Akinator):
-
     async def start(
-        self, 
+        self,
         ctx: commands.Context,
         *,
-        win_at: int = 80, 
+        win_at: int = 80,
         timeout: int = None,
         child_mode: bool = True,
     ) -> None:

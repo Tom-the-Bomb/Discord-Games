@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-from typing import Union, Optional
 import random
+from typing import Optional, Union
 
 import discord
 from discord.ext import commands
 from english_words import english_words_lower_alpha_set
 
 BLANK = '  \u200b'
-STAGES: list[str] = ['''
+STAGES: list[str] = [
+    '''
             _________\t
             |/      |\t
             |      😵\t
@@ -17,7 +18,7 @@ STAGES: list[str] = ['''
             |      / \\\t
          ___|___
             ''',
-            '''
+    '''
             _________\t
             |/      |\t
             |      😦\t
@@ -26,7 +27,7 @@ STAGES: list[str] = ['''
             |      /\t
          ___|___
             ''',
-            '''
+    '''
             _________\t
             |/      |\t
             |      😦\t
@@ -35,7 +36,7 @@ STAGES: list[str] = ['''
             |
          ___|___
             ''',
-            '''
+    '''
             --------\t
             |/     |\t
             |     😦\t
@@ -44,7 +45,7 @@ STAGES: list[str] = ['''
             |
          ___|___
             ''',
-            '''
+    '''
             _________\t
             |/      |\t
             |      😦\t
@@ -53,7 +54,7 @@ STAGES: list[str] = ['''
             |
          ___|___
             ''',
-            '''
+    '''
             _________\t
             |/      |\t
             |      😦\t
@@ -62,7 +63,7 @@ STAGES: list[str] = ['''
             |
          ___|___
             ''',
-            '''
+    '''
             _________\t
             |/      |\t
             |      
@@ -70,8 +71,8 @@ STAGES: list[str] = ['''
             |
             |
          ___|___
-            ''', 
-            '''
+            ''',
+    '''
             _________\t
             |/     
             |      
@@ -79,8 +80,8 @@ STAGES: list[str] = ['''
             |
             |
          ___|___
-            ''', 
-            '''
+            ''',
+    '''
             ___      \t
             |/      
             |      
@@ -88,17 +89,44 @@ STAGES: list[str] = ['''
             |
             |
          ___|___
-            '''
-        ]
+            ''',
+]
+
 
 class Hangman:
-
     def __init__(self) -> None:
-        self._alpha: list[str] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+        self._alpha: list[str] = [
+            'a',
+            'b',
+            'c',
+            'd',
+            'e',
+            'f',
+            'g',
+            'h',
+            'i',
+            'j',
+            'k',
+            'l',
+            'm',
+            'n',
+            'o',
+            'p',
+            'q',
+            'r',
+            's',
+            't',
+            'u',
+            'v',
+            'w',
+            'x',
+            'y',
+            'z',
+        ]
         self._all_words = tuple(english_words_lower_alpha_set)
         self.word = self.get_word()
         self.letters: list[str] = list(self.word)
-        
+
         self.correct: list[str] = [r"\_" for _ in self.word]
         self.wrong_letters: list[str] = []
 
@@ -163,14 +191,21 @@ class Hangman:
         self._embed.description = f"```\n{STAGES[self._counter]}\n```"
         self._embed.color = self.embed_color
         self._embed.add_field(name='Word', value=f"{' '.join(self.correct)}")
-        
+
         wrong_letters = ', '.join(self.wrong_letters) or BLANK
         self._embed.add_field(name='Wrong letters', value=wrong_letters)
         self._embed.add_field(name='Lives left', value=self.lives(), inline=False)
         return self._embed
 
-    async def start(self, ctx: commands.Context, *, delete_after_guess: bool = False, embed_color: Union[discord.Color, int] = 0x2F3136, **kwargs):
-        
+    async def start(
+        self,
+        ctx: commands.Context,
+        *,
+        delete_after_guess: bool = False,
+        embed_color: Union[discord.Color, int] = 0x2F3136,
+        **kwargs,
+    ):
+
         self.player = ctx.author
         self.embed_color = embed_color
         embed = self.initialize_embed()
@@ -181,7 +216,9 @@ class Hangman:
 
             def check(m: discord.Message) -> bool:
                 if m.channel == ctx.channel and m.author == self.player:
-                    return (len(m.content) == 1 and m.content.lower() in self._alpha) or (m.content.lower() == self.word)
+                    return (len(m.content) == 1 and m.content.lower() in self._alpha) or (
+                        m.content.lower() == self.word
+                    )
 
             message = await ctx.bot.wait_for("message", check=check)
 

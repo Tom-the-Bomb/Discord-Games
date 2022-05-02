@@ -1,18 +1,19 @@
 from __future__ import annotations
 
-from typing import ClassVar, Union, Optional
+from typing import ClassVar, Optional, Union
 
 import discord
 from discord.ext import commands
 
 from ..tictactoe import Tictactoe
 
+
 class TTTButton(discord.ui.Button):
     view: TTTView
 
     def __init__(self, label: str, style: discord.ButtonStyle, row: int):
         super().__init__(
-            label=label, 
+            label=label,
             style=style,
             row=row,
         )
@@ -42,7 +43,7 @@ class TTTButton(discord.ui.Button):
             for button in self.view.children:
                 if isinstance(button, discord.ui.Button):
                     button.disabled = True
-            
+
             for y, x in game.winning_indexes:
                 row = [button for button in self.view.children if button.row == y]
                 button = row[x]
@@ -53,14 +54,14 @@ class TTTButton(discord.ui.Button):
 
 
 class TTTView(discord.ui.View):
-
-    def __init__(self, 
-        game: BetaTictactoe, 
+    def __init__(
+        self,
+        game: BetaTictactoe,
         *,
         embed_color: Union[discord.Color, int],
         button_style: discord.ButtonStyle,
         win_button_style: discord.ButtonStyle,
-        timeout: Optional[float] = None
+        timeout: Optional[float] = None,
     ) -> None:
 
         super().__init__(timeout=timeout)
@@ -72,11 +73,7 @@ class TTTView(discord.ui.View):
 
         for x, row in enumerate(game.board):
             for square in row:
-                button = TTTButton(
-                    label=square, 
-                    style=self.button_style,
-                    row=x
-                )
+                button = TTTButton(label=square, style=self.button_style, row=x)
                 self.add_item(button)
 
 
@@ -86,7 +83,7 @@ class BetaTictactoe(Tictactoe):
     CROSS: ClassVar[str] = 'X'
 
     async def start(
-        self, 
+        self,
         ctx: commands.Context,
         button_style: discord.ButtonStyle = discord.ButtonStyle.green,
         *,

@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 from typing import Optional, Union
+
 import discord
 from discord.ext import commands
 
 from ..chess_game import Chess
 from .wordle_buttons import WordInputButton
 
-class ChessInput(discord.ui.Modal, title='Make your move'):
 
+class ChessInput(discord.ui.Modal, title='Make your move'):
     def __init__(self, view: ChessView) -> None:
         super().__init__()
         self.view = view
@@ -31,7 +32,7 @@ class ChessInput(discord.ui.Modal, title='Make your move'):
 
         self.add_item(self.move_from)
         self.add_item(self.move_to)
-        
+
     async def on_submit(self, interaction: discord.Interaction) -> discord.Message:
         game = self.view.game
         from_coord = self.move_from.value.strip().lower()
@@ -43,9 +44,11 @@ class ChessInput(discord.ui.Modal, title='Make your move'):
             is_valid_uci = game.board.parse_uci(uci)
         except ValueError:
             is_valid_uci = False
-        
+
         if not is_valid_uci:
-            return await interaction.response.send_message(f'Invalid coordinates for move: `{from_coord} -> {to_coord}`', ephemeral=True)
+            return await interaction.response.send_message(
+                f'Invalid coordinates for move: `{from_coord} -> {to_coord}`', ephemeral=True
+            )
         else:
             await game.place_move(uci)
 
@@ -56,6 +59,7 @@ class ChessInput(discord.ui.Modal, title='Make your move'):
                 embed = await game.make_embed()
 
             return await interaction.response.edit_message(embed=embed, view=self.view)
+
 
 class ChessButton(WordInputButton):
     view: ChessView
@@ -75,13 +79,13 @@ class ChessButton(WordInputButton):
                 else:
                     return await interaction.response.send_modal(ChessInput(self.view))
 
-class ChessView(discord.ui.View):
 
+class ChessView(discord.ui.View):
     def disable_all(self) -> None:
         for button in self.children:
             if isinstance(button, discord.ui.Button):
                 button.disabled = True
-    
+
     def __init__(self, game: BetaChess, *, timeout: float) -> None:
         super().__init__(timeout=timeout)
 
@@ -93,14 +97,14 @@ class ChessView(discord.ui.View):
         self.add_item(inpbutton)
         self.add_item(ChessButton(cancel_button=True))
 
-class BetaChess(Chess):
 
+class BetaChess(Chess):
     async def start(
-        self, 
-        ctx: commands.Context, 
-        *, 
-        embed_color: Union[discord.Color, int] = 0x2F3136, 
-        timeout: Optional[float] = None, 
+        self,
+        ctx: commands.Context,
+        *,
+        embed_color: Union[discord.Color, int] = 0x2F3136,
+        timeout: Optional[float] = None,
     ) -> None:
 
         self.embed_color = embed_color

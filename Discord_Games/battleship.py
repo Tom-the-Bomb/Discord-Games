@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import pathlib
-from typing import Optional, Union
-from io import BytesIO
 import asyncio
+import pathlib
 import random
 import re
+from io import BytesIO
+from typing import Optional, Union
 
 import discord
 from discord.ext import commands
@@ -16,21 +16,18 @@ from .utils import executor
 Coords = tuple[int, int]
 
 SHIPS: dict[str, tuple[int, tuple[int, int, int]]] = {
-    "carrier": (5, 
-        (52, 152, 219)),
-    "battleship": (4, 
-        (246, 246, 112)),
-    "submarine": (3, 
-        (95, 245, 80)),
-    "cruiser": (2, 
-        (190, 190, 190)),
+    "carrier": (5, (52, 152, 219)),
+    "battleship": (4, (246, 246, 112)),
+    "submarine": (3, (95, 245, 80)),
+    "cruiser": (2, (190, 190, 190)),
 }
 
-class Ship:
 
-    def __init__(self, 
-        name: str, 
-        size: int, 
+class Ship:
+    def __init__(
+        self,
+        name: str,
+        size: int,
         start: Coords,
         color: tuple[int, int, int],
         vertical: bool = False,
@@ -42,26 +39,25 @@ class Ship:
         self.start: Coords = start
         self.vertical: bool = vertical
         self.color: tuple[int, int, int] = color
-        
+
         self.end: Coords = (
-            (self.start[0], self.start[1] + self.size - 1) if self.vertical else
-            (self.start[0] + self.size - 1, self.start[1])
+            (self.start[0], self.start[1] + self.size - 1)
+            if self.vertical
+            else (self.start[0] + self.size - 1, self.start[1])
         )
 
         self.span: list[Coords] = (
-            [
-                (self.start[0], i) for i in range(self.start[1], self.end[1] + 1)
-            ] if self.vertical else [
-                (i, self.start[1]) for i in range(self.start[0], self.end[0] + 1)
-            ]
+            [(self.start[0], i) for i in range(self.start[1], self.end[1] + 1)]
+            if self.vertical
+            else [(i, self.start[1]) for i in range(self.start[0], self.end[0] + 1)]
         )
 
         self.hits: list[bool] = [False] * self.size
 
-class Board:
 
+class Board:
     def __init__(self, player: discord.Member, random: bool = True) -> None:
-        
+
         self.player: discord.Member = player
         self.ships: list[Ship] = []
 
@@ -89,15 +85,14 @@ class Board:
         return True
 
     def _place_ships(self) -> None:
-
         def place_ship(ship: str, size: int, color: tuple[int, int, int]) -> None:
             start = random.randint(1, 10), random.randint(1, 10)
             vertical = bool(random.randint(0, 1))
 
             new_ship = Ship(
-                name=ship, 
-                size=size, 
-                start=start, 
+                name=ship,
+                size=size,
+                start=start,
                 vertical=vertical,
                 color=color,
             )
@@ -122,7 +117,7 @@ class Board:
         vertical = ship.vertical
         left_end = ship.span.index(coord) == 0
         right_end = ship.span.index(coord) == ship.size - 1
-        
+
         if vertical and left_end:
             diffs = (18, 18, 25, 18)
         elif vertical and right_end:
@@ -135,7 +130,7 @@ class Board:
             diffs = (25, 18, 25, 18)
         else:
             diffs = (18, 25, 18, 25)
-            
+
         d1, d2, d3, d4 = diffs
         x1, y1 = x - d1, y - d2
         x2, y2 = x + d3, y + d4
@@ -144,7 +139,7 @@ class Board:
     def get_ship(self, coord: Coords) -> Optional[Ship]:
         if s := [ship for ship in self.ships if coord in ship.span]:
             return s[0]
-    
+
     @executor()
     def to_image(self, hide: bool = False) -> BytesIO:
         RED = (255, 0, 0)
@@ -152,13 +147,9 @@ class Board:
 
         with Image.open(fr'{pathlib.Path(__file__).parent}\assets\battleship.png') as img:
             cur = ImageDraw.Draw(img)
-            
-            for i, y in zip(
-                range(1, 11), range(75, 530, 50)
-            ):
-                for j, x in zip(
-                    range(1, 11), range(75, 530, 50)
-                ):
+
+            for i, y in zip(range(1, 11), range(75, 530, 50)):
+                for j, x in zip(range(1, 11), range(75, 530, 50)):
                     coord = (i, j)
                     if coord in self.op_misses:
                         self.draw_dot(cur, x, y, fill=GRAY)
@@ -183,9 +174,9 @@ class Board:
 
 
 class BattleShip:
-
-    def __init__(self, 
-        player1: discord.Member, 
+    def __init__(
+        self,
+        player1: discord.Member,
         player2: discord.Member,
         *,
         random: bool = True,
@@ -208,20 +199,14 @@ class BattleShip:
 
     def get_board(self, player: discord.Member, other: bool = False) -> Board:
         if other:
-            return (
-                self.player2_board if player == self.player1 
-                else self.player1_board
-            )
+            return self.player2_board if player == self.player1 else self.player1_board
         else:
-            return (
-                self.player1_board if player == self.player1 
-                else self.player2_board
-            )
+            return self.player1_board if player == self.player1 else self.player2_board
 
     def place_move(self, player: discord.Member, coords: Coords) -> tuple[bool, bool]:
         board = self.get_board(player)
         op_board = self.get_board(player, other=True)
-        
+
         for i, ship in enumerate(op_board.ships):
             for j, coord in enumerate(ship.span):
                 if coords == coord:
@@ -261,17 +246,20 @@ class BattleShip:
             return None
 
     async def get_ship_inputs(self, ctx: commands.Context, user: discord.Member) -> bool:
-        
+
         board = self.get_board(user)
 
         async def place_ship(ship: str, size: int, color: tuple[int, int, int]) -> bool:
             file, _ = await self.get_file(user)
-            await user.send(f'Where do you want to place your `{ship}`?\nSend the start coordinate... e.g. (`a1`)', file=file)
+            await user.send(
+                f'Where do you want to place your `{ship}`?\nSend the start coordinate... e.g. (`a1`)', file=file
+            )
 
             def check(msg: discord.Message) -> bool:
                 if not msg.guild and msg.author == user:
                     content = msg.content.replace(' ', '').lower()
                     return bool(self.inputpat.match(content))
+
             try:
                 message: discord.Message = await ctx.bot.wait_for('message', check=check, timeout=self.timeout)
             except asyncio.TimeoutError:
@@ -286,6 +274,7 @@ class BattleShip:
                 if not msg.guild and msg.author == user:
                     content = msg.content.replace(' ', '').lower()
                     return content in ('yes', 'no')
+
             try:
                 message: discord.Message = await ctx.bot.wait_for('message', check=check, timeout=self.timeout)
             except asyncio.TimeoutError:
@@ -295,9 +284,9 @@ class BattleShip:
             vertical = message.content.replace(' ', '').lower() != 'yes'
 
             new_ship = Ship(
-                name=ship, 
-                size=size, 
-                start=start, 
+                name=ship,
+                size=size,
+                start=start,
                 vertical=vertical,
                 color=color,
             )
@@ -323,10 +312,10 @@ class BattleShip:
                 self.get_ship_inputs(ctx, self.player1),
                 self.get_ship_inputs(ctx, self.player2),
             )
-    
+
         self_file, op_file = await self.get_file(self.player1)
         self_file2, op_file2 = await self.get_file(self.player2)
-        
+
         self.message1 = await self.player1.send('**Game starting!**', files=[op_file, self_file])
         self.message2 = await self.player2.send('**Game starting!**', files=[op_file2, self_file2])
         self.timeout = timeout
@@ -337,6 +326,7 @@ class BattleShip:
                 if not msg.guild and msg.author == self.turn:
                     content = msg.content.replace(' ', '').lower()
                     return bool(self.inputpat.match(content))
+
             try:
                 message = await ctx.bot.wait_for('message', check=check, timeout=self.timeout)
             except asyncio.TimeoutError:
@@ -359,7 +349,7 @@ class BattleShip:
 
             self_file, op_file = await self.get_file(self.player1)
             self_file2, op_file2 = await self.get_file(self.player2)
-            
+
             await self.player1.send(files=[op_file, self_file])
             await self.player2.send(files=[op_file2, self_file2])
             self.turn = next_turn

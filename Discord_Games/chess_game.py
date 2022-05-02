@@ -1,11 +1,12 @@
 from __future__ import annotations
 
-from typing import Union, Optional, ClassVar, Literal
 import asyncio
+from typing import ClassVar, Literal, Optional, Union
 
+import chess
 import discord
 from discord.ext import commands
-import chess
+
 
 class Chess:
     BASE_URL: ClassVar[str] = 'http://www.fen-to-image.com/image/64/double/coords/'
@@ -27,21 +28,20 @@ class Chess:
 
     async def make_embed(self) -> discord.Embed:
         embed = discord.Embed(title="Chess Game", color=self.embed_color)
-        embed.description = f"**Turn:** `{self.turn}`\n**Color:** `{self.get_color()}`\n**Check:** `{self.board.is_check()}`"
+        embed.description = (
+            f"**Turn:** `{self.turn}`\n**Color:** `{self.get_color()}`\n**Check:** `{self.board.is_check()}`"
+        )
         embed.set_image(url=f"{self.BASE_URL}{self.board.board_fen()}")
 
         embed.add_field(
-            name='Last Move', 
-            value=f"```yml\n{self.last_move.get('color', '-')}: {self.last_move.get('move', '-')}\n```"
+            name='Last Move',
+            value=f"```yml\n{self.last_move.get('color', '-')}: {self.last_move.get('move', '-')}\n```",
         )
         return embed
 
     async def place_move(self, uci: str) -> chess.Board:
-        self.last_move = {
-            'color': self.get_color(),
-            'move': f'{uci[:2]} -> {uci[2:]}'
-        }
-        
+        self.last_move = {'color': self.get_color(), 'move': f'{uci[:2]} -> {uci[2:]}'}
+
         self.board.push_uci(uci)
         self.turn = self.white if self.turn == self.black else self.black
         return self.board
@@ -67,12 +67,12 @@ class Chess:
         return embed
 
     async def start(
-        self, 
-        ctx: commands.Context, 
-        *, 
-        timeout: Optional[float] = None, 
-        embed_color: Union[discord.Color, int] = 0x2F3136, 
-        add_reaction_after_move: bool = False, 
+        self,
+        ctx: commands.Context,
+        *,
+        timeout: Optional[float] = None,
+        embed_color: Union[discord.Color, int] = 0x2F3136,
+        add_reaction_after_move: bool = False,
         **kwargs,
     ) -> Optional[discord.Message]:
 
@@ -105,7 +105,7 @@ class Chess:
 
             if self.board.is_game_over():
                 break
-            
+
             await self.message.edit(embed=embed)
 
         embed = await self.fetch_results()
