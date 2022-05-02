@@ -273,7 +273,7 @@ class BetaBattleShip(BattleShip):
                 else self.player2_board
             )
 
-    async def get_ship_inputs(self, user: Player) -> Coroutine:
+    async def get_ship_inputs(self, user: Player) -> Coroutine[Any, Any, bool]:
         file, _ = await self.get_file(user)
 
         embed = discord.Embed(
