@@ -23,11 +23,12 @@ SHIPS: dict[str, tuple[int, tuple[int, int, int]]] = {
 }
 
 
+<<<<<<< HEAD
 class Ship:
     def __init__(
-        self,
-        name: str,
-        size: int,
+        self, 
+        name: str, 
+        size: int, 
         start: Coords,
         color: tuple[int, int, int],
         vertical: bool = False,
