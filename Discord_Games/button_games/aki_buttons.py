@@ -1,15 +1,49 @@
 from __future__ import annotations
 
+from typing import Optional, ClassVar
+
 import discord
 from discord.ext import commands
 
 from ..aki import Akinator
+from ..utils import DiscordColor, DEFAULT_COLOR
+
+class AkiButton(discord.ui.Button):
+    view: AkiView
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        return await self.view.process_input(interaction, self.label.lower())
 
 class AkiView(discord.ui.View):
+    OPTIONS: ClassVar[dict[str, discord.ButtonStyle]] = {
+        'yes': discord.ButtonStyle.green,
+        'no': discord.ButtonStyle.red,
+        'idk': discord.ButtonStyle.blurple,
+        'probably': discord.ButtonStyle.gray,
+        'probably not': discord.ButtonStyle.gray,
+    }
 
     def __init__(self, game: BetaAkinator, *, timeout: float) -> None:
-        self.game = game
         super().__init__(timeout=timeout)
+
+        self.embed_color: Optional[DiscordColor] = None
+        self.game = game
+
+        for label, style in self.OPTIONS.items():
+            self.add_item(AkiButton(label=label, style=style))
+
+        if self.game.delete_button:
+            delete = AkiButton(
+                label='Cancel', 
+                style=discord.ButtonStyle.red, 
+                row=1
+            )
+            self.add_item(delete)
+
+    def disable_all(self) -> None:
+        for button in self.children:
+            if isinstance(button, discord.ui.Button):
+                button.disabled = True
 
     async def process_input(self, interaction: discord.Interaction, answer: str) -> None:
 
@@ -25,55 +59,30 @@ class AkiView(discord.ui.View):
         else:
             game.questions += 1
             await game.aki.answer(answer)
-
-            embed = await game.build_embed()
-            await interaction.response.edit_message(embed=embed)
-
+            
             if game.aki.progression >= game.win_at:
-
-                for obb in self.children:
-                    if isinstance(obb, discord.ui.Button):
-                        obb.disabled = True
-
+                self.disable_all()
                 embed = await game.win()
-                await interaction.response.edit_message(embed=embed, view=self)
-                return self.stop()
+            else:
+                embed = game.build_embed(instructions=False)
 
-    @discord.ui.button(label="yes", style=discord.ButtonStyle.green)
-    async def yes_button(self, interaction: discord.Interaction, _) -> None:
-        return await self.process_input(interaction, "y")
-
-    @discord.ui.button(label="no", style=discord.ButtonStyle.red)
-    async def no_button(self, interaction: discord.Interaction, _) -> None:
-        return await self.process_input(interaction, "n")
-
-    @discord.ui.button(label="idk", style=discord.ButtonStyle.blurple)
-    async def idk_button(self, interaction: discord.Interaction, _) -> None:
-        return await self.process_input(interaction, "i")
-
-    @discord.ui.button(label="probably", style=discord.ButtonStyle.grey)
-    async def py_button(self, interaction: discord.Interaction, _) -> None:
-        return await self.process_input(interaction, "p")
-
-    @discord.ui.button(label="probably not", style=discord.ButtonStyle.grey)
-    async def pn_button(self, interaction: discord.Interaction, _) -> None:
-        return await self.process_input(interaction, "pn")
-
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=1)
-    async def del_button(self, interaction: discord.Interaction, _) -> None:
-        return await self.process_input(interaction, "Cancel")
+            return await interaction.response.edit_message(embed=embed, view=self)
         
-
 class BetaAkinator(Akinator):
 
     async def start(
         self, 
         ctx: commands.Context,
         *,
+        delete_button: bool = False,
+        embed_color: DiscordColor = DEFAULT_COLOR,
         win_at: int = 80, 
-        timeout: int = None,
+        timeout: Optional[float] = None,
         child_mode: bool = True,
-    ) -> None:
+    ) -> discord.Message:
+
+        self.delete_button = delete_button
+        self.embed_color = embed_color
 
         self.player = ctx.author
         self.win_at = win_at
@@ -81,5 +90,7 @@ class BetaAkinator(Akinator):
 
         await self.aki.start_game(child_mode=child_mode)
 
-        embed = await self.build_embed()
+        embed = self.build_embed(instructions=False)
         self.message = await ctx.send(embed=embed, view=self.view)
+
+        return self.message

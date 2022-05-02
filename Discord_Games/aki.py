@@ -1,48 +1,54 @@
 from __future__ import annotations
 
-from typing import Optional, Union
+from typing import Optional, ClassVar, Any
+from enum import Enum
 import asyncio
 
 import discord
 from discord.ext import commands
-from akinator.async_aki import Akinator as Akinator_
+from akinator.async_aki import Akinator as AkinatorGame
 
+from .utils import DiscordColor, DEFAULT_COLOR
 
-class Options:
-    YES = "✅"
-    NO = "❌"
-    IDK = "🤷"
-    PY = "🤔"
-    PN  = "😔"
-    STOP = "⏹️"
+class Options(Enum):
+    yes = "✅"
+    no = "❌"
+    idk = "🤷"
+    p = "🤔"
+    pn  = "😕"
+    stop = "⏹️"
 
 class Akinator:
+    BAR: ClassVar[str] = "██"
+    INSTRUCTIONS: ClassVar[str] = (
+        '✅ 🠒 `yes`\n'
+        '❌ 🠒 `no`\n'
+        '🤷 🠒 `I dont know`\n'
+        '🤔 🠒 `probably`\n'
+        '😕 🠒 `probably not`\n'
+        '⏹️ 🠒 `cancel`\n'
+    )
 
     def __init__(self) -> None:
+        self.aki: AkinatorGame = AkinatorGame()
+
         self.player: Optional[discord.Member] = None
         self.win_at: Optional[int] = None
-        self.aki: Akinator_ = Akinator_()
-        self.bar_emojis: tuple[str, str] = ("  ", "██")
-        self.guess = None
-        self.bar: str = ""
+        self.guess: Optional[dict[str, Any]] = None
         self.message: Optional[discord.Message] = None
+
+        self.embed_color: Optional[DiscordColor] = None
+        self.delete_button: bool = False
+        
+        self.bar: str = ''
         self.questions: int = 0
 
-        self.mapping: dict[str, str] = {
-            Options.YES: "y", 
-            Options.NO : "n", 
-            Options.IDK: "i", 
-            Options.PY : "p", 
-            Options.PN : "pn"
-        }
-
     def build_bar(self) -> str:
-        prog = round(self.aki.progression/8)
-        emp, full = self.bar_emojis
-        self.bar = f"[`{full*prog}{emp*(10-prog)}`]"
+        prog = round(self.aki.progression / 8)
+        self.bar = f"[`{self.BAR * prog}{'  ' * (10 - prog)}`]"
         return self.bar
 
-    async def build_embed(self) -> discord.Embed:
+    def build_embed(self, *, instructions: bool = True) -> discord.Embed:
 
         embed = discord.Embed(
             title = "Guess your character!", 
@@ -52,9 +58,13 @@ class Akinator:
                 f"Progression-Level: {self.aki.progression:.2f}\n```\n"
                 f"{self.build_bar()}"
             ), 
-            color = discord.Color.random()
+            color = self.embed_color,
         )
-        embed.add_field(name= "- Question -", value= self.aki.question)
+        embed.add_field(name="- Question -", value=self.aki.question)
+        
+        if instructions:
+            embed.add_field(name="\u200b", value=self.INSTRUCTIONS, inline=False)
+
         embed.set_footer(text= "Figuring out the next question | This may take a second")
         return embed
 
@@ -66,8 +76,10 @@ class Akinator:
         embed = discord.Embed(color=self.embed_color)
         embed.title = "Character Guesser Engine Results"
         embed.description = f"Total Questions: `{self.questions}`"
-        embed.add_field(name= "Character Guessed", value=f"\n**Name:** {self.guess['name']}\n{self.guess['description']}")
-        embed.set_image(url=  self.guess['absolute_picture_path'])
+
+        embed.add_field(name="Character Guessed", value=f"\n**Name:** {self.guess['name']}\n{self.guess['description']}")
+
+        embed.set_image(url=self.guess['absolute_picture_path'])
         embed.set_footer(text="Was I correct?")
 
         return embed
@@ -76,34 +88,39 @@ class Akinator:
         self, 
         ctx: commands.Context,
         *,
-        embed_color: Union[discord.Color, int] = 0x2F3136,
+        embed_color: DiscordColor = DEFAULT_COLOR,
         remove_reaction_after: bool = False, 
         win_at: int = 80, 
-        timeout: int = None, 
+        timeout: Optional[float] = None, 
         delete_button: bool = False, 
         child_mode: bool = True, 
     ) -> Optional[discord.Message]:
         
+        self.delete_button = delete_button
         self.embed_color = embed_color
         self.player = ctx.author
         self.win_at = win_at
 
         await self.aki.start_game(child_mode=child_mode)
 
-        embed = await self.build_embed()
+        embed = self.build_embed()
         self.message = await ctx.send(embed=embed)
 
-        for button in self.mapping:
-            await self.message.add_reaction(button)
+        for button in Options:
+            await self.message.add_reaction(button.value)
 
-        if delete_button:
-            await self.message.add_reaction(Options.STOP)
+        if self.delete_button:
+            await self.message.add_reaction(Options.stop.value)
 
         while self.aki.progression <= self.win_at:
 
             def check(reaction: discord.Reaction, user: discord.Member) -> bool:
+                emoji = str(reaction.emoji)
                 if reaction.message == self.message and user == ctx.author:
-                    return str(reaction.emoji) in self.mapping or str(reaction.emoji) == Options.STOP
+                    try:
+                        return bool(Options(emoji))
+                    except ValueError:
+                        return False
 
             try:
                 reaction, user = await ctx.bot.wait_for('reaction_add', timeout=timeout, check=check)
@@ -111,24 +128,23 @@ class Akinator:
                 return
 
             if remove_reaction_after:
-                await self.message.remove_reaction(reaction, user)
+                try:
+                    await self.message.remove_reaction(reaction, user)
+                except discord.DiscordException:
+                    pass
 
             emoji = str(reaction.emoji)
 
-            if emoji == Options.STOP:
-                await ctx.send("Session ended")
+            if emoji == Options.stop.value:
+                await ctx.send("**Session ended**")
                 return await self.message.delete()
+            else:
+                self.questions += 1
 
-            self.questions += 1
-
-            await self.aki.answer(self.mapping[emoji])
-            try:
-                await self.message.remove_reaction(emoji, ctx.author)
-            except discord.DiscordException:
-                pass
-            
-            embed = await self.build_embed()
-            await self.message.edit(embed=embed)
+                await self.aki.answer(Options(emoji).name)
+                
+                embed = self.build_embed()
+                await self.message.edit(embed=embed)
             
         embed = await self.win()
         return await self.message.edit(embed=embed)

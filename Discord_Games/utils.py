@@ -13,7 +13,7 @@ __all__ = (
 
 DiscordColor = Union[discord.Color, int]
 
-DEFAULT_COLOR: discord.Color = discord.Color(DEFAULT_COLOR)
+DEFAULT_COLOR: discord.Color = discord.Color(0x2F3136)
 
 def executor():
 
