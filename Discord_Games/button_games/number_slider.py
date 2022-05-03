@@ -24,6 +24,7 @@ class SlideButton(discord.ui.Button):
             self.disabled = True
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        content = None
         game = self.view.game
 
         if interaction.user != game.player:
@@ -43,8 +44,9 @@ class SlideButton(discord.ui.Button):
 
                 if game.numbers == game.completed:
                     self.view.disable_all()
+                    content = '**Congrats! You won!**'
                         
-                return await interaction.response.edit_message(view=self.view)
+                return await interaction.response.edit_message(content=content, view=self.view)
             
 class SlideView(discord.ui.View):
 
