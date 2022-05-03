@@ -1,5 +1,5 @@
-discord.py
+discord.py>=1.7.3
 english-words
 chess
-akinator.py
+akinator.py[async]
 Pillow
