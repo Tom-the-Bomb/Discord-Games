@@ -22,14 +22,14 @@ class Player:
         self.game = game
         self.player = player
 
-        self.embed = discord.Embed(title='Log')
+        self.embed = discord.Embed(title='Log', description='```\n\u200b\n```')
         
         self._logs: list[str] = []
         self.log: str = ''
 
         self.approves_cancel: bool = False
 
-    def update_guesslog(self, log: str) -> None:
+    def update_log(self, log: str) -> None:
         self._logs.append(log)
         log_str = '\n\n'.join(self._logs[-17:])
 
@@ -76,30 +76,33 @@ class BattleshipInput(discord.ui.Modal, title='Input a coordinate'):
             next_turn = game.player2 if game.turn == game.player1 else game.player1
 
             if hit and sunk:
-                game.turn.update_guesslog(f'+ ({raw}) was a hit!, you also sank one of their ships! :)')
-                next_turn.update_guesslog(f'- They went for ({raw}), and it was a hit!\nOne of your ships also got sunk! :(')
+                game.turn.update_log(f'+ ({raw}) was a hit!, you also sank one of their ships! :)')
+                next_turn.update_log(f'- They went for ({raw}), and it was a hit!\nOne of your ships also got sunk! :(')
             elif hit:
-                game.turn.update_guesslog(f'+ ({raw}) was a hit :)')
-                next_turn.update_guesslog(f'- They went for ({raw}), and it was a hit! :(')
+                game.turn.update_log(f'+ ({raw}) was a hit :)')
+                next_turn.update_log(f'- They went for ({raw}), and it was a hit! :(')
             else:
-                game.turn.update_guesslog(f'- ({raw}) was a miss :(')
-                next_turn.update_guesslog(f'+ They went for ({raw}), and it was a miss! :)')
+                game.turn.update_log(f'- ({raw}) was a miss :(')
+                next_turn.update_log(f'+ They went for ({raw}), and it was a miss! :)')
 
             e1, f1, e2, f2 = await game.get_file(game.player1)
             e3, f3, e4, f4 = await game.get_file(game.player2)
+
+            game.turn = next_turn
+
+            game.player1.embed.set_field_at(0, name='\u200b', value=f'```yml\nturn: {game.turn.player}\n```')
+            game.player2.embed.set_field_at(0, name='\u200b', value=f'```yml\nturn: {game.turn.player}\n```')
             
             await game.message1.edit(
                 content='**Battleship**', 
                 embeds=[e2, e1, game.player1.embed], 
-                attachments=[f2, f1]
+                attachments=[f2, f1],
             )
             await game.message2.edit(
                 content='**Battleship**', 
                 embeds=[e4, e3, game.player2.embed], 
-                attachments=[f4, f3]
+                attachments=[f4, f3],
             )
-            
-            game.turn = next_turn
 
             if winner := game.who_won():
                 await winner.send('Congrats, you won! :)')
@@ -325,17 +328,20 @@ class BetaBattleShip(BattleShip):
 
         self.view1 = BattleshipView(self, user=self.player1, timeout=timeout)
         self.view2 = BattleshipView(self, user=self.player1, timeout=timeout)
+
+        self.player1.embed.add_field(name='\u200b', value=f'```yml\nturn: {self.turn.player}\n```')
+        self.player2.embed.add_field(name='\u200b', value=f'```yml\nturn: {self.turn.player}\n```')
         
         self.message1 = await self.player1.send(
             content='**Game starting!**', 
             view=self.view1, 
-            embeds=[e2, e1],
+            embeds=[e2, e1, self.player1.embed],
             files=[f2, f1],
         )
         self.message2 = await self.player2.send(
             content='**Game starting!**', 
             view=self.view2, 
-            embeds=[e4, e3],
+            embeds=[e4, e3, self.player2.embed],
             files=[f4, f3],
         )
 
