@@ -6,7 +6,7 @@ import random
 import discord
 from discord.ext import commands
 
-from ..utils import chunk
+from ..utils import *
 
 Board = list[list[Optional[int]]] 
 
@@ -117,20 +117,23 @@ class NumberSlider:
         ctx: commands.Context, 
         *,
         button_style: discord.ButtonStyle = discord.ButtonStyle.green,
+        embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None,
     ) -> discord.Message:
         
         self.player = ctx.author
         self.button_style = button_style
 
-        numbers = self.all_numbers + [None]
+        numbers = self.all_numbers[:]
         random.shuffle(numbers)
         random.shuffle(numbers)
+
+        numbers.append(None)
         self.numbers = chunk(numbers, count=self.count)
 
         self.completed = chunk(self.all_numbers + [None], count=self.count)
         
         view = SlideView(self, timeout=timeout)
-        embed = discord.Embed(description='Slide the tiles back in ascending order!')
+        embed = discord.Embed(description='Slide the tiles back in ascending order!', color=embed_color)
 
         return await ctx.send(embed=embed, view=view)

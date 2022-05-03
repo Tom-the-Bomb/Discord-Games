@@ -14,6 +14,7 @@ from .reaction_test_buttons import BetaReactionGame
 from .country_guess_buttons import BetaCountryGuesser
 from .chess_buttons import BetaChess
 from .battleship_buttons import BetaBattleShip
+from .number_slider import NumberSlider
 
 __all__ = (
     'BetaAkinator',
@@ -27,4 +28,5 @@ __all__ = (
     'BetaCountryGuesser',
     'BetaChess',
     'BetaBattleShip',
+    'NumberSlider',
 )
