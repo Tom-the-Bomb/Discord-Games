@@ -7,6 +7,8 @@ import asyncio
 import discord
 from discord.ext import commands
 
+from ..utils import chunk
+
 class MemoryButton(discord.ui.Button):
     view: MemoryView
 
@@ -76,7 +78,7 @@ class MemoryView(discord.ui.View):
         random.shuffle(items)
         items.insert(12, None)
 
-        self.board = [items[i:i + 5] for i in range(0, len(items), 5)]
+        self.board = chunk(items, count=5)
 
         for i, row in enumerate(self.board):
             for item in row:

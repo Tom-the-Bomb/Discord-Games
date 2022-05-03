@@ -9,11 +9,15 @@ __all__ = (
     'DiscordColor',
     'DEFAULT_COLOR',
     'executor',
+    'chunk',
 )
 
 DiscordColor = Union[discord.Color, int]
 
 DEFAULT_COLOR: discord.Color = discord.Color(0x2F3136)
+
+def chunk(iterable: list[int], *, count: int) -> list[list[int]]:
+    return [iterable[i:i + count] for i in range(0, len(iterable), count)]
 
 def executor():
 
