@@ -24,7 +24,6 @@ class SlideButton(discord.ui.Button):
             self.disabled = True
 
     async def callback(self, interaction: discord.Interaction) -> None:
-        content = None
         game = self.view.game
 
         if interaction.user != game.player:
@@ -44,9 +43,9 @@ class SlideButton(discord.ui.Button):
 
                 if game.numbers == game.completed:
                     self.view.disable_all()
-                    content = '**Congrats! You won!**'
+                    game.embed.description = '**Congrats! You won!**'
                         
-                return await interaction.response.edit_message(content=content, view=self.view)
+                return await interaction.response.edit_message(embed=game.embed, view=self.view)
             
 class SlideView(discord.ui.View):
 
@@ -136,6 +135,6 @@ class NumberSlider:
         self.completed = chunk(self.all_numbers + [None], count=self.count)
         
         view = SlideView(self, timeout=timeout)
-        embed = discord.Embed(description='Slide the tiles back in ascending order!', color=embed_color)
+        self.embed = discord.Embed(description='Slide the tiles back in ascending order!', color=embed_color)
 
-        return await ctx.send(embed=embed, view=view)
+        return await ctx.send(embed=self.embed, view=view)
