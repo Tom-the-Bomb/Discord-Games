@@ -52,6 +52,7 @@ class BattleshipInput(discord.ui.Modal, title='Input a coordinate'):
 
         self.coord = discord.ui.TextInput(
             label='Enter your target coordinate',
+            placeholder='ex: a8',
             style=discord.TextStyle.short,
             required=True,
             min_length=2,
@@ -161,6 +162,7 @@ class SetupInput(discord.ui.Modal):
 
         self.start_coord = discord.ui.TextInput(
             label=f'Enter the starting coordinate',
+            placeholder='ex: a8',
             style=discord.TextStyle.short,
             required=True,
             min_length=2,
@@ -169,6 +171,7 @@ class SetupInput(discord.ui.Modal):
 
         self.is_vertical = discord.ui.TextInput(
             label=f'Do you want it to be vertical? (y/n)',
+            placeholder='"y" or "n"',
             style=discord.TextStyle.short,
             required=True,
             min_length=1,
