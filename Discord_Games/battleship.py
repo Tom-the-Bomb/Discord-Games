@@ -275,8 +275,8 @@ class BattleShip:
         board = self.get_board(user)
 
         async def place_ship(ship: str, size: int, color: tuple[int, int, int]) -> bool:
-            file, _ = await self.get_file(user)
-            await user.send(f'Where do you want to place your `{ship}`?\nSend the start coordinate... e.g. (`a1`)', file=file)
+            embed, file, _, _ = await self.get_file(user)
+            await user.send(f'Where do you want to place your `{ship}`?\nSend the start coordinate... e.g. (`a1`)', embed=embed, file=file)
 
             def check(msg: discord.Message) -> bool:
                 if not msg.guild and msg.author == user:
@@ -342,11 +342,11 @@ class BattleShip:
                 self.get_ship_inputs(ctx, self.player2),
             )
     
-        self_file, op_file = await self.get_file(self.player1)
-        self_file2, op_file2 = await self.get_file(self.player2)
+        e1, f1, e2, f2 = await self.get_file(self.player1)
+        e3, f3, e4, f4 = await self.get_file(self.player2)
         
-        self.message1 = await self.player1.send('**Game starting!**', files=[op_file, self_file])
-        self.message2 = await self.player2.send('**Game starting!**', files=[op_file2, self_file2])
+        self.message1 = await self.player1.send('**Game starting!**', embeds=[e2, e1], files=[f2, f1])
+        self.message2 = await self.player2.send('**Game starting!**', embeds=[e4, e3], files=[f4, f3])
         self.timeout = timeout
 
         while True:
@@ -375,11 +375,11 @@ class BattleShip:
                 await self.turn.send(f'`{raw}` was a miss :(')
                 await next_turn.send(f'They went for `{raw}`, and it was a miss! :)')
 
-            self_file, op_file = await self.get_file(self.player1)
-            self_file2, op_file2 = await self.get_file(self.player2)
+            e1, f1, e2, f2  = await self.get_file(self.player1)
+            e3, f3, e4, f4 = await self.get_file(self.player2)
             
-            await self.player1.send(files=[op_file, self_file])
-            await self.player2.send(files=[op_file2, self_file2])
+            await self.player1.send(embeds=[e2, e1], files=[f2, f1])
+            await self.player2.send(embeds=[e4, e3], files=[f4, f3])
             self.turn = next_turn
 
             if winner := self.who_won():
