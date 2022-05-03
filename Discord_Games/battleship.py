@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pathlib
-from typing import Optional, Union
+from typing import Optional, Union, ClassVar
 from io import BytesIO
 import asyncio
 import random
@@ -11,7 +11,7 @@ import discord
 from discord.ext import commands
 from PIL import Image, ImageDraw
 
-from .utils import executor
+from .utils import *
 
 Coords = tuple[int, int]
 
@@ -184,6 +184,7 @@ class Board:
 
 
 class BattleShip:
+    inputpat: ClassVar[re.Pattern] = re.compile(r'([a-j])(10|[1-9])')
 
     def __init__(self, 
         player1: discord.Member, 
@@ -192,7 +193,8 @@ class BattleShip:
         random: bool = True,
     ) -> None:
 
-        self.inputpat: re.Pattern = re.compile(r'([a-j])(10|[1-9])')
+        self.embed_color: Optional[DiscordColor] = None
+
         self.player1: discord.Member = player1
         self.player2: discord.Member = player2
 
@@ -235,7 +237,7 @@ class BattleShip:
         op_board.op_misses.append(coords)
         return False, False
 
-    async def get_file(self, player: discord.Member, *, hide: bool = True) -> discord.File:
+    async def get_file(self, player: discord.Member, *, hide: bool = True) -> tuple[discord.Embed, discord.File, discord.Embed, discord.File]:
 
         board = self.get_board(player)
         image1 = await board.to_image()
@@ -245,7 +247,14 @@ class BattleShip:
 
         file1 = discord.File(image1, 'board1.png')
         file2 = discord.File(image2, 'board2.png')
-        return file1, file2
+
+        embed1 = discord.Embed(color=self.embed_color)
+        embed2 = discord.Embed(color=self.embed_color)
+
+        embed1.set_image(url='attachment://board1.png')
+        embed2.set_image(url='attachment://board2.png')
+
+        return embed1, file1, embed2, file2
 
     def get_coords(self, inp: str) -> tuple[str, Coords]:
         inp = inp.replace(' ', '').lower()
@@ -315,7 +324,15 @@ class BattleShip:
         await user.send('All setup! (Game will soon start after the opponent finishes)')
         return True
 
-    async def start(self, ctx: commands.Context, *, timeout: Optional[float] = None) -> discord.Message:
+    async def start(
+        self, 
+        ctx: commands.Context, 
+        *, 
+        embed_color: DiscordColor = DEFAULT_COLOR,
+        timeout: Optional[float] = None
+    ) -> discord.Message:
+
+        self.embed_color = embed_color
 
         await ctx.send('**Game Started!**\nI\'ve setup the boards in your dms!')
 

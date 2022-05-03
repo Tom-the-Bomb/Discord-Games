@@ -11,10 +11,10 @@ bot = commands.Bot(command_prefix='!!', intents=discord.Intents.all())
 
 @bot.command(name='test', aliases=['t'])
 @commands.is_owner()
-async def test(ctx: commands.Context):
+async def test(ctx: commands.Context, member: discord.Member):
 
-    game = button_games.BetaAkinator()
-    await game.start(ctx, delete_button=True)
+    game = button_games.BetaBattleShip(ctx.author, member, random=False)
+    await game.start(ctx)
 
 if __name__ == '__main__':
     with open(f'{pathlib.Path(__file__).parent}/bot_config.json') as bot_config:

@@ -85,11 +85,20 @@ class BattleshipInput(discord.ui.Modal, title='Input a coordinate'):
                 game.turn.update_guesslog(f'- ({raw}) was a miss :(')
                 next_turn.update_guesslog(f'+ They went for ({raw}), and it was a miss! :)')
 
-            file1, file3 = await game.get_file(game.player1)
-            file2, file4 = await game.get_file(game.player2)
+            e1, f1, e2, f2 = await game.get_file(game.player1)
+            e3, f3, e4, f4 = await game.get_file(game.player2)
             
-            await game.message1.edit(content='**Battleship**', embed=game.player1.embed, attachments=[file3, file1])
-            await game.message2.edit(content='**Battleship**', embed=game.player2.embed, attachments=[file4, file2])
+            await game.message1.edit(
+                content='**Battleship**', 
+                embeds=[e2, e1, game.player1.embed], 
+                attachments=[f2, f1]
+            )
+            await game.message2.edit(
+                content='**Battleship**', 
+                embeds=[e4, e3, game.player2.embed], 
+                attachments=[f4, f3]
+            )
+            
             game.turn = next_turn
 
             if winner := game.who_won():
@@ -211,9 +220,9 @@ class SetupInput(discord.ui.Modal):
             self.button.disabled = True
             board.ships.append(new_ship)
 
-            file, _ = await game.get_file(interaction.user, hide=False) 
+            embed, file, _, _ = await game.get_file(interaction.user, hide=False) 
 
-            await interaction.response.edit_message(attachments=[file], view=self.button.view)
+            await interaction.response.edit_message(attachments=[file], embed=embed, view=self.button.view)
 
             if all(button.disabled for button in self.button.view.children):
                 await interaction.user.send('**All setup!** (Game will soon start after the opponent finishes)')
@@ -277,15 +286,15 @@ class BetaBattleShip(BattleShip):
             )
 
     async def get_ship_inputs(self, user: Player) -> Coroutine[Any, Any, bool]:
-        file, _ = await self.get_file(user)
+        embed, file, _, _ = await self.get_file(user)
 
-        embed = discord.Embed(
+        embed1 = discord.Embed(
             description='**Press the buttons to place your ships!**',
             color=self.embed_color,
         ) 
 
         view = SetupView(self, timeout=self.timeout)
-        await user.send(file=file, embed=embed, view=view)
+        await user.send(file=file, embeds=[embed, embed1], view=view)
 
         return view.wait()
         
@@ -311,13 +320,23 @@ class BetaBattleShip(BattleShip):
         self.player1.embed.color = self.embed_color
         self.player2.embed.color = self.embed_color
 
-        file1, file3 = await self.get_file(self.player1)
-        file2, file4 = await self.get_file(self.player2)
+        e1, f1, e2, f2 = await self.get_file(self.player1)
+        e3, f3, e4, f4 = await self.get_file(self.player2)
 
         self.view1 = BattleshipView(self, user=self.player1, timeout=timeout)
         self.view2 = BattleshipView(self, user=self.player1, timeout=timeout)
         
-        self.message1 = await self.player1.send('**Game starting!**', view=self.view1, files=[file3, file1])
-        self.message2 = await self.player2.send('**Game starting!**', view=self.view2, files=[file4, file2])
+        self.message1 = await self.player1.send(
+            content='**Game starting!**', 
+            view=self.view1, 
+            embeds=[e2, e1],
+            files=[f2, f1],
+        )
+        self.message2 = await self.player2.send(
+            content='**Game starting!**', 
+            view=self.view2, 
+            embeds=[e4, e3],
+            files=[f4, f3],
+        )
 
         return self.message1, self.message2
