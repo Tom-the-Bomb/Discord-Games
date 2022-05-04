@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 from io import BytesIO
 import asyncio
 import random
@@ -12,7 +12,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 from .utils import executor
 
-Board = list[list[int]]
+if TYPE_CHECKING:
+    Board = list[list[int]]
 
 class Twenty48:
     player: discord.Member

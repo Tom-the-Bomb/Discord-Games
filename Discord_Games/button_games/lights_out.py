@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Literal, Final
+from typing import TYPE_CHECKING, Optional, Literal, Final
 import random
 
 import discord
@@ -9,7 +9,8 @@ from discord.ext import commands
 from .number_slider import SlideView
 from ..utils import *
 
-Board = list[list[Literal[None, '💡']]]
+if TYPE_CHECKING:
+    Board = list[list[Optional[Literal['💡']]]]
 
 BULB: Final[str] = '💡'
     
@@ -117,7 +118,7 @@ class LightsOut:
         self.button_style = button_style
         self.player = ctx.author
 
-        self.tiles = [random.choice((None, BULB)) for _ in range(self.count ** 2)]
+        self.tiles = random.choices((None, BULB), k=self.count ** 2)
         self.tiles = chunk(self.tiles, count=self.count)
 
         view = LightsOutView(self, timeout=timeout)

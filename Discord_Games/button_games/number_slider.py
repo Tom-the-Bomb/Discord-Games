@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 import random
 
 import discord
@@ -8,7 +8,8 @@ from discord.ext import commands
 
 from ..utils import *
 
-Board = list[list[Optional[int]]] 
+if TYPE_CHECKING:
+    Board = list[list[Optional[int]]] 
 
 class SlideButton(discord.ui.Button):
     view: SlideView

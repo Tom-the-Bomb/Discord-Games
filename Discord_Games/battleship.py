@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import pathlib
-from typing import Optional, Union, ClassVar
+from typing import TYPE_CHECKING, Optional, Union, ClassVar
 from io import BytesIO
 import asyncio
 import random
@@ -13,7 +13,8 @@ from PIL import Image, ImageDraw
 
 from .utils import *
 
-Coords = tuple[int, int]
+if TYPE_CHECKING:
+    Coords = tuple[int, int]
 
 SHIPS: dict[str, tuple[int, tuple[int, int, int]]] = {
     "carrier": (5, 
