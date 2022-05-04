@@ -15,6 +15,7 @@ from .country_guess_buttons import BetaCountryGuesser
 from .chess_buttons import BetaChess
 from .battleship_buttons import BetaBattleShip
 from .number_slider import NumberSlider
+from .lights_out import LightsOut
 
 __all__ = (
     'BetaAkinator',
@@ -29,4 +30,5 @@ __all__ = (
     'BetaChess',
     'BetaBattleShip',
     'NumberSlider',
+    'LightsOut',
 )

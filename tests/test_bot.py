@@ -11,9 +11,9 @@ bot = commands.Bot(command_prefix='!!', intents=discord.Intents.all())
 
 @bot.command(name='test', aliases=['t'])
 @commands.is_owner()
-async def test(ctx: commands.Context):
+async def test(ctx: commands.Context, count: int = 4):
 
-    game = button_games.BetaTwenty48(render_image=True)
+    game = button_games.LightsOut(count)
     await game.start(ctx)
 
 if __name__ == '__main__':
