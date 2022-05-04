@@ -36,16 +36,16 @@ class Twenty48_Button(discord.ui.Button):
             return await interaction.message.delete()
 
         elif emoji == '➡️':
-            await self.game.move_right()
+            self.game.move_right()
 
         elif emoji == '⬅️':
-            await self.game.move_left()
+            self.game.move_left()
 
         elif emoji == '⬇️':
-            await self.game.move_down()
+            self.game.move_down()
 
         elif emoji == '⬆️':
-            await self.game.move_up()
+            self.game.move_up()
 
         self.game.spawn_new()
 

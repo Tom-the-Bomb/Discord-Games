@@ -66,30 +66,22 @@ class Twenty48:
                 fr'{pathlib.Path(__file__).parent}\assets\ClearSans-Bold.ttf', 50
             )
         
-    async def reverse(self, board: Board) -> Board:
-        new_board = []
-        for i in range(4):
-            new_board.append([])
-            for j in range(4):
-                new_board[i].append(board[i][3-j])
-        return new_board
+    def _reverse(self, board: Board) -> Board:
+        return [row[::-1] for row in board]
 
-    async def transp(self, board: Board) -> Board:
-        new_board = [[0 for _ in range(4)] for _ in range(4)]
-        for i in range(4):
-            for j in range(4):
-                new_board[i][j] = board[j][i]
-        return new_board
+    def _transp(self, board: Board) -> Board:
+        return [[board[i][j] for i in range(4)] for j in range(4)]
 
-    async def merge(self, board: Board) -> Board:
+    def _merge(self, board: Board) -> Board:
         for i in range(4):
             for j in range(3):
-                if board[i][j] == board[i][j+1] and board[i][j] != 0:
-                    board[i][j] += board[i][j]
+                tile = board[i][j]
+                if tile == board[i][j + 1] and tile != 0:
+                    board[i][j] *= 2
                     board[i][j + 1] = 0
         return board
             
-    async def compress(self, board: Board) -> Board:
+    def _compress(self, board: Board) -> Board:
         new_board = [[0 for _ in range(4)] for _ in range(4)]
         for i in range(4):
             pos = 0
@@ -99,36 +91,36 @@ class Twenty48:
                     pos += 1
         return new_board
 
-    async def move_left(self) -> None:
-        stage = await self.compress(self.board)
-        stage = await self.merge(stage)
-        stage = await self.compress(stage)
+    def move_left(self) -> None:
+        stage = self._compress(self.board)
+        stage = self._merge(stage)
+        stage = self._compress(stage)
         self.board = stage
         
-    async def move_right(self) -> None:
-        stage = await self.reverse(self.board)
-        stage = await self.compress(stage)
-        stage = await self.merge(stage)
-        stage = await self.compress(stage)
-        stage = await self.reverse(stage)
+    def move_right(self) -> None:
+        stage = self._reverse(self.board)
+        stage = self._compress(stage)
+        stage = self._merge(stage)
+        stage = self._compress(stage)
+        stage = self._reverse(stage)
         self.board = stage
         
-    async def move_up(self) -> None:
-        stage = await self.transp(self.board)
-        stage = await self.compress(stage)
-        stage = await self.merge(stage)
-        stage = await self.compress(stage)
-        stage = await self.transp(stage)
+    def move_up(self) -> None:
+        stage = self._transp(self.board)
+        stage = self._compress(stage)
+        stage = self._merge(stage)
+        stage = self._compress(stage)
+        stage = self._transp(stage)
         self.board = stage
         
-    async def move_down(self) -> None:
-        stage = await self.transp(self.board)
-        stage = await self.reverse(stage)
-        stage = await self.compress(stage)
-        stage = await self.merge(stage)
-        stage = await self.compress(stage)
-        stage = await self.reverse(stage)
-        stage = await self.transp(stage)
+    def move_down(self) -> None:
+        stage = self._transp(self.board)
+        stage = self._reverse(stage)
+        stage = self._compress(stage)
+        stage = self._merge(stage)
+        stage = self._compress(stage)
+        stage = self._reverse(stage)
+        stage = self._transp(stage)
         self.board = stage
 
     def spawn_new(self) -> None:
@@ -224,16 +216,16 @@ class Twenty48:
                 return await self.message.delete()
 
             if emoji == '➡️':
-                await self.move_right()
+                self.move_right()
 
             elif emoji == '⬅️':
-                await self.move_left()
+                self.move_left()
 
             elif emoji == '⬇️':
-                await self.move_down()
+                self.move_down()
 
             elif emoji == '⬆️':
-                await self.move_up()
+                self.move_up()
 
             if remove_reaction_after:
                 try:
