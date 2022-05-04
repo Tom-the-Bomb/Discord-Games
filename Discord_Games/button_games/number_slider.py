@@ -41,6 +41,9 @@ class SlideButton(discord.ui.Button):
 
                 self.view.update_board(clear=True)
 
+                game.moves += 1
+                game.embed.set_field_at(0, name='\u200b', value=f'Moves: `{game.moves}`')
+
                 if game.numbers == game.completed:
                     self.view.disable_all()
                     game.embed.description = '**Congrats! You won!**'
@@ -86,6 +89,7 @@ class NumberSlider:
 
         self.player: Optional[discord.Member] = None
 
+        self.moves: int = 0
         self.count = count
         self.numbers: Board = []
         self.completed: Board = []
@@ -97,7 +101,7 @@ class NumberSlider:
             (x, y) for x, row in enumerate(self.numbers) for y, item in enumerate(row) if item == obj
         )
 
-    def beside_blank(self) -> dict[str, int]:
+    def beside_blank(self) -> list[int]:
         nx, ny = self.get_item()
 
         beside_item = [
@@ -136,5 +140,6 @@ class NumberSlider:
         
         view = SlideView(self, timeout=timeout)
         self.embed = discord.Embed(description='Slide the tiles back in ascending order!', color=embed_color)
+        self.embed.add_field(name='\u200b', value='Moves: `0`')
 
         return await ctx.send(embed=self.embed, view=view)
