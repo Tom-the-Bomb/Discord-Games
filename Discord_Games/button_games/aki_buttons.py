@@ -4,6 +4,7 @@ from typing import Optional, ClassVar
 
 import discord
 from discord.ext import commands
+from akinator import CantGoBackAnyFurther
 
 from ..aki import Akinator
 from ..utils import DiscordColor, DEFAULT_COLOR
@@ -31,6 +32,14 @@ class AkiView(discord.ui.View):
         for label, style in self.OPTIONS.items():
             self.add_item(AkiButton(label=label, style=style))
 
+        if self.game.back_button:
+            delete = AkiButton(
+                label='back', 
+                style=discord.ButtonStyle.red, 
+                row=1
+            )
+            self.add_item(delete)
+
         if self.game.delete_button:
             delete = AkiButton(
                 label='Cancel', 
@@ -55,6 +64,12 @@ class AkiView(discord.ui.View):
             await interaction.message.reply("Session ended", mention_author=True)
             return await interaction.message.delete()
 
+        if answer == "back":
+            try:
+                await game.aki.back()
+                embed = game.build_embed(instructions=False)
+            except CantGoBackAnyFurther:
+                return await interaction.response.send_message('I cant go back any further!', ephemeral=True)
         else:
             game.questions += 1
             await game.aki.answer(answer)
@@ -65,7 +80,7 @@ class AkiView(discord.ui.View):
             else:
                 embed = game.build_embed(instructions=False)
 
-            return await interaction.response.edit_message(embed=embed, view=self)
+        return await interaction.response.edit_message(embed=embed, view=self)
         
 class BetaAkinator(Akinator):
 
@@ -73,6 +88,7 @@ class BetaAkinator(Akinator):
         self, 
         ctx: commands.Context,
         *,
+        back_button: bool = False,
         delete_button: bool = False,
         embed_color: DiscordColor = DEFAULT_COLOR,
         win_at: int = 80, 
@@ -80,6 +96,7 @@ class BetaAkinator(Akinator):
         child_mode: bool = True,
     ) -> discord.Message:
 
+        self.back_button = back_button
         self.delete_button = delete_button
         self.embed_color = embed_color
 

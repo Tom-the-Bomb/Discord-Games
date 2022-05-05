@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import pathlib
 from typing import TYPE_CHECKING, Optional, Union, ClassVar
 from io import BytesIO
 import asyncio
+import pathlib
 import random
 import re
 

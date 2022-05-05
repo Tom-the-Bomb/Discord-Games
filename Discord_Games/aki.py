@@ -6,9 +6,14 @@ import asyncio
 
 import discord
 from discord.ext import commands
+
+from akinator import CantGoBackAnyFurther
 from akinator.async_aki import Akinator as AkinatorGame
 
 from .utils import DiscordColor, DEFAULT_COLOR
+
+BACK = "◀️"
+STOP = "⏹️"
 
 class Options(Enum):
     yes = "✅"
@@ -16,17 +21,15 @@ class Options(Enum):
     idk = "🤷"
     p = "🤔"
     pn  = "😕"
-    stop = "⏹️"
 
 class Akinator:
     BAR: ClassVar[str] = "██"
-    INSTRUCTIONS: ClassVar[str] = (
+    instructions: ClassVar[str] = (
         '✅ 🠒 `yes`\n'
         '❌ 🠒 `no`\n'
         '🤷 🠒 `I dont know`\n'
         '🤔 🠒 `probably`\n'
         '😕 🠒 `probably not`\n'
-        '⏹️ 🠒 `cancel`\n'
     )
 
     def __init__(self) -> None:
@@ -38,6 +41,7 @@ class Akinator:
         self.message: Optional[discord.Message] = None
 
         self.embed_color: Optional[DiscordColor] = None
+        self.back_button: bool = False
         self.delete_button: bool = False
         
         self.bar: str = ''
@@ -63,7 +67,7 @@ class Akinator:
         embed.add_field(name="- Question -", value=self.aki.question)
         
         if instructions:
-            embed.add_field(name="\u200b", value=self.INSTRUCTIONS, inline=False)
+            embed.add_field(name="\u200b", value=self.instructions, inline=False)
 
         embed.set_footer(text= "Figuring out the next question | This may take a second")
         return embed
@@ -91,15 +95,23 @@ class Akinator:
         embed_color: DiscordColor = DEFAULT_COLOR,
         remove_reaction_after: bool = False, 
         win_at: int = 80, 
-        timeout: Optional[float] = None, 
+        timeout: Optional[float] = None,
+        back_button: bool = False,
         delete_button: bool = False, 
         child_mode: bool = True, 
     ) -> Optional[discord.Message]:
         
+        self.back_button = back_button
         self.delete_button = delete_button
         self.embed_color = embed_color
         self.player = ctx.author
         self.win_at = win_at
+
+        if self.back_button:
+            self.instructions += f'{BACK} 🠒 `back`\n'
+
+        if self.delete_button:
+            self.instructions += f'{STOP} 🠒 `cancel`\n'
 
         await self.aki.start_game(child_mode=child_mode)
 
@@ -109,8 +121,11 @@ class Akinator:
         for button in Options:
             await self.message.add_reaction(button.value)
 
+        if self.back_button:
+            await self.message.add_reaction(BACK)
+
         if self.delete_button:
-            await self.message.add_reaction(Options.stop.value)
+            await self.message.add_reaction(STOP)
 
         while self.aki.progression <= self.win_at:
 
@@ -120,7 +135,7 @@ class Akinator:
                     try:
                         return bool(Options(emoji))
                     except ValueError:
-                        return False
+                        return emoji in (BACK, STOP)
 
             try:
                 reaction, user = await ctx.bot.wait_for('reaction_add', timeout=timeout, check=check)
@@ -135,16 +150,22 @@ class Akinator:
 
             emoji = str(reaction.emoji)
 
-            if emoji == Options.stop.value:
+            if emoji == STOP:
                 await ctx.send("**Session ended**")
                 return await self.message.delete()
+
+            if emoji == BACK:
+                try:
+                    await self.aki.back()
+                except CantGoBackAnyFurther:
+                    await self.message.reply('I cannot go back any further', delete_after=10)
             else:
                 self.questions += 1
 
                 await self.aki.answer(Options(emoji).name)
                 
-                embed = self.build_embed()
-                await self.message.edit(embed=embed)
+            embed = self.build_embed()
+            await self.message.edit(embed=embed)
             
         embed = await self.win()
         return await self.message.edit(embed=embed)
