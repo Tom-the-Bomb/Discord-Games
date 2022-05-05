@@ -4,7 +4,6 @@ from typing import Optional
 
 import discord
 from discord.ext import commands
-from sympy import Float
 
 from ..wordle import Wordle
 
