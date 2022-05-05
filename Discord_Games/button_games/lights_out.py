@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Literal, Final
 import random
+from typing import Any, TYPE_CHECKING, Optional, Literal, Final
 
 import discord
 from discord.ext import commands
@@ -12,9 +12,10 @@ from ..utils import *
 if TYPE_CHECKING:
     Board = list[list[Optional[Literal['💡']]]]
 
-BULB: Final[str] = '💡'
+BULB: Final[Literal['💡']] = '💡'
     
-class LightsOutButton(discord.ui.Button):
+
+class LightsOutButton(discord.ui.Button['LightsOutView']):
     view: LightsOutView
 
     def __init__(self, emoji: str, *, style: discord.ButtonStyle, row: int, col: int) -> None:
@@ -59,7 +60,6 @@ class LightsOutView(SlideView):
         super().__init__(game, timeout=timeout)
 
     def update_board(self, *, clear: bool = False) -> None:
-        
         if clear:
             self.clear_items()
             
@@ -74,16 +74,14 @@ class LightsOutView(SlideView):
                 self.add_item(button)
 
 class LightsOut:
-
-    def __init__(self, count: int = 4) -> None:
-
+    def __init__(self, count: Literal[1, 2, 3, 4, 5, 6] = 4) -> None:
         if count not in range(1, 6):
             raise ValueError('Count must be an integer between 1 and 6')
 
         self.moves: int = 0
         self.count = count
 
-        self.completed: Final[Board] = [[None] * self.count] * self.count
+        self.completed: Final[Board] = [[None] * self.count for _ in range(self.count)]
         self.tiles: Board = []
 
         self.player: Optional[discord.Member] = None
@@ -93,12 +91,11 @@ class LightsOut:
         self.tiles[row][col] = BULB if self.tiles[row][col] is None else None
 
     def beside_item(self, row: int, col: int) -> list[tuple[int, int]]:
-
         beside = [
-            (row-1, col), 
-            (row, col-1), 
-            (row+1, col), 
-            (row, col+1),
+            (row - 1, col), 
+            (row, col - 1), 
+            (row + 1, col), 
+            (row, col + 1),
         ]
 
         data = [
@@ -108,13 +105,12 @@ class LightsOut:
 
     async def start(
         self, 
-        ctx: commands.Context, 
+        ctx: commands.Context[Any],
         *,
         button_style: discord.ButtonStyle = discord.ButtonStyle.green,
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None
     ) -> discord.Message:
-        
         self.button_style = button_style
         self.player = ctx.author
 
