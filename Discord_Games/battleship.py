@@ -14,7 +14,8 @@ from PIL import Image, ImageDraw
 from .utils import *
 
 if TYPE_CHECKING:
-    Coords = tuple[int, int]
+    from typing_extensions import TypeAlias
+    Coords: TypeAlias = tuple[int, int]
 
 SHIPS: dict[str, tuple[int, tuple[int, int, int]]] = {
     "carrier": (5, 

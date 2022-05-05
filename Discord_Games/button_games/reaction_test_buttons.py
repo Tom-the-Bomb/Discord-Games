@@ -10,8 +10,7 @@ from discord.ext import commands
 
 from ..utils import DiscordColor, DEFAULT_COLOR
 
-class ReactionButton(discord.ui.Button):
-    view: ReactionView
+class ReactionButton(discord.ui.Button['ReactionView']):
 
     def __init__(self, style: discord.ButtonStyle) -> None:
         super().__init__(label='\u200b', style=style)

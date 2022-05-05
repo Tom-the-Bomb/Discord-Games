@@ -48,8 +48,7 @@ class WordInput(discord.ui.Modal, title='Word Input'):
             
             return await interaction.response.edit_message(embed=embed, attachments=[file], view=self.view)
 
-class WordInputButton(discord.ui.Button):
-    view: WordleView
+class WordInputButton(discord.ui.Button['WordleView']):
 
     def __init__(self, *, cancel_button: bool = False):
         super().__init__(

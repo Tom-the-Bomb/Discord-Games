@@ -28,6 +28,7 @@ def chunk(iterable: list[int], *, count: int) -> list[list[int]]:
     return [iterable[i:i + count] for i in range(0, len(iterable), count)]
 
 def executor() -> Callable[[Callable[P, T]], Callable[P, Awaitable[T]]]:
+    
     def decorator(func: Callable[P, T]) -> Callable[P, Awaitable[T]]:
         @functools.wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs):

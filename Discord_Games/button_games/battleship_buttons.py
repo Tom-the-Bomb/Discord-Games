@@ -233,8 +233,7 @@ class SetupInput(discord.ui.Modal):
         else:
             return await interaction.response.send_message('Ship placement was detected to be invalid, please try again.', ephemeral=True)
 
-class SetupButton(discord.ui.Button):
-    view: SetupView
+class SetupButton(discord.ui.Button['SetupView']):
 
     def __init__(self, label: str, ship_size: int, ship_color: tuple[int, int, int]) -> None:
         super().__init__(

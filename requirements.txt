@@ -3,3 +3,4 @@ english-words
 chess
 akinator.py[async]
 Pillow
+typing_extensions

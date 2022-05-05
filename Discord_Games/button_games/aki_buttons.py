@@ -8,8 +8,7 @@ from discord.ext import commands
 from ..aki import Akinator
 from ..utils import DiscordColor, DEFAULT_COLOR
 
-class AkiButton(discord.ui.Button):
-    view: AkiView
+class AkiButton(discord.ui.Button['AkiView']):
 
     async def callback(self, interaction: discord.Interaction) -> None:
         return await self.view.process_input(interaction, self.label.lower())

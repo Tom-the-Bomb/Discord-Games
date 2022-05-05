@@ -8,8 +8,7 @@ from discord.ext import commands
 from ..tictactoe import Tictactoe
 from ..utils import DiscordColor, DEFAULT_COLOR
 
-class TTTButton(discord.ui.Button):
-    view: TTTView
+class TTTButton(discord.ui.Button['TTTView']):
 
     def __init__(self, label: str, style: discord.ButtonStyle, row: int):
         super().__init__(

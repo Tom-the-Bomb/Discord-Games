@@ -13,7 +13,8 @@ from PIL import Image, ImageDraw, ImageFont
 from .utils import executor
 
 if TYPE_CHECKING:
-    Board = list[list[int]]
+    from typing_extensions import TypeAlias
+    Board: TypeAlias = list[list[int]]
 
 class Twenty48:
     player: discord.Member

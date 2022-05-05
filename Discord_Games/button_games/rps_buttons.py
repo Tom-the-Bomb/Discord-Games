@@ -9,8 +9,7 @@ from discord.ext import commands
 from ..rps import RockPaperScissors
 from ..utils import DiscordColor, DEFAULT_COLOR
 
-class RPSButton(discord.ui.Button):
-    view: RPSView
+class RPSButton(discord.ui.Button['RPSView']):
 
     def __init__(self, emoji: str, *, style: discord.ButtonStyle) -> None:
         super().__init__(

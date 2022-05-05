@@ -9,9 +9,8 @@ from discord.ext import commands
 
 from ..utils import chunk
 
-class MemoryButton(discord.ui.Button):
-    view: MemoryView
-
+class MemoryButton(discord.ui.Button['MemoryView']):
+    
     def __init__(self, emoji: str, *, style: discord.ButtonStyle, row: int = 0) -> None:
         self.value = emoji
 

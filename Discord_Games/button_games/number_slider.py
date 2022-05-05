@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Literal
 import random
 
 import discord
@@ -9,10 +9,10 @@ from discord.ext import commands
 from ..utils import *
 
 if TYPE_CHECKING:
-    Board = list[list[Optional[int]]] 
+    from typing_extensions import TypeAlias
+    Board: TypeAlias = list[list[Optional[int]]] 
 
-class SlideButton(discord.ui.Button):
-    view: SlideView
+class SlideButton(discord.ui.Button['SlideView']):
 
     def __init__(self, label: str, *, style: discord.ButtonStyle, row: int) -> None:
         super().__init__(
@@ -81,10 +81,10 @@ class SlideView(discord.ui.View):
         
 class NumberSlider:
 
-    def __init__(self, count: int = 4) -> None:
+    def __init__(self, count: Literal[1, 2, 3, 4, 5] = 4) -> None:
 
         if count not in range(1, 6):
-            raise ValueError('Count must be an integer between 1 and 6')
+            raise ValueError('Count must be an integer between 1 and 5')
 
         self.all_numbers = list(range(1, count ** 2))
 

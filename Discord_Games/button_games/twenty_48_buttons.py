@@ -8,9 +8,7 @@ from discord.ext import commands
 
 from ..twenty_48 import Twenty48
 
-class Twenty48_Button(discord.ui.Button):
-
-    view: discord.ui.View
+class Twenty48_Button(discord.ui.Button['discord.ui.View']):
     
     def __init__(self, game: BetaTwenty48, emoji: str) -> None:
 
