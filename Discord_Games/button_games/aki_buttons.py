@@ -53,8 +53,8 @@ class AkiView(discord.ui.View):
             return await interaction.response.send_message(content="This isn't your game", ephemeral=True)
         
         if answer == "cancel":
-            await interaction.message.delete()
-            return await interaction.message.reply("Session ended", mention_author=True)
+            await interaction.message.reply("Session ended", mention_author=True)
+            return await interaction.message.delete()
 
         else:
             game.questions += 1
