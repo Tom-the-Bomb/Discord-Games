@@ -4,8 +4,8 @@ import pathlib
 import discord
 from discord.ext import commands
 
-import Discord_Games as games
-from Discord_Games import button_games
+import discord_games as games
+from discord_games import button_games
 
 bot = commands.Bot(command_prefix='!!', intents=discord.Intents.all())
 

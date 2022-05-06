@@ -30,7 +30,7 @@ __all__ = (
     'CountryGuesser',
 )
 
-__title__ = "Discord_Games"
+__title__ = "discord_games"
 __version__  = "1.9.27"
 __author__   = "Tom-the-Bomb"
 __license__  = "MIT"

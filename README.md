@@ -8,7 +8,7 @@ $ py -m pip install git+https://github.com/Tom-the-Bomb/Discord-Games.git
 ---
 ## The basic usage of the library goes like this
 - Import the specific game `class` from the library
-    - Ex: `from Discord_Games import Wordle`
+    - Ex: `from discord_games import Wordle`
 - Initialize the game class (with the appropriate arguments, normally none but varies from game to game)
     - Ex: `game = Wordle()`
 - Call the start method (with the appropriate arguments) to start the game

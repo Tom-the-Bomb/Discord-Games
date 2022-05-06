@@ -1,6 +1,6 @@
-import Discord_Games as games
+import discord_games as games
 # import base module
-from Discord_Games import button_games
+from discord_games import button_games
 # import button_games module
 
 import discord

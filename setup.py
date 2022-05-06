@@ -11,11 +11,11 @@ with open("README.md") as rm:
 with open('requirements.txt') as r:
     requirements = r.read().splitlines()
 
-with open("Discord_Games/__init__.py") as f:
+with open("discord_games/__init__.py") as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
 setuptools.setup(
-    name="Discord_Games", 
+    name="discord_games", 
     author="Tom-the-Bomb", 
     version= version, 
     description="A library to help users easily implement games within their discord bot",
@@ -47,8 +47,8 @@ setuptools.setup(
         ]
     },
     packages=[
-        'Discord_Games', 
-        'Discord_Games.button_games'
+        'discord_games', 
+        'discord_games.button_games'
     ],
     install_requires=requirements,
     zip_safe=True,

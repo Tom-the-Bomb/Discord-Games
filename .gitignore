@@ -1,4 +1,4 @@
-Discord_Games.egg-info/
+discord_games.egg-info/
 dist/
 build/
 tests/*.json
