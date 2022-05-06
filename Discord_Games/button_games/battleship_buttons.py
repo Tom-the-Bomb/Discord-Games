@@ -77,7 +77,7 @@ class BattleshipInput(discord.ui.Modal, title='Input a coordinate'):
 
             if hit and sunk:
                 game.turn.update_log(f'+ ({raw}) was a hit!, you also sank one of their ships! :)')
-                next_turn.update_log(f'- They went for ({raw}), and it was a hit!\nOne of your ships also got sunk! :(')
+                next_turn.update_log(f'- They went for ({raw}), and it was a hit!\n- One of your ships also got sunk! :(')
             elif hit:
                 game.turn.update_log(f'+ ({raw}) was a hit :)')
                 next_turn.update_log(f'- They went for ({raw}), and it was a hit! :(')

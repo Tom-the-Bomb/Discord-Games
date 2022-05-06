@@ -22,9 +22,11 @@ SHIPS: dict[str, tuple[int, tuple[int, int, int]]] = {
         (52, 152, 219)),
     "battleship": (4, 
         (246, 246, 112)),
+    "destroyer": (3,
+        (14,146,150)),
     "submarine": (3, 
         (95, 245, 80)),
-    "cruiser": (2, 
+    "patrol boat": (2, 
         (190, 190, 190)),
 }
 
