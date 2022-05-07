@@ -6,6 +6,7 @@ import discord
 from discord.ext import commands
 
 from ..wordle import Wordle
+from ..utils import DiscordColor, DEFAULT_COLOR
 
 class WordInput(discord.ui.Modal, title='Word Input'):
     word = discord.ui.TextInput(
@@ -35,7 +36,7 @@ class WordInput(discord.ui.Modal, title='Word Input'):
             won = game.parse_guess(content)
             buf = await game.render_image()
 
-            embed = discord.Embed(title='Wordle!', color=self.view.game.color)
+            embed = discord.Embed(title='Wordle!', color=self.view.game.embed_color)
             embed.set_image(url='attachment://wordle.png')
             file = discord.File(buf, 'wordle.png')
 
@@ -79,11 +80,19 @@ class WordleView(discord.ui.View):
 class BetaWordle(Wordle):
     player: discord.Member
 
-    async def start(self, ctx: commands.Context, *, timeout: Optional[float] = None) -> discord.Message:
+    async def start(
+        self, 
+        ctx: commands.Context, 
+        *,
+        embed_color: DiscordColor = DEFAULT_COLOR,
+        timeout: Optional[float] = None
+    ) -> discord.Message:
+
+        self.embed_color = embed_color
         self.player = ctx.author
 
         buf = await self.render_image()
-        embed = discord.Embed(title='Wordle!', color=self.color)
+        embed = discord.Embed(title='Wordle!', color=self.embed_color)
         embed.set_image(url='attachment://wordle.png')
 
         return await ctx.send(

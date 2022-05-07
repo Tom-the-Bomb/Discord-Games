@@ -74,11 +74,11 @@ class Wordle:
 
     async def start(self, ctx: commands.Context, *, embed_color: DiscordColor = DEFAULT_COLOR) -> Optional[discord.Message]:
 
-        self.emebd_color = embed_color
+        self.embed_color = embed_color
 
         buf = await self.render_image()
 
-        embed = discord.Embed(title='Wordle!', color=self.color)
+        embed = discord.Embed(title='Wordle!', color=self.embed_color)
         embed.set_image(url='attachment://wordle.png')
 
         message = await ctx.send(embed=embed, file=discord.File(buf, 'wordle.png'))
