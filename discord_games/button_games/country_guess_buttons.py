@@ -54,10 +54,18 @@ class CountryInput(discord.ui.Modal, title='Input your guess!'):
 
 class CountryView(discord.ui.View):
     
-    def __init__(self, game: BetaCountryGuesser, *, timeout: float) -> None:
+    def __init__(self, game: BetaCountryGuesser, *, user: discord.Member, timeout: float) -> None:
         super().__init__(timeout=timeout)
 
         self.game = game
+        self.user = user
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        if interaction.user != self.user:
+            await interaction.response.send_message(f'This is not your game!', ephemeral=True)
+            return False
+        else:
+            return True
     
     def disable_all(self) -> None:
         for button in self.children:
@@ -116,5 +124,5 @@ class BetaCountryGuesser(CountryGuesser):
         self.embed.add_field(name='Guess Log', value='```diff\n\u200b\n```', inline=False)
         self.embed.set_image(url='attachment://country.png')
 
-        view = CountryView(self, timeout=timeout)
+        view = CountryView(self, user=ctx.author, timeout=timeout)
         return await ctx.send(embed=self.embed, file=file, view=view)
