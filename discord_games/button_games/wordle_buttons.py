@@ -94,7 +94,7 @@ class BetaWordle(Wordle):
         embed.set_image(url='attachment://wordle.png')
 
         self.view = WordleView(self, timeout=timeout)
-        self.message = ctx.send(
+        self.message = await ctx.send(
             embed=embed,
             file=discord.File(buf, 'wordle.png'), 
             view=self.view,
