@@ -38,17 +38,11 @@ class TTTButton(discord.ui.Button['TTTView']):
 
         await interaction.response.edit_message(embed=game.make_embed(self.view.embed_color, tie=tie), view=self.view)
 
-        if game.is_game_over():
-            for button in self.view.children:
-                if isinstance(button, discord.ui.Button):
-                    button.disabled = True
-            
-            for y, x in game.winning_indexes:
-                row = [button for button in self.view.children if button.row == y]
-                button = row[x]
-                button.style = self.view.win_button_style
-
-            await interaction.message.edit(view=self.view)
+        if game.is_game_over(tie=tie):
+            if not tie:
+                self.view.disable_all()
+                game.create_streak()
+                await interaction.message.edit(view=self.view)
             return self.view.stop()
 
 
@@ -84,6 +78,12 @@ class BetaTictactoe(Tictactoe):
     BLANK: ClassVar[str] = '\u200b'
     CIRCLE: ClassVar[str] = 'O'
     CROSS: ClassVar[str] = 'X'
+
+    def create_streak(self) -> None:
+        for y, x in self.winning_indexes:
+            row = [button for button in self.view.children if button.row == y]
+            button = row[x]
+            button.style = self.view.win_button_style
 
     async def start(
         self, 

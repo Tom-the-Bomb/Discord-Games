@@ -71,9 +71,9 @@ class Tictactoe:
             self._controls.remove(emoji)
             return self.board
 
-    def is_game_over(self) -> bool:
+    def is_game_over(self, *, tie: bool = False) -> bool:
 
-        if not self._controls:
+        if not self._controls or tie:
             return True
 
         for i in range(3):
