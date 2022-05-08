@@ -10,7 +10,7 @@ from english_words import english_words_lower_alpha_set
 from .utils import DiscordColor, DEFAULT_COLOR
 
 BLANK = '  \u200b'
-STAGES: list[str] = ['''
+STAGES: tuple[str] = ('''
             _________\t
             |/      |\t
             |      😵\t
@@ -90,8 +90,8 @@ STAGES: list[str] = ['''
             |
             |
          ___|___
-            '''
-        ]
+            ''',
+)
 
 class Hangman:
 
@@ -99,7 +99,7 @@ class Hangman:
         self._alpha: list[str] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
         self._all_words = tuple(english_words_lower_alpha_set)
         self.word = self.get_word()
-        self.letters: list[str] = list(self.word)
+        self.letters: tuple[str] = tuple(self.word)
         
         self.correct: list[str] = [r"\_" for _ in self.word]
         self.wrong_letters: list[str] = []
