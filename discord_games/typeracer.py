@@ -112,7 +112,7 @@ class TypeRacer:
             winners.append({
                 "user": message.author, 
                 "time": end - start, 
-                "wpm" : len(text.split(" ")) / ((end - start) / 60), 
+                "wpm" : len(text.split()) / ((end - start) / 60), 
                 "acc" : difflib.SequenceMatcher(None, content, text).ratio() * 100
             })
 
@@ -141,7 +141,7 @@ class TypeRacer:
         embed_title: str = "Type the following sentence in the chat now!", 
         embed_color: DiscordColor = DEFAULT_COLOR, 
         path_to_text_font: Optional[str] = None,
-        timeout: Optional[float] = None, 
+        timeout: float = 40, 
         words_mode: bool = False,
         show_author: bool = True,
     ) -> discord.Message:
