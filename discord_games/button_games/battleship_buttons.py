@@ -108,7 +108,10 @@ class BattleshipInput(discord.ui.Modal, title='Input a coordinate'):
                 await winner.send('Congrats, you won! :)')
 
                 other = game.player2 if winner == game.player1 else game.player1
-                return await other.send('You lost, better luck next time :(')
+                await other.send('You lost, better luck next time :(')
+                
+                game.view1.stop()
+                return game.view2.stop()
 
 class BattleshipButton(WordInputButton):
     view: BattleshipView
@@ -136,7 +139,10 @@ class BattleshipButton(WordInputButton):
                 await game.player2.send('**GAME OVER**, Cancelled')
 
                 await game.message1.edit(view=game.view1)
-                return await game.message2.edit(view=game.view2)
+                await game.message2.edit(view=game.view2)
+                
+                game.view1.stop()
+                return game.view2.stop()
         else:
             if interaction.user != game.turn.player:
                 return await interaction.response.send_message('It is not your turn yet!', ephemeral=True)
@@ -227,7 +233,7 @@ class SetupInput(discord.ui.Modal):
 
             await interaction.response.edit_message(attachments=[file], embed=embed, view=self.button.view)
 
-            if all(button.disabled for button in self.button.view.children):
+            if all(button.disabled for button in self.button.view.children if isinstance(button, discord.ui.Button)):
                 await interaction.user.send('**All setup!** (Game will soon start after the opponent finishes)')
                 return self.button.view.stop()
         else:
@@ -306,7 +312,7 @@ class BetaBattleShip(BattleShip):
         *,
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None,
-    ) -> tuple[discord.Message, discord.Message]:
+    ) -> tuple[bool, bool]:
 
         self.timeout = timeout
         self.embed_color = embed_color
@@ -344,4 +350,7 @@ class BetaBattleShip(BattleShip):
             files=[f4, f3],
         )
 
-        return self.message1, self.message2
+        return await asyncio.gather(
+            self.view1.wait(),
+            self.view2.wait(),
+        )

@@ -23,7 +23,7 @@ class CountryInput(discord.ui.Modal, title='Input your guess!'):
 
         self.add_item(self.guess)
         
-    async def on_submit(self, interaction: discord.Interaction) -> discord.Message:
+    async def on_submit(self, interaction: discord.Interaction) -> None:
         guess = self.guess.value.strip().lower()
         game = self.view.game
 
@@ -33,7 +33,8 @@ class CountryInput(discord.ui.Modal, title='Input your guess!'):
 
             self.view.disable_all()
             game.embed.description = f'```fix\n{game.country.title()}\n```'
-            return await interaction.message.edit(view=self.view, embed=game.embed)
+            await interaction.message.edit(view=self.view, embed=game.embed)
+            return self.stop()
         else:
             game.guesses -= 1
 
@@ -42,7 +43,8 @@ class CountryInput(discord.ui.Modal, title='Input your guess!'):
                 game.update_guesslog('- GAME OVER, you lost -')
 
                 await interaction.message.edit(embed=game.embed, view=self.view)
-                return await interaction.response.send_message(f'Game Over! you lost, The country was `{game.country.title()}`')
+                await interaction.response.send_message(f'Game Over! you lost, The country was `{game.country.title()}`')
+                return self.stop()
             else:
                 acc = game.get_accuracy(guess)
                 game.update_guesslog(
@@ -50,7 +52,7 @@ class CountryInput(discord.ui.Modal, title='Input your guess!'):
                     f'+ You have {game.guesses} guesses left.\n'
                 )
 
-                return await interaction.response.edit_message(embed=game.embed)
+                await interaction.response.edit_message(embed=game.embed)
 
 class CountryView(discord.ui.View):
     
@@ -87,14 +89,15 @@ class CountryView(discord.ui.View):
             await interaction.message.edit(view=self)
             
     @discord.ui.button(label='Cancel', style=discord.ButtonStyle.red)
-    async def cancel_button(self, interaction: discord.Interaction, _) -> discord.Message:
+    async def cancel_button(self, interaction: discord.Interaction, _) -> None:
         self.disable_all()
 
         self.game.embed.description = f'```fix\n{self.game.country.title()}\n```'
         self.game.update_guesslog('- GAME OVER, CANCELLED -')
 
         await interaction.response.send_message(f'Game Over! The country was `{self.game.country.title()}`')
-        return await interaction.message.edit(view=self, embed=self.game.embed)
+        await interaction.message.edit(view=self, embed=self.game.embed)
+        return self.stop()
 
 class BetaCountryGuesser(CountryGuesser):
     guesslog: str = ''
@@ -110,7 +113,7 @@ class BetaCountryGuesser(CountryGuesser):
         embed_color: DiscordColor = DEFAULT_COLOR,
         ignore_diff_len: bool = False,
         timeout: Optional[float] = None,
-    ) -> discord.Message:
+    ) -> bool:
 
         self.accepted_length = len(self.country) if ignore_diff_len else None
 
@@ -124,5 +127,7 @@ class BetaCountryGuesser(CountryGuesser):
         self.embed.add_field(name='Guess Log', value='```diff\n\u200b\n```', inline=False)
         self.embed.set_image(url='attachment://country.png')
 
-        view = CountryView(self, user=ctx.author, timeout=timeout)
-        return await ctx.send(embed=self.embed, file=file, view=view)
+        self.view = CountryView(self, user=ctx.author, timeout=timeout)
+        self.message = await ctx.send(embed=self.embed, file=file, view=self.view)
+
+        return await self.view.wait()

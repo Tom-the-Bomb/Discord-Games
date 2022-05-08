@@ -42,9 +42,11 @@ class WordInput(discord.ui.Modal, title='Word Input'):
 
             if won:
                 self.disable_all()
+                self.view.stop()
                 await interaction.message.reply('Game Over! You won!', mention_author=True)
             elif len(game.guesses) >= 6:
                 self.disable_all()
+                self.view.stop()
                 await interaction.message.reply(f'Game Over! You lose, the word was: **{game.word}**', mention_author=True)
             
             return await interaction.response.edit_message(embed=embed, attachments=[file], view=self.view)
@@ -64,7 +66,8 @@ class WordInputButton(discord.ui.Button['WordleView']):
         else:
             if self.label == 'Cancel':
                 await interaction.response.send_message(f'Game Over! the word was: **{game.word}**')
-                return await interaction.message.delete()
+                await interaction.message.delete()
+                return self.view.stop()
             else:
                 return await interaction.response.send_modal(WordInput(self.view))
 
@@ -86,7 +89,7 @@ class BetaWordle(Wordle):
         *,
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None
-    ) -> discord.Message:
+    ) -> bool:
 
         self.embed_color = embed_color
         self.player = ctx.author
@@ -95,8 +98,10 @@ class BetaWordle(Wordle):
         embed = discord.Embed(title='Wordle!', color=self.embed_color)
         embed.set_image(url='attachment://wordle.png')
 
-        return await ctx.send(
+        self.view = WordleView(self, timeout=timeout)
+        self.message = ctx.send(
             embed=embed,
             file=discord.File(buf, 'wordle.png'), 
-            view=WordleView(self, timeout=timeout)
+            view=self.view,
         )
+        return await self.view.wait()

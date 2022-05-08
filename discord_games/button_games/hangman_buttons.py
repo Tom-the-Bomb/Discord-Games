@@ -45,8 +45,8 @@ class HangmanInput(discord.ui.Modal, title='Make a guess!'):
 
             if await game.check_win():
                 self.disable_all()
-
-                return await interaction.response.edit_message(view=self.view)
+                await interaction.response.edit_message(view=self.view)
+                return self.view.stop()
             else:
                 return await interaction.response.defer()
 
@@ -60,7 +60,8 @@ class HangmanButton(WordInputButton):
         else:
             if self.label == 'Cancel':
                 await interaction.response.send_message(f'Game Over! the word was: **{game.word}**')
-                return await interaction.message.delete()
+                await interaction.message.delete()
+                return self.view.stop()
             else:
                 return await interaction.response.send_modal(HangmanInput(self.view))
 
@@ -83,11 +84,13 @@ class BetaHangman(Hangman):
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None,
         **kwargs,
-    ) -> discord.Message:
+    ) -> bool:
 
         self.player = ctx.author
         self.embed_color = embed_color
 
         embed = self.initialize_embed()
-        view = HangmanView(self, timeout=timeout)
-        self._message = await ctx.send(embed=embed, view=view, **kwargs)
+        self.view = HangmanView(self, timeout=timeout)
+        self._message = await ctx.send(embed=embed, view=self.view, **kwargs)
+
+        return await self.view.wait()

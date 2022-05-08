@@ -47,6 +47,7 @@ class SlideButton(discord.ui.Button['SlideView']):
 
                 if game.numbers == game.completed:
                     self.view.disable_all()
+                    self.view.stop()
                     game.embed.description = '**Congrats! You won!**'
                         
                 return await interaction.response.edit_message(embed=game.embed, view=self.view)
@@ -125,7 +126,7 @@ class NumberSlider:
         button_style: discord.ButtonStyle = discord.ButtonStyle.green,
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None,
-    ) -> discord.Message:
+    ) -> bool:
         
         self.player = ctx.author
         self.button_style = button_style
@@ -139,8 +140,10 @@ class NumberSlider:
 
         self.completed = chunk(self.all_numbers + [None], count=self.count)
         
-        view = SlideView(self, timeout=timeout)
+        self.view = SlideView(self, timeout=timeout)
         self.embed = discord.Embed(description='Slide the tiles back in ascending order!', color=embed_color)
         self.embed.add_field(name='\u200b', value='Moves: `0`')
 
-        return await ctx.send(embed=self.embed, view=view)
+        self.message = await ctx.send(embed=self.embed, view=self.view)
+
+        return await self.view.wait()

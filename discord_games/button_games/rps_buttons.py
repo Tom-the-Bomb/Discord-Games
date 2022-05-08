@@ -51,6 +51,7 @@ class RPSButton(discord.ui.Button['RPSView']):
                         game.embed.description = f'**You Lost!**\nI picked {bot_choice} and you picked {user_choice}.'
                 
                 self.disable_all()
+                self.view.stop()
 
             else:
                 if self.get_choice(interaction.user):
@@ -79,6 +80,7 @@ class RPSButton(discord.ui.Button['RPSView']):
                     )
 
                     self.disable_all()
+                    self.view.stop()
 
             return await interaction.response.edit_message(embed=game.embed, view=self.view)
 
@@ -119,7 +121,7 @@ class BetaRockPaperScissors(RockPaperScissors):
         button_style: discord.ButtonStyle = discord.ButtonStyle.blurple,
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None,
-    ) -> discord.Message:
+    ) -> bool:
 
         self.player1 = ctx.author
 
@@ -129,5 +131,7 @@ class BetaRockPaperScissors(RockPaperScissors):
             color=embed_color,
         )
 
-        view = RPSView(self, button_style=button_style, timeout=timeout)
-        return await ctx.send(embed=self.embed, view=view)
+        self.view = RPSView(self, button_style=button_style, timeout=timeout)
+        self.message = await ctx.send(embed=self.embed, view=self.view)
+
+        return await self.view.wait()

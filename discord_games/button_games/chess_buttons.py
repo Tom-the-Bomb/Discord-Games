@@ -53,6 +53,7 @@ class ChessInput(discord.ui.Modal, title='Make your move'):
             if game.board.is_game_over():
                 self.view.disable_all()
                 embed = await game.fetch_results()
+                self.view.stop()
             else:
                 embed = await game.make_embed()
 
@@ -69,7 +70,8 @@ class ChessButton(WordInputButton):
             if self.label == 'Cancel':
                 self.view.disable_all()
                 await interaction.message.edit(view=self.view)
-                return await interaction.response.send_message(f'**Game Over!** Cancelled')
+                await interaction.response.send_message(f'**Game Over!** Cancelled')
+                return self.view.stop()
             else:
                 if interaction.user != game.turn:
                     return await interaction.response.send_message('It is not your turn yet!', ephemeral=True)
@@ -102,11 +104,12 @@ class BetaChess(Chess):
         *, 
         embed_color: DiscordColor = DEFAULT_COLOR, 
         timeout: Optional[float] = None, 
-    ) -> None:
+    ) -> bool:
 
         self.embed_color = embed_color
 
         embed = await self.make_embed()
-        view = ChessView(self, timeout=timeout)
+        self.view = ChessView(self, timeout=timeout)
 
-        self.message = await ctx.send(embed=embed, view=view)
+        self.message = await ctx.send(embed=embed, view=self.view)
+        return await self.view.wait()

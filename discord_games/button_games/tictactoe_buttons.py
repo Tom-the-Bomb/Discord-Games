@@ -93,14 +93,14 @@ class BetaTictactoe(Tictactoe):
         embed_color: DiscordColor = DEFAULT_COLOR,
         win_button_style: discord.ButtonStyle = discord.ButtonStyle.red,
         timeout: Optional[float] = None,
-    ) -> discord.Message:
+    ) -> bool:
 
-        view = TTTView(
+        self.view = TTTView(
             self,
             embed_color=embed_color,
             button_style=button_style,
             win_button_style=win_button_style,
             timeout=timeout,
         )
-
-        return await ctx.send(embed=self.make_embed(embed_color), view=view)
+        self.message = await ctx.send(embed=self.make_embed(embed_color), view=self.view)
+        return await self.view.wait()

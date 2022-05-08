@@ -49,6 +49,7 @@ class LightsOutButton(discord.ui.Button['LightsOutView']):
 
             if game.tiles == game.completed:
                 self.view.disable_all()
+                self.view.stop()
                 game.embed.description = '**Congrats! You won!**'
                     
             return await interaction.response.edit_message(embed=game.embed, view=self.view)
@@ -113,7 +114,7 @@ class LightsOut:
         button_style: discord.ButtonStyle = discord.ButtonStyle.green,
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None
-    ) -> discord.Message:
+    ) -> bool:
 
         self.button_style = button_style
         self.player = ctx.author
@@ -121,8 +122,10 @@ class LightsOut:
         self.tiles = random.choices((None, BULB), k=self.count ** 2)
         self.tiles = chunk(self.tiles, count=self.count)
 
-        view = LightsOutView(self, timeout=timeout)
+        self.view = LightsOutView(self, timeout=timeout)
         self.embed = discord.Embed(description='Turn off all the tiles!', color=embed_color)
         self.embed.add_field(name='\u200b', value='Moves: `0`')
 
-        return await ctx.send(embed=self.embed, view=view)
+        self.message = await ctx.send(embed=self.embed, view=self.view)
+
+        return await self.view.wait()

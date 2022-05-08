@@ -62,6 +62,7 @@ class AkiView(discord.ui.View):
         
         if answer == "cancel":
             await interaction.message.reply("Session ended", mention_author=True)
+            self.stop()
             return await interaction.message.delete()
 
         if answer == "back":
@@ -77,6 +78,7 @@ class AkiView(discord.ui.View):
             if game.aki.progression >= game.win_at:
                 self.disable_all()
                 embed = await game.win()
+                self.stop()
             else:
                 embed = game.build_embed(instructions=False)
 
@@ -94,7 +96,7 @@ class BetaAkinator(Akinator):
         win_at: int = 80, 
         timeout: Optional[float] = None,
         child_mode: bool = True,
-    ) -> discord.Message:
+    ) -> bool:
 
         self.back_button = back_button
         self.delete_button = delete_button
@@ -109,4 +111,4 @@ class BetaAkinator(Akinator):
         embed = self.build_embed(instructions=False)
         self.message = await ctx.send(embed=embed, view=self.view)
 
-        return self.message
+        return await self.view.wait()

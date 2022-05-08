@@ -41,8 +41,9 @@ class MemoryButton(discord.ui.Button['MemoryView']):
             else:
                 self.view.opened = None
 
-                if all(button.disabled for button in self.view.children):
-                    return await interaction.message.edit(content='Game Over, Congrats!', view=self.view)
+                if all(button.disabled for button in self.view.children if isinstance(button, discord.ui.Button)):
+                    await interaction.message.edit(content='Game Over, Congrats!', view=self.view)
+                    return self.view.stop()
         else:
             self.emoji = self.value
             self.view.opened = self
@@ -97,12 +98,14 @@ class MemoryGame:
         pause_time: float = 0.7,
         button_style: discord.ButtonStyle = discord.ButtonStyle.red,
         timeout: Optional[float] = None,
-    ) -> discord.Message:
+    ) -> bool:
 
-        view = MemoryView(
+        self.view = MemoryView(
             items=items, 
             button_style=button_style, 
             pause_time=pause_time,
             timeout=timeout
         )
-        return await ctx.send(view=view)
+        self.message = await ctx.send(view=self.view)
+
+        return await self.view.wait()
