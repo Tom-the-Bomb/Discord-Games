@@ -1,16 +1,17 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Literal, Optional
 from io import BytesIO
 import asyncio
 import random
 import pathlib
+import itertools
 
 import discord
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 
-from .utils import executor
+from .utils import *
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -25,6 +26,9 @@ class Twenty48:
         *,
         render_image: bool = False,
     ) -> None:
+        
+        self.embed_color: Optional[DiscordColor] = None
+        self.embed: Optional[discord.Embed] = None
         
         self.board: Board = [[0 for _ in range(4)] for _ in range(4)]
         self.message: Optional[discord.Message] = None
@@ -148,6 +152,20 @@ class Twenty48:
             game_string += "".join(row) + "\n"
         return game_string
 
+    def check_win(self) -> bool:
+        flattened = itertools.chain(*self.board)
+            
+        for num in (2048, 4096, 8192):
+            if num in flattened:
+                if num == 2048:
+                    self.embed = discord.Embed(description='', color=self.embed_color)
+                self.embed.description += f'⭐: Congrats! You hit **{num}**!\n'
+
+                if num == self.win_at:
+                    self.embed.description += '**Game Over! You Won**\n'
+                    return True
+        return False
+
     @executor()
     def render_image(self) -> discord.File:
         SQ = self.SQ_S
@@ -178,13 +196,17 @@ class Twenty48:
     async def start(
         self, 
         ctx: commands.Context, 
-        *, 
+        *,
+        win_at: Literal[2048, 4096, 8192] = 8192,
         timeout: Optional[float] = None,
         remove_reaction_after: bool = True, 
-        delete_button: bool = False, 
+        delete_button: bool = False,
+        embed_color: DiscordColor = DEFAULT_COLOR,
         **kwargs,
     ) -> None:
 
+        self.win_at = win_at
+        self.embed_color = embed_color
         self.player = ctx.author
         self.board[random.randrange(4)][random.randrange(4)] = 2
         self.board[random.randrange(4)][random.randrange(4)] = 2
@@ -236,10 +258,14 @@ class Twenty48:
                     pass
 
             self.spawn_new()
+            won = self.check_win()
 
             if self._render_image:
                 image = await self.render_image()
-                await self.message.edit(attachments=[image])
+                await self.message.edit(attachments=[image], embed=self.embed)
             else:
                 board_string = self.number_to_emoji()
-                await self.message.edit(content=board_string)
+                await self.message.edit(content=board_string, embed=self.embed)
+
+            if won:
+                return

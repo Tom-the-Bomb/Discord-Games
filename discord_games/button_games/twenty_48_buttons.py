@@ -1,12 +1,14 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Literal
 import random
 
 import discord
 from discord.ext import commands
 
 from ..twenty_48 import Twenty48
+from ..utils import DiscordColor, DEFAULT_COLOR
+
 
 class Twenty48_Button(discord.ui.Button['discord.ui.View']):
     
@@ -21,7 +23,7 @@ class Twenty48_Button(discord.ui.Button['discord.ui.View']):
             label="\u200b"
         )
 
-    async def callback(self, interaction: discord.Interaction) -> discord.Message:
+    async def callback(self, interaction: discord.Interaction) -> None:
 
         assert self.view
 
@@ -31,6 +33,7 @@ class Twenty48_Button(discord.ui.Button['discord.ui.View']):
         emoji = str(self.emoji)
 
         if emoji == '⏹️':
+            self.view.stop()
             return await interaction.message.delete()
 
         elif emoji == '➡️':
@@ -46,14 +49,17 @@ class Twenty48_Button(discord.ui.Button['discord.ui.View']):
             self.game.move_up()
 
         self.game.spawn_new()
+        won = self.game.check_win()
 
         if self.game._render_image:
             image = await self.game.render_image()
-            return await interaction.response.edit_message(attachments=[image])
+            await interaction.response.edit_message(attachments=[image], embed=self.game.embed)
         else:
             board_string = self.game.number_to_emoji()
-            return await interaction.response.edit_message(content=board_string)
+            await interaction.response.edit_message(content=board_string, embed=self.game.embed)
 
+        if won:
+            return self.view.stop()
 
 class BetaTwenty48(Twenty48):
     view: discord.ui.View
@@ -62,11 +68,16 @@ class BetaTwenty48(Twenty48):
         self, 
         ctx: commands.Context, 
         *,
+        win_at: Literal[2048, 4096, 8192] = 8192,
         timeout: Optional[float] = None, 
         delete_button: bool = False,
+        embed_color: DiscordColor = DEFAULT_COLOR,
         **kwargs,
-    ) -> None:
+    ) -> bool:
         
+        self.win_at = win_at
+        self.embed_color = embed_color
+
         self.player = ctx.author
         self.view = discord.ui.View(timeout=timeout)
 
@@ -85,3 +96,5 @@ class BetaTwenty48(Twenty48):
         else:
             board_string = self.number_to_emoji()
             self.message = await ctx.send(content=board_string, view=self.view, **kwargs)
+
+        return await self.view.wait()
