@@ -81,7 +81,7 @@ class TypeRacer:
     def format_line(self, i: int, x: dict[str, Any]) -> str:
         return f" • {self.EMOJI_MAP[i]} | {x['user'].mention} in {x['time']:.2f}s | **WPM:** {x['wpm']:.2f} | **ACC:** {x['acc']:.2f}%"
 
-    async def wait_for_tr_response(self, ctx: commands.Context, text: str, *, timeout: int) -> discord.Message:
+    async def wait_for_tr_response(self, ctx: commands.Context, text: str, *, timeout: float) -> discord.Message:
 
         self._embed.description = ""
 
