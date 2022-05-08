@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Final
 import random
+import string
 
 import discord
 from discord.ext import commands
@@ -9,8 +10,8 @@ from english_words import english_words_lower_alpha_set
 
 from .utils import DiscordColor, DEFAULT_COLOR
 
-BLANK = '  \u200b'
-STAGES: tuple[str] = ('''
+BLANK: Final[str] = '  \u200b'
+STAGES: Final[tuple[str]] = ('''
             _________\t
             |/      |\t
             |      😵\t
@@ -96,7 +97,7 @@ STAGES: tuple[str] = ('''
 class Hangman:
 
     def __init__(self) -> None:
-        self._alpha: list[str] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+        self._alpha: list[str] = list(string.ascii_lowercase)
         self._all_words = tuple(english_words_lower_alpha_set)
         self.word = self.get_word()
         self.letters: tuple[str] = tuple(self.word)
