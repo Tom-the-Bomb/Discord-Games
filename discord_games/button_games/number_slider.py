@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
     Board: TypeAlias = list[list[Optional[int]]] 
 
+
 class SlideButton(discord.ui.Button['SlideView']):
 
     def __init__(self, label: str, *, style: discord.ButtonStyle, row: int) -> None:
@@ -67,10 +68,15 @@ class SlideView(BaseView):
             self.clear_items()
             
         for i, row in enumerate(self.game.numbers):
-            for number in row:
+            for j, number in enumerate(row):
+                if number == self.game.completed[i][j]:
+                    style = self.game.correct_style
+                else:
+                    style = self.game.wrong_style
+
                 button = SlideButton(
                     label=number or '\u200b', 
-                    style=self.game.button_style,
+                    style=style,
                     row=i,
                 )
                 self.add_item(button)
@@ -91,7 +97,8 @@ class NumberSlider:
         self.numbers: Board = []
         self.completed: Board = []
 
-        self.button_style: discord.ButtonStyle = discord.ButtonStyle.green
+        self.wrong_style: discord.ButtonStyle = discord.ButtonStyle.gray
+        self.correct_style: discord.ButtonStyle = discord.ButtonStyle.green
 
     def get_item(self, obj: Optional[int] = None) -> tuple[int, int]:
         return next(
@@ -118,13 +125,15 @@ class NumberSlider:
         self, 
         ctx: commands.Context, 
         *,
-        button_style: discord.ButtonStyle = discord.ButtonStyle.green,
+        wrong_style: discord.ButtonStyle = discord.ButtonStyle.gray,
+        correct_style: discord.ButtonStyle = discord.ButtonStyle.green,
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None,
     ) -> bool:
         
         self.player = ctx.author
-        self.button_style = button_style
+        self.wrong_style = wrong_style
+        self.correct_style = correct_style
 
         numbers = self.all_numbers[:]
         random.shuffle(numbers)
