@@ -13,7 +13,7 @@ bot = commands.Bot(command_prefix='!!', intents=discord.Intents.all())
 @commands.is_owner()
 async def test(ctx: commands.Context):
 
-    game = button_games.BetaReactionGame()
+    game = button_games.MemoryGame()
     await game.start(ctx)
 
 if __name__ == '__main__':

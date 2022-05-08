@@ -7,7 +7,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from ..utils import chunk
+from ..utils import *
 
 class MemoryButton(discord.ui.Button['MemoryView']):
     
@@ -21,8 +21,12 @@ class MemoryButton(discord.ui.Button['MemoryView']):
         )
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        game = self.view.game
         
         if opened := self.view.opened:
+            game.moves += 1
+            game.embed.set_field_at(0, name='\u200b', value=f'Moves: `{game.moves}`')
+
             self.emoji = self.value
             self.disabled = True
             await interaction.response.edit_message(view=self.view)
@@ -36,14 +40,14 @@ class MemoryButton(discord.ui.Button['MemoryView']):
                 self.emoji = None
                 self.disabled = False
                 self.view.opened = None
-
-                return await interaction.message.edit(view=self.view)
             else:
                 self.view.opened = None
 
                 if all(button.disabled for button in self.view.children if isinstance(button, discord.ui.Button)):
                     await interaction.message.edit(content='Game Over, Congrats!', view=self.view)
                     return self.view.stop()
+
+            return await interaction.message.edit(view=self.view, embed=game.embed)
         else:
             self.emoji = self.value
             self.view.opened = self
@@ -55,7 +59,8 @@ class MemoryView(discord.ui.View):
     DEFAULT_ITEMS: ClassVar[list[str]] = ['🥝', '🍓', '🍹', '🍋', '🥭', '🍎', '🍊', '🍍', '🍑', '🍇', '🍉', '🥬']
     
     def __init__(
-        self, 
+        self,
+        game: MemoryGame,
         items: list[str], 
         *, 
         button_style: discord.ButtonStyle,
@@ -64,6 +69,8 @@ class MemoryView(discord.ui.View):
     ) -> None:
 
         super().__init__(timeout=timeout)
+
+        self.game = game
 
         self.button_style = button_style
         self.pause_time = pause_time
@@ -90,22 +97,33 @@ class MemoryView(discord.ui.View):
 
 class MemoryGame:
 
+    def __init__(self) -> None:
+        self.embed_color: Optional[DiscordColor] = None
+        self.embed: Optional[discord.Embed] = None
+        self.moves: int = 0
+
     async def start(
         self, 
         ctx: commands.Context,
         *,
+        embed_color: DiscordColor = DEFAULT_COLOR,
         items: list[str] = [],
         pause_time: float = 0.7,
         button_style: discord.ButtonStyle = discord.ButtonStyle.red,
         timeout: Optional[float] = None,
     ) -> bool:
 
+        self.embed_color = embed_color
+        self.embed = discord.Embed(description='**Memory Game**', color=self.embed_color)
+        self.embed.add_field(name='\u200b', value='Moves: `0`')
+
         self.view = MemoryView(
+            game=self,
             items=items, 
             button_style=button_style, 
             pause_time=pause_time,
             timeout=timeout
         )
-        self.message = await ctx.send(view=self.view)
+        self.message = await ctx.send(embed=self.embed, view=self.view)
 
         return await self.view.wait()
