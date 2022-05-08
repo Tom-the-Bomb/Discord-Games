@@ -51,6 +51,9 @@ class Twenty48_Button(discord.ui.Button['BaseView']):
         self.game.spawn_new()
         won = self.game.check_win()
 
+        if won:
+            self.view.disable_all()
+
         if self.game._render_image:
             image = await self.game.render_image()
             await interaction.response.edit_message(attachments=[image], embed=self.game.embed)
