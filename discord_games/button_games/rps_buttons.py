@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands
 
 from ..rps import RockPaperScissors
-from ..utils import DiscordColor, DEFAULT_COLOR
+from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
 
 class RPSButton(discord.ui.Button['RPSView']):
 
@@ -17,11 +17,6 @@ class RPSButton(discord.ui.Button['RPSView']):
             emoji=emoji,
             style=style, 
         )
-
-    def disable_all(self) -> None:
-        for button in self.view.children:
-            if isinstance(button, discord.ui.Button):
-                button.disabled = True
 
     def get_choice(self, user: discord.Member, other: bool = False) -> Optional[str]:
         game = self.view.game
@@ -50,7 +45,7 @@ class RPSButton(discord.ui.Button['RPSView']):
                     else:
                         game.embed.description = f'**You Lost!**\nI picked {bot_choice} and you picked {user_choice}.'
                 
-                self.disable_all()
+                self.view.disable_all()
                 self.view.stop()
 
             else:
@@ -79,12 +74,12 @@ class RPSButton(discord.ui.Button['RPSView']):
                         f'\n{game.player2.mention} chose {game.player2_choice}.'
                     )
 
-                    self.disable_all()
+                    self.view.disable_all()
                     self.view.stop()
 
             return await interaction.response.edit_message(embed=game.embed, view=self.view)
 
-class RPSView(discord.ui.View):
+class RPSView(BaseView):
     game: BetaRockPaperScissors
 
     def __init__(

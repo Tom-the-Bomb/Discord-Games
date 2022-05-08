@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 
 from ..tictactoe import Tictactoe
-from ..utils import DiscordColor, DEFAULT_COLOR
+from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
 
 class TTTButton(discord.ui.Button['TTTView']):
 
@@ -52,7 +52,7 @@ class TTTButton(discord.ui.Button['TTTView']):
             return self.view.stop()
 
 
-class TTTView(discord.ui.View):
+class TTTView(BaseView):
 
     def __init__(self, 
         game: BetaTictactoe, 

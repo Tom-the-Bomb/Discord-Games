@@ -54,7 +54,7 @@ class MemoryButton(discord.ui.Button['MemoryView']):
             self.disabled = True
             return await interaction.response.edit_message(view=self.view)
 
-class MemoryView(discord.ui.View):
+class MemoryView(BaseView):
     board: list[list[str]]
     DEFAULT_ITEMS: ClassVar[list[str]] = ['🥝', '🍓', '🍹', '🍋', '🥭', '🍎', '🍊', '🍍', '🍑', '🍇', '🍉', '🥬']
     

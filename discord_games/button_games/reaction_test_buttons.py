@@ -8,7 +8,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from ..utils import DiscordColor, DEFAULT_COLOR
+from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
 
 class ReactionButton(discord.ui.Button['ReactionView']):
 
@@ -36,7 +36,7 @@ class ReactionButton(discord.ui.Button['ReactionView']):
             self.clicked = True
             game.finished_event.set()
 
-class ReactionView(discord.ui.View):
+class ReactionView(BaseView):
     game: BetaReactionGame
 
     def __init__(

@@ -7,14 +7,14 @@ from discord.ext import commands
 from akinator import CantGoBackAnyFurther
 
 from ..aki import Akinator
-from ..utils import DiscordColor, DEFAULT_COLOR
+from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
 
 class AkiButton(discord.ui.Button['AkiView']):
 
     async def callback(self, interaction: discord.Interaction) -> None:
         return await self.view.process_input(interaction, self.label.lower())
 
-class AkiView(discord.ui.View):
+class AkiView(BaseView):
     OPTIONS: ClassVar[dict[str, discord.ButtonStyle]] = {
         'yes': discord.ButtonStyle.green,
         'no': discord.ButtonStyle.red,
@@ -47,11 +47,6 @@ class AkiView(discord.ui.View):
                 row=1
             )
             self.add_item(delete)
-
-    def disable_all(self) -> None:
-        for button in self.children:
-            if isinstance(button, discord.ui.Button):
-                button.disabled = True
 
     async def process_input(self, interaction: discord.Interaction, answer: str) -> None:
 

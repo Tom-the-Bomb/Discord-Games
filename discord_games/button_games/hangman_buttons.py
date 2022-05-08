@@ -7,7 +7,7 @@ from discord.ext import commands
 
 from .wordle_buttons import WordInputButton
 from ..hangman import Hangman
-from ..utils import DiscordColor, DEFAULT_COLOR
+from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
 
 class HangmanInput(discord.ui.Modal, title='Make a guess!'):
     
@@ -25,11 +25,6 @@ class HangmanInput(discord.ui.Modal, title='Make a guess!'):
 
         self.add_item(self.word)
 
-    def disable_all(self) -> None:
-        for button in self.view.children:
-            if isinstance(button, discord.ui.Button):
-                button.disabled = True
-
     async def on_submit(self, interaction: discord.Interaction) -> None:
         content = self.word.value.lower()
         game = self.view.game
@@ -44,7 +39,7 @@ class HangmanInput(discord.ui.Modal, title='Make a guess!'):
             await game.make_guess(content)
 
             if await game.check_win():
-                self.disable_all()
+                self.view.disable_all()
                 await interaction.response.edit_message(view=self.view)
                 return self.view.stop()
             else:
@@ -65,7 +60,7 @@ class HangmanButton(WordInputButton):
             else:
                 return await interaction.response.send_modal(HangmanInput(self.view))
 
-class HangmanView(discord.ui.View):
+class HangmanView(BaseView):
 
     def __init__(self, game: BetaHangman, *, timeout: float) -> None:
         super().__init__(timeout=timeout)

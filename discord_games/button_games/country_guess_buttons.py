@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 
 from ..country_guess import CountryGuesser
-from ..utils import DiscordColor, DEFAULT_COLOR
+from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
 
 class CountryInput(discord.ui.Modal, title='Input your guess!'):
     
@@ -54,7 +54,7 @@ class CountryInput(discord.ui.Modal, title='Input your guess!'):
 
                 await interaction.response.edit_message(embed=game.embed)
 
-class CountryView(discord.ui.View):
+class CountryView(BaseView):
     
     def __init__(self, game: BetaCountryGuesser, *, user: discord.Member, timeout: float) -> None:
         super().__init__(timeout=timeout)
@@ -68,11 +68,6 @@ class CountryView(discord.ui.View):
             return False
         else:
             return True
-    
-    def disable_all(self) -> None:
-        for button in self.children:
-            if isinstance(button, discord.ui.Button):
-                button.disabled = True
 
     @discord.ui.button(label='Make a guess!', style=discord.ButtonStyle.blurple)
     async def guess_button(self, interaction: discord.Interaction, _) -> None:

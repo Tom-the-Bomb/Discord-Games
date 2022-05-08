@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 
 from ..wordle import Wordle
-from ..utils import DiscordColor, DEFAULT_COLOR
+from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
 
 class WordInput(discord.ui.Modal, title='Word Input'):
     word = discord.ui.TextInput(
@@ -20,11 +20,6 @@ class WordInput(discord.ui.Modal, title='Word Input'):
     def __init__(self, view: WordleView) -> None:
         super().__init__()
         self.view = view
-
-    def disable_all(self) -> None:
-        for button in self.view.children:
-            if isinstance(button, discord.ui.Button):
-                button.disabled = True
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
         content = self.word.value.lower()
@@ -41,11 +36,11 @@ class WordInput(discord.ui.Modal, title='Word Input'):
             file = discord.File(buf, 'wordle.png')
 
             if won:
-                self.disable_all()
+                self.view.disable_all()
                 self.view.stop()
                 await interaction.message.reply('Game Over! You won!', mention_author=True)
             elif len(game.guesses) >= 6:
-                self.disable_all()
+                self.view.disable_all()
                 self.view.stop()
                 await interaction.message.reply(f'Game Over! You lose, the word was: **{game.word}**', mention_author=True)
             
@@ -71,7 +66,7 @@ class WordInputButton(discord.ui.Button['WordleView']):
             else:
                 return await interaction.response.send_modal(WordInput(self.view))
 
-class WordleView(discord.ui.View):
+class WordleView(BaseView):
     
     def __init__(self, game: BetaWordle, *, timeout: float):
         super().__init__(timeout=timeout)

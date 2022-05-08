@@ -4,9 +4,10 @@ from typing import Optional
 import discord
 from discord.ext import commands
 
-from ..utils import DiscordColor, DEFAULT_COLOR
 from ..chess_game import Chess
 from .wordle_buttons import WordInputButton
+from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
+
 
 class ChessInput(discord.ui.Modal, title='Make your move'):
 
@@ -78,12 +79,7 @@ class ChessButton(WordInputButton):
                 else:
                     return await interaction.response.send_modal(ChessInput(self.view))
 
-class ChessView(discord.ui.View):
-
-    def disable_all(self) -> None:
-        for button in self.children:
-            if isinstance(button, discord.ui.Button):
-                button.disabled = True
+class ChessView(BaseView):
     
     def __init__(self, game: BetaChess, *, timeout: float) -> None:
         super().__init__(timeout=timeout)

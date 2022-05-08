@@ -52,7 +52,7 @@ class SlideButton(discord.ui.Button['SlideView']):
                         
                 return await interaction.response.edit_message(embed=game.embed, view=self.view)
             
-class SlideView(discord.ui.View):
+class SlideView(BaseView):
 
     def __init__(self, game: NumberSlider, *, timeout: float) -> None:
         super().__init__(timeout=timeout)
@@ -60,11 +60,6 @@ class SlideView(discord.ui.View):
         self.game = game
 
         self.update_board()
-
-    def disable_all(self) -> None:
-        for button in self.children:
-            if isinstance(button, discord.ui.Button):
-                button.disabled = True
 
     def update_board(self, *, clear: bool = False) -> None:
         

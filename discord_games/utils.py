@@ -18,6 +18,7 @@ __all__ = (
     'DEFAULT_COLOR',
     'executor',
     'chunk',
+    'BaseView',
 )
 
 DiscordColor: TypeAlias = Union[discord.Color, int]
@@ -38,3 +39,13 @@ def executor() -> Callable[[Callable[P, T]], Callable[P, Awaitable[T]]]:
 
         return wrapper
     return decorator
+
+class BaseView(discord.ui.View):
+
+    def disable_all(self) -> None:
+        for button in self.children:
+            if isinstance(button, discord.ui.Button):
+                button.disabled = True
+
+    async def on_timeout(self) -> None:
+        return self.stop()

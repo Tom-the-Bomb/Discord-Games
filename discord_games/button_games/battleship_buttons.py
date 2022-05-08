@@ -14,7 +14,7 @@ from ..battleship import (
 )
 
 from .wordle_buttons import WordInputButton
-from ..utils import DiscordColor, DEFAULT_COLOR
+from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
 
 class Player:
 
@@ -149,12 +149,7 @@ class BattleshipButton(WordInputButton):
             else:
                 return await interaction.response.send_modal(BattleshipInput(self.view))
 
-class BattleshipView(discord.ui.View):
-
-    def disable_all(self) -> None:
-        for button in self.children:
-            if isinstance(button, discord.ui.Button):
-                button.disabled = True
+class BattleshipView(BaseView):
 
     def __init__(self, game: BetaBattleShip, user: discord.Member, *, timeout: float) -> None:
         super().__init__(timeout=timeout)
@@ -253,7 +248,7 @@ class SetupButton(discord.ui.Button['SetupView']):
     async def callback(self, interaction: discord.Interaction) -> None:
         await interaction.response.send_modal(SetupInput(self))
 
-class SetupView(discord.ui.View):
+class SetupView(BaseView):
 
     def __init__(self, game: BetaBattleShip, timeout: float) -> None:
         super().__init__(timeout=timeout)
