@@ -31,7 +31,7 @@ __all__ = (
 )
 
 __title__ = "discord_games"
-__version__  = "1.9.27"
+__version__  = "1.10.0"
 __author__   = "Tom-the-Bomb"
 __license__  = "MIT"
 __copyright__ = "Copyright 2021-present Tom-the-Bomb"
@@ -43,8 +43,8 @@ class VersionInfo(NamedTuple):
 
 version_info: VersionInfo = VersionInfo(
     major=1, 
-    minor=9, 
-    micro=27,
+    minor=10, 
+    micro=0,
 )
 
 del NamedTuple, VersionInfo
