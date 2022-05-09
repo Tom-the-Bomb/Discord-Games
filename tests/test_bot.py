@@ -12,7 +12,9 @@ bot = commands.Bot(command_prefix='!!', intents=discord.Intents.all())
 @bot.command(name='test', aliases=['t'])
 @commands.is_owner()
 async def test(ctx: commands.Context) -> None:
-    ...
+
+    game = games.CountryGuesser(hard_mode=True)
+    await game.start(ctx)
 
 if __name__ == '__main__':
     with open(f'{pathlib.Path(__file__).parent}/bot_config.json') as bot_config:

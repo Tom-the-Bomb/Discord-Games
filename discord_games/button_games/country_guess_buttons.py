@@ -99,7 +99,7 @@ class BetaCountryGuesser(CountryGuesser):
 
     def update_guesslog(self, log: str) -> None:
         self.guesslog += log + '\n'
-        self.embed.set_field_at(0, name='Guess Log', value=f'```diff\n{self.guesslog}\n```')
+        self.embed.set_field_at(1, name='Guess Log', value=f'```diff\n{self.guesslog}\n```')
 
     async def start(
         self, 
@@ -114,13 +114,9 @@ class BetaCountryGuesser(CountryGuesser):
 
         file = await self.get_country()
 
-        self.embed = discord.Embed(
-            title='Guess that country!',
-            description=f'```fix\n{self.get_blanks()}\n```',
-            color=embed_color,
-        )
+        self.embed_color = embed_color
+        self.embed = self.get_embed()
         self.embed.add_field(name='Guess Log', value='```diff\n\u200b\n```', inline=False)
-        self.embed.set_image(url='attachment://country.png')
 
         self.view = CountryView(self, user=ctx.author, timeout=timeout)
         self.message = await ctx.send(embed=self.embed, file=file, view=self.view)

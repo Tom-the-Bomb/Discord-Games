@@ -28,6 +28,7 @@ class CountryGuesser:
         hints: int = 1
     ) -> None:
 
+        self.embed_color: Optional[DiscordColor] = None
         self.hints = hints
         self.guesses = guesses
 
@@ -99,6 +100,20 @@ class CountryGuesser:
     def get_accuracy(self, guess: str) -> int:
         return round(difflib.SequenceMatcher(None, guess, self.country).ratio() * 100)
 
+    def get_embed(self) -> discord.Embed:
+        embed = discord.Embed(
+            title='Guess that country!',
+            description=f'```fix\n{self.get_blanks()}\n```',
+            color=self.embed_color,
+        )
+        embed.add_field(
+            name='\u200b', 
+            value=f'```yml\nblurred: {str(self.hard_mode).lower()}\nflag-mode: {str(self.is_flags).lower()}\n```',
+            inline=False,
+        )
+        embed.set_image(url='attachment://country.png')
+        return embed
+
     async def wait_for_response(
         self, 
         ctx: commands.Context, 
@@ -132,13 +147,10 @@ class CountryGuesser:
 
         file = await self.get_country()
 
-        self.embed = discord.Embed(
-            title='Guess that country!',
-            description=f'```fix\n{self.get_blanks()}\n```',
-            color=embed_color,
-        )
+        self.embed_color = embed_color
+        self.embed = self.get_embed()
         self.embed.set_footer(text='send your guess into the chat now!')
-        self.embed.set_image(url='attachment://country.png')
+
         await ctx.send(embed=self.embed, file=file)
 
         self.accepted_length = len(self.country) if ignore_diff_len else None
