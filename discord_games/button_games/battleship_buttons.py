@@ -31,9 +31,9 @@ class Player:
 
     def update_log(self, log: str) -> None:
         self._logs.append(log)
-        log_str = '\n\n'.join(self._logs[-17:])
+        log_str = '\n\n'.join(self._logs[-self.game.max_log_size:])
 
-        if len(self._logs) > 17:
+        if len(self._logs) > self.game.max_log_size:
             log_str = '...\n\n' + log_str
 
         self.embed.description = f'```diff\n{log_str}\n```'
@@ -305,10 +305,12 @@ class BetaBattleShip(BattleShip):
         self, 
         ctx: commands.Context, 
         *,
+        max_log_size: int = 10,
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None,
     ) -> tuple[bool, bool]:
 
+        self.max_log_size = max_log_size
         self.timeout = timeout
         self.embed_color = embed_color
 
