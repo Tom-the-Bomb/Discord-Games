@@ -28,7 +28,7 @@ class Wordle:
         self.embed_color: Optional[DiscordColor] = None
 
         self._valid_words = tuple(
-            open(fr'{pathlib.Path(__file__).parent}\assets\words.txt', 'r').read().splitlines()
+            open(fr'{pathlib.Path(__file__).parent}/assets/words.txt', 'r').read().splitlines()
         )
         self._font = ImageFont.truetype('arial.ttf', 70)
         self.guesses: list[list[dict[str, str]]] = []
