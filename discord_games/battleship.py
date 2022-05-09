@@ -261,7 +261,7 @@ class BattleShip:
         return embed1, file1, embed2, file2
 
     def get_coords(self, inp: str) -> tuple[str, Coords]:
-        inp = inp.replace(' ', '').lower()
+        inp = re.sub(r'\s+', '', inp).lower()
         match = self.inputpat.match(inp)
         x, y = match.group(1), match.group(2)
         return (inp, (ord(x) % 96, int(y)))

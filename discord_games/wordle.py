@@ -61,7 +61,7 @@ class Wordle:
                         cursor.rectangle((x, y, x+SQ, y+SQ), outline='gray', width=2)
                     else:
                         cursor.rectangle((x, y, x+SQ, y+SQ), width=0, fill=color)
-                        cursor.text((x+SQ/2, y+SQ/2), act_letter, font=self._font, anchor='mm', fill=(255, 255, 255))
+                        cursor.text((x+SQ/2, y+SQ/2), act_letter.upper(), font=self._font, anchor='mm', fill=(255, 255, 255))
 
                     x += SQ + SPACE
                 x = BORDER
