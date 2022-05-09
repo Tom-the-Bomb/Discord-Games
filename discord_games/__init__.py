@@ -15,6 +15,7 @@ from .typeracer import TypeRacer
 from .rps import RockPaperScissors
 from .reaction_test import ReactionGame
 from .country_guess import CountryGuesser
+from .wordle import Wordle
 
 __all__ = (
     'Akinator',
@@ -28,6 +29,7 @@ __all__ = (
     'RockPaperScissors',
     'ReactionGame',
     'CountryGuesser',
+    'Wordle',
 )
 
 __title__ = "discord_games"
