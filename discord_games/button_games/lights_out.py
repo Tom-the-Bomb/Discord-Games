@@ -128,4 +128,7 @@ class LightsOut:
 
         self.message = await ctx.send(embed=self.embed, view=self.view)
 
-        return await self.view.wait()
+        return await double_wait(
+            wait_for_delete(ctx, self.message), 
+            self.view.wait(),
+        )

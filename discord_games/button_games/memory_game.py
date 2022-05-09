@@ -77,7 +77,7 @@ class MemoryView(BaseView):
         self.opened: Optional[MemoryButton] = None
         
         if not items:
-            items = self.DEFAULT_ITEMS
+            items = self.DEFAULT_ITEMS[:]
         assert len(items) == 12
 
         items *= 2
@@ -126,4 +126,7 @@ class MemoryGame:
         )
         self.message = await ctx.send(embed=self.embed, view=self.view)
 
-        return await self.view.wait()
+        return await double_wait(
+            wait_for_delete(ctx, self.message), 
+            self.view.wait(),
+        )

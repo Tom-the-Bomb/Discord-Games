@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 
 from ..tictactoe import Tictactoe
-from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
+from ..utils import *
 
 class TTTButton(discord.ui.Button['TTTView']):
 
@@ -103,4 +103,8 @@ class BetaTictactoe(Tictactoe):
             timeout=timeout,
         )
         self.message = await ctx.send(embed=self.make_embed(embed_color), view=self.view)
-        return await self.view.wait()
+
+        return await double_wait(
+            wait_for_delete(ctx, self.message, user=(self.cross, self.circle)),
+            self.view.wait(),
+        )

@@ -13,8 +13,9 @@ bot = commands.Bot(command_prefix='!!', intents=discord.Intents.all())
 @commands.is_owner()
 async def test(ctx: commands.Context) -> None:
 
-    game = games.CountryGuesser(hard_mode=True)
+    game = button_games.MemoryGame()
     await game.start(ctx)
+    await ctx.send('done!')
 
 if __name__ == '__main__':
     with open(f'{pathlib.Path(__file__).parent}/bot_config.json') as bot_config:
