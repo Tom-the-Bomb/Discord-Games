@@ -260,11 +260,14 @@ class BattleShip:
 
         return embed1, file1, embed2, file2
 
+    def to_num(self, alpha: str) -> int:
+        return ord(alpha) % 96
+
     def get_coords(self, inp: str) -> tuple[str, Coords]:
         inp = re.sub(r'\s+', '', inp).lower()
         match = self.inputpat.match(inp)
         x, y = match.group(1), match.group(2)
-        return (inp, (ord(x) % 96, int(y)))
+        return (inp, (self.to_num(x), int(y)))
 
     def who_won(self) -> Optional[discord.Member]:
         if self.player1_board.won():
@@ -284,7 +287,7 @@ class BattleShip:
 
             def check(msg: discord.Message) -> bool:
                 if not msg.guild and msg.author == user:
-                    content = msg.content.replace(' ', '').lower()
+                    content = re.sub(r'\s+', '', message.content).lower()
                     return bool(self.inputpat.match(content))
             try:
                 message: discord.Message = await ctx.bot.wait_for('message', check=check, timeout=self.timeout)
@@ -292,7 +295,7 @@ class BattleShip:
                 await user.send(f'The timeout of {self.timeout} seconds, has been reached. Aborting...')
                 return False
 
-            _, start = self.get_coords(message.content.replace(' ', '').lower())
+            _, start = self.get_coords(message.content)
 
             await user.send('Do you want it to be vertical?\nSay `yes` or `no`')
 
@@ -360,34 +363,38 @@ class BattleShip:
                     content = msg.content.replace(' ', '').lower()
                     return bool(self.inputpat.match(content))
             try:
-                message = await ctx.bot.wait_for('message', check=check, timeout=self.timeout)
+                message: discord.Message = await ctx.bot.wait_for('message', check=check, timeout=self.timeout)
             except asyncio.TimeoutError:
                 return await ctx.send(f'The timeout of {timeout} seconds, has been reached. Aborting...')
 
             raw, coords = self.get_coords(message.content)
 
-            sunk, hit = self.place_move(self.turn, coords)
-            next_turn: discord.Member = self.player2 if self.turn == self.player1 else self.player1
-
-            if hit and sunk:
-                await self.turn.send(f'`{raw}` was a hit!, you also sank one of their ships! :)')
-                await next_turn.send(f'They went for `{raw}`, and it was a hit!\nOne of your ships also got sunk! :(')
-            elif hit:
-                await self.turn.send(f'`{raw}` was a hit :)')
-                await next_turn.send(f'They went for `{raw}`, and it was a hit! :(')
+            if coords in self.get_board(self.turn):
+                await self.turn.send('You\'ve attacked this coordinate before!')
+                
             else:
-                await self.turn.send(f'`{raw}` was a miss :(')
-                await next_turn.send(f'They went for `{raw}`, and it was a miss! :)')
+                sunk, hit = self.place_move(self.turn, coords)
+                next_turn: discord.Member = self.player2 if self.turn == self.player1 else self.player1
 
-            e1, f1, e2, f2  = await self.get_file(self.player1)
-            e3, f3, e4, f4 = await self.get_file(self.player2)
-            
-            await self.player1.send(embeds=[e2, e1], files=[f2, f1])
-            await self.player2.send(embeds=[e4, e3], files=[f4, f3])
-            self.turn = next_turn
+                if hit and sunk:
+                    await self.turn.send(f'`{raw}` was a hit!, you also sank one of their ships! :)')
+                    await next_turn.send(f'They went for `{raw}`, and it was a hit!\nOne of your ships also got sunk! :(')
+                elif hit:
+                    await self.turn.send(f'`{raw}` was a hit :)')
+                    await next_turn.send(f'They went for `{raw}`, and it was a hit! :(')
+                else:
+                    await self.turn.send(f'`{raw}` was a miss :(')
+                    await next_turn.send(f'They went for `{raw}`, and it was a miss! :)')
 
-            if winner := self.who_won():
-                await winner.send('Congrats, you won! :)')
+                e1, f1, e2, f2  = await self.get_file(self.player1)
+                e3, f3, e4, f4 = await self.get_file(self.player2)
+                
+                await self.player1.send(embeds=[e2, e1], files=[f2, f1])
+                await self.player2.send(embeds=[e4, e3], files=[f4, f3])
+                self.turn = next_turn
 
-                other = self.player2 if winner == self.player1 else self.player1
-                return await other.send('You lost, better luck next time :(')
+                if winner := self.who_won():
+                    await winner.send('Congrats, you won! :)')
+
+                    other = self.player2 if winner == self.player1 else self.player1
+                    return await other.send('You lost, better luck next time :(')

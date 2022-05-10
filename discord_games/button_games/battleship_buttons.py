@@ -74,7 +74,11 @@ class BattleshipInput(discord.ui.Modal, title='Input a coordinate'):
             raw, coords = game.get_coords(content)
 
             self.view.update_views()
-            return await game.process_move(raw, coords)
+
+            if coords in game.get_board(self.view.player):
+                return await interaction.response.send_message('You\'ve attacked this coordinate before!', ephemeral=True)
+            else:
+                return await game.process_move(raw, coords)
 
 class BattleshipButton(WordInputButton):
     view: BattleshipView
@@ -127,7 +131,7 @@ class CoordButton(discord.ui.Button['BattleshipView']):
             self.view.digit = int(self.label)
 
             raw = self.view.alpha + str(self.view.digit)
-            coords = (ord(self.view.alpha) % 96, self.view.digit)
+            coords = (game.to_num(self.view.alpha), self.view.digit)
             await interaction.response.defer()
 
             self.view.alpha = None
@@ -170,6 +174,11 @@ class BattleshipView(BaseView):
             self.clear_items()
             for num in range(1, 11):
                 button = CoordButton(num)
+
+                coord = (self.game.to_num(self.alpha), num)
+                if coord in self.game.get_board(self.player).moves:
+                    button.disabled = True
+
                 self.add_item(button)
         else:
             for letter in string.ascii_uppercase[:10]:
