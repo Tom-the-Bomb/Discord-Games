@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import Optional, Any, Coroutine
-
+from typing import Optional, Any, Coroutine, Union
 import asyncio
+import string
+
 import discord
 from discord.ext import commands
 
@@ -72,46 +73,8 @@ class BattleshipInput(discord.ui.Modal, title='Input a coordinate'):
             await interaction.response.defer()
             raw, coords = game.get_coords(content)
 
-            sunk, hit = game.place_move(game.turn, coords)
-            next_turn = game.player2 if game.turn == game.player1 else game.player1
-
-            if hit and sunk:
-                game.turn.update_log(f'+ ({raw}) was a hit!, you also sank one of their ships! :)')
-                next_turn.update_log(f'- They went for ({raw}), and it was a hit!\n- One of your ships also got sunk! :(')
-            elif hit:
-                game.turn.update_log(f'+ ({raw}) was a hit :)')
-                next_turn.update_log(f'- They went for ({raw}), and it was a hit! :(')
-            else:
-                game.turn.update_log(f'- ({raw}) was a miss :(')
-                next_turn.update_log(f'+ They went for ({raw}), and it was a miss! :)')
-
-            e1, f1, e2, f2 = await game.get_file(game.player1)
-            e3, f3, e4, f4 = await game.get_file(game.player2)
-
-            game.turn = next_turn
-
-            game.player1.embed.set_field_at(0, name='\u200b', value=f'```yml\nturn: {game.turn.player}\n```')
-            game.player2.embed.set_field_at(0, name='\u200b', value=f'```yml\nturn: {game.turn.player}\n```')
-            
-            await game.message1.edit(
-                content='**Battleship**', 
-                embeds=[e2, e1, game.player1.embed], 
-                attachments=[f2, f1],
-            )
-            await game.message2.edit(
-                content='**Battleship**', 
-                embeds=[e4, e3, game.player2.embed], 
-                attachments=[f4, f3],
-            )
-
-            if winner := game.who_won():
-                await winner.send('Congrats, you won! :)')
-
-                other = game.player2 if winner == game.player1 else game.player1
-                await other.send('You lost, better luck next time :(')
-                
-                game.view1.stop()
-                return game.view2.stop()
+            self.view.update_views()
+            return await game.process_move(raw, coords)
 
 class BattleshipButton(WordInputButton):
     view: BattleshipView
@@ -120,7 +83,7 @@ class BattleshipButton(WordInputButton):
         game = self.view.game
 
         if self.label == 'Cancel':
-            player = game.player2 if interaction.user == game.player2.player else game.player1
+            player = self.view.player
             other_player = game.player2 if interaction.user == game.player1.player else game.player1
 
             if not player.approves_cancel:
@@ -149,21 +112,78 @@ class BattleshipButton(WordInputButton):
             else:
                 return await interaction.response.send_modal(BattleshipInput(self.view))
 
+class CoordButton(discord.ui.Button['BattleshipView']):
+    
+    def __init__(self, letter_or_num: Union[str, int]) -> None:
+        super().__init__(
+            label=str(letter_or_num),
+            style=discord.ButtonStyle.green,
+        )
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        game = self.view.game
+
+        if self.label.isdigit():
+            self.view.digit = int(self.label)
+
+            raw = self.view.alpha + str(self.view.digit)
+            coords = (ord(self.view.alpha) % 96, self.view.digit)
+            await interaction.response.defer()
+
+            self.view.alpha = None
+            self.view.digit = None
+
+            self.view.update_views()
+            return await game.process_move(raw, coords)
+        else:
+            self.view.alpha = self.label.lower()
+            self.view.initialize_view(clear=True)
+            return await interaction.response.edit_message(view=self.view)
+
 class BattleshipView(BaseView):
 
-    def __init__(self, game: BetaBattleShip, user: discord.Member, *, timeout: float) -> None:
+    def __init__(self, game: BetaBattleShip, user: Player, *, timeout: float) -> None:
         super().__init__(timeout=timeout)
 
         self.game = game
+        self.player = user
+        self.initialize_view(start=True)
+
+        self.alpha: Optional[str] = None
+        self.digit: Optional[int] = None
+
+    def disable(self) -> None:
+        self.disable_all()
+        self.children[-1].disabled = False
+
+    def update_views(self) -> None:
+        game = self.game
+        self.disable()
+        
+        other_view = game.view1 if game.turn == game.player2 else game.view2
+
+        other_view.clear_items()
+        other_view.initialize_view()
+
+    def initialize_view(self, *, clear: bool = False, start: bool = False) -> None:
+        if clear:
+            self.clear_items()
+            for num in range(1, 11):
+                button = CoordButton(num)
+                self.add_item(button)
+        else:
+            for letter in string.ascii_uppercase[:10]:
+                self.add_item(CoordButton(letter))
 
         inpbutton = BattleshipButton()
         inpbutton.label = '\u200b'
         inpbutton.emoji = '🎯'
 
-        self.player = user
-
         self.add_item(inpbutton)
         self.add_item(BattleshipButton(cancel_button=True))
+
+        if start and self.player == self.game.player2:
+            self.disable()
 
 class SetupInput(discord.ui.Modal):
 
@@ -300,6 +320,50 @@ class BetaBattleShip(BattleShip):
         await user.send(file=file, embeds=[embed, embed1], view=view)
 
         return view.wait()
+
+    async def process_move(self, raw: str, coords: tuple[int, int]):
+        sunk, hit = self.place_move(self.turn, coords)
+        next_turn = self.player2 if self.turn == self.player1 else self.player1
+
+        if hit and sunk:
+            self.turn.update_log(f'+ ({raw}) was a hit!, you also sank one of their ships! :)')
+            next_turn.update_log(f'- They went for ({raw}), and it was a hit!\n- One of your ships also got sunk! :(')
+        elif hit:
+            self.turn.update_log(f'+ ({raw}) was a hit :)')
+            next_turn.update_log(f'- They went for ({raw}), and it was a hit! :(')
+        else:
+            self.turn.update_log(f'- ({raw}) was a miss :(')
+            next_turn.update_log(f'+ They went for ({raw}), and it was a miss! :)')
+
+        e1, f1, e2, f2 = await self.get_file(self.player1)
+        e3, f3, e4, f4 = await self.get_file(self.player2)
+
+        self.turn = next_turn
+
+        self.player1.embed.set_field_at(0, name='\u200b', value=f'```yml\nturn: {self.turn.player}\n```')
+        self.player2.embed.set_field_at(0, name='\u200b', value=f'```yml\nturn: {self.turn.player}\n```')
+        
+        await self.message1.edit(
+            view=self.view1,
+            content='**Battleship**', 
+            embeds=[e2, e1, self.player1.embed], 
+            attachments=[f2, f1],
+        )
+        await self.message2.edit(
+            view=self.view2,
+            content='**Battleship**', 
+            embeds=[e4, e3, self.player2.embed], 
+            attachments=[f4, f3],
+        )
+
+        if winner := self.who_won():
+            await winner.send('Congrats, you won! :)')
+
+            other = self.player2 if winner == self.player1 else self.player1
+            await other.send('You lost, better luck next time :(')
+            
+            self.view1.stop()
+            return self.view2.stop()
         
     async def start(
         self, 
@@ -329,7 +393,7 @@ class BetaBattleShip(BattleShip):
         e3, f3, e4, f4 = await self.get_file(self.player2)
 
         self.view1 = BattleshipView(self, user=self.player1, timeout=timeout)
-        self.view2 = BattleshipView(self, user=self.player1, timeout=timeout)
+        self.view2 = BattleshipView(self, user=self.player2, timeout=timeout)
 
         self.player1.embed.add_field(name='\u200b', value=f'```yml\nturn: {self.turn.player}\n```')
         self.player2.embed.add_field(name='\u200b', value=f'```yml\nturn: {self.turn.player}\n```')

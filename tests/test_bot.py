@@ -11,9 +11,9 @@ bot = commands.Bot(command_prefix='!!', intents=discord.Intents.all())
 
 @bot.command(name='test', aliases=['t'])
 @commands.is_owner()
-async def test(ctx: commands.Context) -> None:
+async def test(ctx: commands.Context, member: discord.Member) -> None:
 
-    game = button_games.BetaWordle()
+    game = button_games.BetaBattleShip(ctx.author, member)
     await game.start(ctx)
     await ctx.send('done!')
 
