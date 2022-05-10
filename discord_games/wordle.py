@@ -21,16 +21,20 @@ HEIGHT = BORDER * 2 + SQ * 6 + SPACE * 5
 GRAY = (119, 123, 125)
 ORANGE = (200, 179, 87)
 GREEN = (105, 169, 99)
+LGRAY = (198, 201, 205)
 
 class Wordle:
 
-    def __init__(self) -> None:
+    def __init__(self, *, text_size: int = 55) -> None:
         self.embed_color: Optional[DiscordColor] = None
 
+        parent = pathlib.Path(__file__).parent
         self._valid_words = tuple(
-            open(fr'{pathlib.Path(__file__).parent}\assets\words.txt', 'r').read().splitlines()
+            open(fr'{parent}\assets\words.txt', 'r').read().splitlines()
         )
-        self._font = ImageFont.truetype('arial.ttf', 70)
+        self._text_size = text_size
+        self._font = ImageFont.truetype(fr'{parent}\assets\HelveticaNeuBold.ttf', self._text_size)
+
         self.guesses: list[list[dict[str, str]]] = []
         self.word: str = random.choice(self._valid_words)
 
@@ -58,7 +62,7 @@ class Wordle:
                         color = letter['color']
                         act_letter = letter['letter']
                     except (IndexError, KeyError):
-                        cursor.rectangle((x, y, x+SQ, y+SQ), outline='gray', width=2)
+                        cursor.rectangle((x, y, x+SQ, y+SQ), outline=LGRAY, width=4)
                     else:
                         cursor.rectangle((x, y, x+SQ, y+SQ), width=0, fill=color)
                         cursor.text((x+SQ/2, y+SQ/2), act_letter.upper(), font=self._font, anchor='mm', fill=(255, 255, 255))

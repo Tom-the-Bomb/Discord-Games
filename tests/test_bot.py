@@ -13,7 +13,7 @@ bot = commands.Bot(command_prefix='!!', intents=discord.Intents.all())
 @commands.is_owner()
 async def test(ctx: commands.Context) -> None:
 
-    game = button_games.MemoryGame()
+    game = button_games.BetaWordle()
     await game.start(ctx)
     await ctx.send('done!')
 
