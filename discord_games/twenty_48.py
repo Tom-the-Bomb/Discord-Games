@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Literal, Optional
 from io import BytesIO
+import os
 import asyncio
 import random
 import pathlib
@@ -16,6 +17,19 @@ from .utils import *
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
     Board: TypeAlias = list[list[int]]
+
+async def create_2048_emojis(guild: discord.Guild, names: Optional[list[str]] = None) -> None:
+    directory = fr'{pathlib.Path(__file__).parent}\assets\2048-emoji-asset-examples'
+    files = os.listdir(directory)
+    names = map(lambda n: n[:-4], files) if not names else names
+
+    for name, file in zip(names, files):
+        with open(os.path.join(directory, file), 'rb') as fp:
+            await guild.create_custom_emoji(
+                name=name, 
+                image=fp.read(),
+                reason='2048 emojis'
+            )
 
 class Twenty48:
     player: discord.Member
