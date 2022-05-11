@@ -70,14 +70,13 @@ class BattleshipInput(discord.ui.Modal, title='Input a coordinate'):
         if not game.inputpat.fullmatch(content):
             return await interaction.response.send_message(f'`{content}` is not a valid coordinate!', ephemeral=True)
         else:
-            await interaction.response.defer()
             raw, coords = game.get_coords(content)
-
             self.view.update_views()
 
-            if coords in game.get_board(self.view.player):
+            if coords in self.view.player_board.moves:
                 return await interaction.response.send_message('You\'ve attacked this coordinate before!', ephemeral=True)
             else:
+                await interaction.response.defer()
                 return await game.process_move(raw, coords)
 
 class BattleshipButton(WordInputButton):
@@ -151,6 +150,8 @@ class BattleshipView(BaseView):
 
         self.game = game
         self.player = user
+        self.player_board = self.game.get_board(self.player)
+
         self.initialize_view(start=True)
 
         self.alpha: Optional[str] = None
@@ -170,19 +171,22 @@ class BattleshipView(BaseView):
         other_view.initialize_view()
 
     def initialize_view(self, *, clear: bool = False, start: bool = False) -> None:
+        moves = self.player_board.moves
+
         if clear:
             self.clear_items()
             for num in range(1, 11):
                 button = CoordButton(num)
-
                 coord = (self.game.to_num(self.alpha), num)
-                if coord in self.game.get_board(self.player).moves:
+                if coord in moves:
                     button.disabled = True
-
                 self.add_item(button)
         else:
             for letter in string.ascii_uppercase[:10]:
-                self.add_item(CoordButton(letter))
+                button = CoordButton(letter)
+                if all((self.game.to_num(letter.lower()), i) in moves for i in range(1, 11)):
+                    button.disabled = True
+                self.add_item(button)
 
         inpbutton = BattleshipButton()
         inpbutton.label = '\u200b'
