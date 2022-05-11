@@ -16,7 +16,7 @@ class ConnectFour:
         self.blue_player = blue
 
         self.board: list[list[str]] = [[BLANK for _ in range(7)] for _ in range(6)]
-        self._controls: tuple[str] = ('1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣')
+        self._controls: tuple[str, ...] = ('1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣')
 
         self.turn = self.red_player
         self.message: Optional[discord.Message] = None

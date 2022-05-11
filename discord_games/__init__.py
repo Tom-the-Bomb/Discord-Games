@@ -18,7 +18,7 @@ from .reaction_test import ReactionGame
 from .country_guess import CountryGuesser
 from .wordle import Wordle
 
-__all__: tuple[str] = (
+__all__: tuple[str, ...] = (
     'Akinator',
     'BattleShip',
     'Chess', 

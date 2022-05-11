@@ -18,7 +18,7 @@ from .battleship_buttons import BetaBattleShip
 from .number_slider import NumberSlider
 from .lights_out import LightsOut
 
-__all__: tuple[str] = (
+__all__: tuple[str, ...] = (
     'BetaAkinator',
     'BetaTwenty48',
     'BetaWordle',

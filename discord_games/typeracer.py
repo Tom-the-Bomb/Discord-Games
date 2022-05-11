@@ -21,7 +21,7 @@ from .utils import *
 
 class TypeRacer:
     SENTENCE_URL: ClassVar[str] = "https://api.quotable.io/random"
-    GRAMMAR_WORDS: ClassVar[tuple[str]] = (
+    GRAMMAR_WORDS: ClassVar[tuple[str, ...]] = (
         'the', 'of', 'to', 'and', 'a', 'in', 'is', 'it',
         'you', 'that', 'he', 'was', 'for', 'on', 'are',
         'with', 'as', 'his', 'they', 'be', 'at', 'one',

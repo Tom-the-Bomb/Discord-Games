@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     A = TypeVar('A', bool)
     B = TypeVar('B', bool)
 
-__all__: tuple[str] = (
+__all__: tuple[str, ...] = (
     'DiscordColor',
     'DEFAULT_COLOR',
     'executor',
