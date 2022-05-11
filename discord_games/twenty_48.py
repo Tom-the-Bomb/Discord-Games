@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 async def create_2048_emojis(guild: discord.Guild, names: Optional[list[str]] = None) -> None:
     directory = fr'{pathlib.Path(__file__).parent}\assets\2048-emoji-asset-examples'
     files = os.listdir(directory)
-    names = map(lambda n: n[:-4], files) if not names else names
+    names = map(lambda n: f'_{n[:-4]}', files) if not names else names
 
     for name, file in zip(names, files):
         with open(os.path.join(directory, file), 'rb') as fp:
