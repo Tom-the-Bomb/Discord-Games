@@ -1,6 +1,7 @@
 """
 Discord-Games
 """
+from __future__ import annotations
 
 from typing import NamedTuple
 
@@ -10,14 +11,14 @@ from .chess_game import Chess
 from .connect_four import ConnectFour
 from .hangman import Hangman
 from .tictactoe import Tictactoe
-from .twenty_48 import Twenty48
+from .twenty_48 import Twenty48, create_2048_emojis
 from .typeracer import TypeRacer
 from .rps import RockPaperScissors
 from .reaction_test import ReactionGame
 from .country_guess import CountryGuesser
 from .wordle import Wordle
 
-__all__ = (
+__all__: tuple[str] = (
     'Akinator',
     'BattleShip',
     'Chess', 
@@ -25,6 +26,7 @@ __all__ = (
     'Hangman', 
     'Tictactoe',
     'Twenty48', 
+    'create_2048_emojis',
     'TypeRacer',
     'RockPaperScissors',
     'ReactionGame',

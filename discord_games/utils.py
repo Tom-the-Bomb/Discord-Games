@@ -1,6 +1,15 @@
 from __future__ import annotations
 
-from typing import Optional, Coroutine, Callable, Final, Union, TypeVar, TYPE_CHECKING, Any
+from typing import (
+    Optional, 
+    Coroutine, 
+    Callable, 
+    Final, 
+    Union, 
+    TypeVar, 
+    TYPE_CHECKING, 
+    Any,
+)
 
 import functools
 import asyncio
@@ -17,7 +26,7 @@ if TYPE_CHECKING:
     A = TypeVar('A', bool)
     B = TypeVar('B', bool)
 
-__all__ = (
+__all__: tuple[str] = (
     'DiscordColor',
     'DEFAULT_COLOR',
     'executor',
@@ -84,7 +93,7 @@ async def double_wait(
     task2: Coroutine[Any, Any, B],
     *,
     loop: Optional[asyncio.AbstractEventLoop] = None,
-) -> tuple[set[asyncio.Task[A]], set[asyncio.Task[B]]]:
+) -> tuple[set[asyncio.Task[Union[A, B]]], set[asyncio.Task[Union[A, B]]]]:
 
     if not loop:
         loop = asyncio.get_event_loop()

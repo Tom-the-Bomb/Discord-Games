@@ -2,6 +2,7 @@
 This folder contains games that require discord.py v2.0.0 + to be used
 they utilize UI components such as buttons.
 """
+from __future__ import annotations
 
 from .aki_buttons import BetaAkinator
 from .twenty_48_buttons import BetaTwenty48
@@ -17,7 +18,7 @@ from .battleship_buttons import BetaBattleShip
 from .number_slider import NumberSlider
 from .lights_out import LightsOut
 
-__all__ = (
+__all__: tuple[str] = (
     'BetaAkinator',
     'BetaTwenty48',
     'BetaWordle',

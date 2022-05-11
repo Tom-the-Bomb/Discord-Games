@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Union
 import time
 import random
 import asyncio
@@ -34,7 +34,7 @@ class ReactionButton(discord.ui.Button['ReactionView']):
             await interaction.response.edit_message(embed=game.embed)
             
             self.clicked = True
-            game.finished_event.set()
+            return game.finished_event.set()
 
 class ReactionView(BaseView):
     game: BetaReactionGame
@@ -61,7 +61,11 @@ class BetaReactionGame:
         ctx: commands.Context, 
         *,
         author_only: bool = False,
-        button_style: discord.ButtonStyle = discord.ButtonStyle.blurple, 
+        pause_range: tuple[float, float] = (1.0, 5.0),
+        start_button_style: discord.ButtonStyle = discord.ButtonStyle.blurple, 
+        end_button_style: Union[
+            discord.ButtonStyle, tuple[discord.ButtonStyle, ...]
+        ] = (discord.ButtonStyle.green, discord.ButtonStyle.red),
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None,
     ) -> bool:
@@ -76,17 +80,19 @@ class BetaReactionGame:
             description=f'Click the button below, when the button changes color!',
             color=embed_color,
         )
-        view = ReactionView(self, button_style=button_style, timeout=timeout)
-        self.message = await ctx.send(embed=self.embed, view=view)
+        self.view = ReactionView(self, button_style=start_button_style, timeout=timeout)
+        self.message = await ctx.send(embed=self.embed, view=self.view)
         
-        pause = random.uniform(1.0, 5.0)
+        pause = random.uniform(*pause_range)
         await asyncio.sleep(pause)
 
-        styles = (discord.ButtonStyle.green, discord.ButtonStyle.red)
-        view.button.style = random.choices(styles, weights=[1, 2])[0]
+        if isinstance(end_button_style, tuple):
+            self.view.button.style = random.choice(end_button_style)
+        else:
+            self.view.button.style = end_button_style
 
-        await self.message.edit(view=view)
+        await self.message.edit(view=self.view)
         self.start_time = time.perf_counter()
-        view.button.edited = True
+        self.view.button.edited = True
 
         return await self.finished_event.wait()

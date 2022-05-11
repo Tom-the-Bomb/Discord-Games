@@ -73,7 +73,7 @@ class CountryGuesser:
 
     async def get_country(self) -> discord.File:
         country_file = random.choice(self.all_countries)
-        self.country = country_file.strip().removesuffix('.png').lower()
+        self.country = country_file.strip()[:-4].lower()
 
         file = os.path.join(self._countries_path, country_file)
 
