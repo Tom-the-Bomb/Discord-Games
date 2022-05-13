@@ -122,8 +122,8 @@ class Boggle:
         self.embed_color: Optional[DiscordColor] = None
 
     def reset(self) -> None:
-        for button in self.view.children[2:]:
-            if isinstance(button, discord.ui.Button):
+        for button in self.view.children:
+            if isinstance(button, discord.ui.Button) and button.row != 4:
                 button.style = self.button_style
 
     def get_embed(self) -> discord.Embed:
