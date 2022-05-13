@@ -18,7 +18,7 @@ class Tictactoe:
         self.turn: discord.Member  = self.cross
 
         self.winner: Optional[discord.Member] = None
-        self.winning_indexes: list = []
+        self.winning_indexes: list[tuple[int, int]] = []
         self.message: Optional[discord.Message] = None
 
         self._controls: list[str] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
@@ -83,7 +83,7 @@ class Tictactoe:
 
             if (self.board[0][i] == self.board[1][i] == self.board[2][i]) and self.board[0][i] != self.BLANK:
                 self.winner = self.emoji_to_player[self.board[0][i]]
-                self.winning_indexes = [(0, 1), (1, i), (2, i)]
+                self.winning_indexes = [(0, i), (1, i), (2, i)]
 
                 return True
 

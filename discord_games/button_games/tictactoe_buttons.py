@@ -10,12 +10,14 @@ from ..utils import *
 
 class TTTButton(discord.ui.Button['TTTView']):
 
-    def __init__(self, label: str, style: discord.ButtonStyle, row: int):
+    def __init__(self, label: str, style: discord.ButtonStyle, *, row: int, col: int):
         super().__init__(
             label=label, 
             style=style,
             row=row,
         )
+
+        self.col = col
 
     async def callback(self, interaction: discord.Interaction) -> None:
         user = interaction.user
@@ -30,8 +32,7 @@ class TTTButton(discord.ui.Button['TTTView']):
         self.label = game.player_to_emoji[user]
         self.disabled = True
 
-        column_idx = [button for button in self.view.children if button.row == self.row].index(self)
-        game.board[self.row][column_idx] = self.label
+        game.board[self.row][self.col] = self.label
         game.turn = game.circle if user == game.cross else game.cross
 
         tie = all(button.disabled for button in self.view.children)
@@ -65,11 +66,12 @@ class TTTView(BaseView):
         self.win_button_style = win_button_style
 
         for x, row in enumerate(game.board):
-            for square in row:
+            for y, square in enumerate(row):
                 button = TTTButton(
                     label=square, 
                     style=self.button_style,
-                    row=x
+                    row=x,
+                    col=y,
                 )
                 self.add_item(button)
 
@@ -80,9 +82,9 @@ class BetaTictactoe(Tictactoe):
     CROSS: ClassVar[str] = 'X'
 
     def create_streak(self) -> None:
-        for y, x in self.winning_indexes:
-            row = [button for button in self.view.children if button.row == y]
-            button = row[x]
+        chunked = chunk(self.view.children, count=3)
+        for row, col in self.winning_indexes:
+            button = chunked[row][col]
             button.style = self.view.win_button_style
 
     async def start(
