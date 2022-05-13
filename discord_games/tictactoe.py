@@ -73,9 +73,6 @@ class Tictactoe:
 
     def is_game_over(self, *, tie: bool = False) -> bool:
 
-        if not self._controls or tie:
-            return True
-
         for i in range(3):
 
             if (self.board[i][0] == self.board[i][1] == self.board[i][2]) and self.board[i][0] != self.BLANK:
@@ -100,6 +97,9 @@ class Tictactoe:
             self.winner = self.emoji_to_player[self.board[0][2]]
             self.winning_indexes = [(0, 2), (1, 1), (2, 0)]
 
+            return True
+
+        if not self._controls or tie:
             return True
            
         return False
