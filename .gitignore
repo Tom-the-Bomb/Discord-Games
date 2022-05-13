@@ -1,5 +1,5 @@
 discord_games.egg-info/
 dist/
-build/
+build/lib/*
 tests/*.json
 **/__pycache__/
