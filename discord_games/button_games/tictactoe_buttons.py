@@ -39,7 +39,7 @@ class TTTButton(discord.ui.Button['TTTView']):
         await interaction.response.edit_message(embed=game.make_embed(self.view.embed_color, tie=tie), view=self.view)
 
         if game.is_game_over(tie=tie):
-            if not tie:
+            if game.winning_indexes:
                 self.view.disable_all()
                 game.create_streak()
                 await interaction.message.edit(view=self.view)
