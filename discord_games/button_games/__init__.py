@@ -17,6 +17,7 @@ from .chess_buttons import BetaChess
 from .battleship_buttons import BetaBattleShip
 from .number_slider import NumberSlider
 from .lights_out import LightsOut
+from .boggle import Boggle
 
 __all__: tuple[str, ...] = (
     'BetaAkinator',
@@ -32,4 +33,5 @@ __all__: tuple[str, ...] = (
     'BetaBattleShip',
     'NumberSlider',
     'LightsOut',
+    'Boggle',
 )
