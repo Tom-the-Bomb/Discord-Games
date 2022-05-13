@@ -22,9 +22,6 @@ class BoggleButton(discord.ui.Button['BoggleView']):
 
         self.col = col
 
-    def __repr__(self) -> str:
-        return self.label
-
     async def callback(self, interaction: discord.Interaction) -> None:
         game = self.view.game
 
@@ -72,9 +69,8 @@ class BoggleView(BaseView):
                 )
                 self.add_item(button)
 
-    @property
-    def nested_children(self) -> list[list[BoggleButton]]:
-        return chunk(self.children[2:], count=4)
+        clean_children = [item for item in self.children if item.row != 4]
+        self.nested_children: list[list[BoggleButton]] = chunk(clean_children, count=4)
 
     @discord.ui.button(label='Enter', style=discord.ButtonStyle.blurple, row=4)
     async def enter_button(self, interaction: discord.Interaction, _) -> None:
@@ -85,6 +81,9 @@ class BoggleView(BaseView):
 
         if len(game.current_word) < 3:
             return await interaction.response.send_message('Word must be of at least 3 letters in length!', ephemeral=True)
+
+        if game.current_word in game.correct_guesses:
+            return await interaction.response.send_message('You have guessed this word before!')
 
         if game.current_word.lower() in english_words_alpha_set:
             game.correct_guesses.append(game.current_word)
@@ -155,10 +154,9 @@ class Boggle:
             (row - 1, col + 1),
         )
 
-        components = self.view.nested_children[:]
         return [
             (i, j) for (i, j) in indexes if i in range(4) and j in range(4) and 
-            components[i][j].style != self.selected_style
+            self.view.nested_children[i][j].style != self.selected_style
         ]
 
     async def start(
