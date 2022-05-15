@@ -2,7 +2,6 @@ from typing import Optional, ClassVar
 
 import discord
 from discord.ext import commands
-from regex import R
 
 from .utils import DiscordColor, DEFAULT_COLOR
 
