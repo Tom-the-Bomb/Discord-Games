@@ -90,7 +90,7 @@ class Tictactoe:
 
             if len(set(row)) == 1 and row[0] != self.BLANK:
                 self.winner = self.emoji_to_player[row[0]]
-                self.winning_indexes = row
+                self.winning_indexes = possibility
                 return True
 
         if not self._controls or tie:
