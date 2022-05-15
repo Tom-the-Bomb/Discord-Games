@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Optional, Final
 import random
 import string
+import asyncio
 
 import discord
 from discord.ext import commands
@@ -106,7 +107,7 @@ class Hangman:
             self.word = word
         else:
             self.word = self.get_word()
-            
+
         self.letters: tuple[str, ...] = tuple(self.word)
         
         self.correct: list[str] = [r'\_' for _ in self.word]
@@ -182,7 +183,8 @@ class Hangman:
     async def start(
         self, 
         ctx: commands.Context[commands.Bot], 
-        *, 
+        *,
+        timeout: Optional[float] = None,
         embed_color: DiscordColor = DEFAULT_COLOR, 
         delete_after_guess: bool = False, 
         **kwargs
@@ -194,6 +196,8 @@ class Hangman:
         ----------
         ctx : commands.Context
             the context of the invokation command
+        timeout : Optional[float], optional
+            the timeout for when waiting, by default None
         embed_color : DiscordColor, optional
             the color of the game embed, by default DEFAULT_COLOR
         delete_after_guess : bool, optional
@@ -215,14 +219,16 @@ class Hangman:
             def check(m: discord.Message) -> bool:
                 if m.channel == ctx.channel and m.author == self.player:
                     return (len(m.content) == 1 and m.content.lower() in self._alpha) or (m.content.lower() == self.word)
-
-            message: discord.Message = await ctx.bot.wait_for("message", check=check)
+            try:
+                message: discord.Message = await ctx.bot.wait_for("message", timeout=timeout, check=check)
+            except asyncio.TimeoutError:
+                break
 
             await self.make_guess(message.content.lower())
             gameover = await self.check_win()
 
             if gameover:
-                return
+                break
 
             if delete_after_guess:
                 try:

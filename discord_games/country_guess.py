@@ -6,6 +6,7 @@ import os
 import pathlib
 import random
 import difflib
+import asyncio
 
 import discord
 from discord.ext import commands
@@ -131,7 +132,7 @@ class CountryGuesser:
             else:
                 return m.channel == ctx.channel and m.author == ctx.author
 
-        message: discord.Message = await ctx.bot.wait_for('message', check=check)
+        message: discord.Message = await ctx.bot.wait_for('message', timeout=self.timeout, check=check)
         content = message.content.strip().lower()
 
         if options:
@@ -143,7 +144,8 @@ class CountryGuesser:
     async def start(
         self, 
         ctx: commands.Context[commands.Bot], 
-        *, 
+        *,
+        timeout: Optional[float] = None,
         embed_color: DiscordColor = DEFAULT_COLOR,
         ignore_diff_len: bool = False
     ) -> discord.Message:
@@ -154,6 +156,8 @@ class CountryGuesser:
         ----------
         ctx : commands.Context
             the context of the invokation command
+        timeout : Optional[float], optional
+            the timeout for when waiting, by default None
         embed_color : DiscordColor, optional
             the color of the game embed, by default DEFAULT_COLOR
         ignore_diff_len : bool, optional
@@ -166,6 +170,7 @@ class CountryGuesser:
         """
         file = await self.get_country()
 
+        self.timeout = timeout
         self.embed_color = embed_color
         self.embed = self.get_embed()
         self.embed.set_footer(text='send your guess into the chat now!')
@@ -175,8 +180,10 @@ class CountryGuesser:
         self.accepted_length = len(self.country) if ignore_diff_len else None
 
         while not ctx.bot.is_closed():
-
-            msg, response = await self.wait_for_response(ctx, length=self.accepted_length)
+            try:
+                msg, response = await self.wait_for_response(ctx, length=self.accepted_length)
+            except asyncio.TimeoutError:
+                break
 
             if response == self.country:
                 await msg.reply(f'That is correct! The country was `{self.country.title()}`')
@@ -195,12 +202,16 @@ class CountryGuesser:
                 else:
                     await msg.reply(f'That is incorrect! but you are `{acc}%` of the way there!\nWould you like a hint? type: `(y/n)`', mention_author=False)
 
-                    hint_msg, resp = await self.wait_for_response(ctx, options=('y', 'n'))
-                    if resp == 'y':
-                        hint = self.get_hint()
-                        self.hints -= 1
-                        await hint_msg.reply(f'Here is your hint: `{hint}`', mention_author=False)
+                    try:
+                        hint_msg, resp = await self.wait_for_response(ctx, options=('y', 'n'))
+                    except asyncio.TimeoutError:
+                        break
                     else:
-                        await hint_msg.reply(f'Okay continue guessing! You have **{self.guesses}** guesses left.', mention_author=False)
+                        if resp == 'y':
+                            hint = self.get_hint()
+                            self.hints -= 1
+                            await hint_msg.reply(f'Here is your hint: `{hint}`', mention_author=False)
+                        else:
+                            await hint_msg.reply(f'Okay continue guessing! You have **{self.guesses}** guesses left.', mention_author=False)
 
         return self.message

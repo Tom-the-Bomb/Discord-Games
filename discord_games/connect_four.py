@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Optional
+import asyncio
 
 import discord
 from discord.ext import commands
@@ -97,6 +98,7 @@ class ConnectFour:
         self, 
         ctx: commands.Context[commands.Bot], 
         *,
+        timeout: Optional[float] = None,
         embed_color: DiscordColor = DEFAULT_COLOR,
         remove_reaction_after: bool = False, 
         **kwargs
@@ -108,6 +110,8 @@ class ConnectFour:
         ----------
         ctx : commands.Context
             the context of the invokation command
+        timeout : Optional[float], optional
+            the timeout for when waiting, by default None
         embed_color : DiscordColor, optional
             the color of the game embed, by default DEFAULT_COLOR
         remove_reaction_after : bool, optional
@@ -135,7 +139,10 @@ class ConnectFour:
                     self.board[0][self._conversion[str(reaction.emoji)]] == BLANK
                 )
 
-            reaction, user = await ctx.bot.wait_for("reaction_add", check=check)
+            try:
+                reaction, user = await ctx.bot.wait_for("reaction_add", timeout=timeout, check=check)
+            except asyncio.TimeoutError:
+                break
 
             emoji = str(reaction.emoji)
             await self.PlacePiece(emoji, user)

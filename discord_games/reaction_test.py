@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Optional
 import time
 import random
 import asyncio
@@ -16,13 +17,13 @@ class ReactionGame:
     def __init__(self, emoji: str = '🖱️') -> None:
         self.emoji = emoji
 
-    async def wait_for_reaction(self, ctx: commands.Context[commands.Bot]) -> tuple[discord.Member, float]:
+    async def wait_for_reaction(self, ctx: commands.Context[commands.Bot], *, timeout: float) -> tuple[discord.Member, float]:
         start = time.perf_counter()
 
         def check(reaction: discord.Reaction, _: discord.Member) -> bool:
             return str(reaction.emoji) == self.emoji and reaction.message == self.message
 
-        _, user = await ctx.bot.wait_for('reaction_add', check=check)
+        _, user = await ctx.bot.wait_for('reaction_add', timeout=timeout, check=check)
         end = time.perf_counter()
 
         return user, (end - start)
@@ -31,6 +32,7 @@ class ReactionGame:
         self, 
         ctx: commands.Context[commands.Bot], 
         *,
+        timeout: Optional[float] = None,
         embed_color: DiscordColor = DEFAULT_COLOR,
     ) -> discord.Message:
         """
@@ -40,6 +42,8 @@ class ReactionGame:
         ----------
         ctx : commands.Context
             the context of the invokation command
+        timeout : Optional[float], optional
+            the timeout for when waiting, by default None
         embed_color : DiscordColor, optional
             the color of the game embed, by default DEFAULT_COLOR
 
@@ -63,7 +67,12 @@ class ReactionGame:
         embed.description = f'React with {self.emoji} now!'
         await self.message.edit(embed=embed)
 
-        user, elapsed = await self.wait_for_reaction(ctx)
+        try:
+            user, elapsed = await self.wait_for_reaction(ctx, timeout=timeout)
+        except asyncio.TimeoutError:
+            return self.message
 
         embed.description = f'{user.mention} reacted first in `{elapsed:.2f}s` !'
-        return await self.message.edit(embed=embed)
+        await self.message.edit(embed=embed)
+
+        return self.message

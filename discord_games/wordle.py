@@ -3,6 +3,7 @@ from typing import Optional
 
 import pathlib
 import random
+import asyncio
 from io import BytesIO
 
 import discord
@@ -82,7 +83,13 @@ class Wordle:
         buf.seek(0)
         return buf
 
-    async def start(self, ctx: commands.Context[commands.Bot], *, embed_color: DiscordColor = DEFAULT_COLOR) -> discord.Message:
+    async def start(
+        self, 
+        ctx: commands.Context[commands.Bot], 
+        *,
+        timeout: Optional[float] = None,
+        embed_color: DiscordColor = DEFAULT_COLOR
+    ) -> discord.Message:
         """
         starts the wordle game
 
@@ -90,6 +97,8 @@ class Wordle:
         ----------
         ctx : commands.Context
             the context of the invokation command
+        timeout : Optional[float], optional
+            the timeout for when waiting, by default None
         embed_color : DiscordColor, optional
             the color of the game embed, by default DEFAULT_COLOR
 
@@ -112,7 +121,11 @@ class Wordle:
             def check(m):
                 return len(m.content) == 5 and m.author == ctx.author and m.channel == ctx.channel
             
-            guess: discord.Message = await ctx.bot.wait_for('message', check=check)
+            try:
+                guess: discord.Message = await ctx.bot.wait_for('message', timeout=timeout, check=check)
+            except asyncio.TimeoutError:
+                break
+
             content = guess.content.lower()
 
             if content not in self._valid_words:
@@ -129,8 +142,10 @@ class Wordle:
                 self.message = await ctx.send(embed=embed, file=discord.File(buf, 'wordle.png'))
 
                 if won:
-                    return await ctx.send('Game Over! You won!')
+                    await ctx.send('Game Over! You won!')
+                    break
                 elif len(self.guesses) >= 6:
-                    return await ctx.send(f'Game Over! You lose, the word was: **{self.word}**')
+                    await ctx.send(f'Game Over! You lose, the word was: **{self.word}**')
+                    break
 
         return self.message

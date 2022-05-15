@@ -1,4 +1,5 @@
 from typing import Optional, ClassVar
+import asyncio
 
 import discord
 from discord.ext import commands
@@ -101,7 +102,8 @@ class Tictactoe:
     async def start(
         self, 
         ctx: commands.Context[commands.Bot], 
-        *, 
+        *,
+        timeout: Optional[float] = None,
         embed_color: DiscordColor = DEFAULT_COLOR, 
         remove_reaction_after: bool = False, 
         **kwargs,
@@ -113,6 +115,8 @@ class Tictactoe:
         ----------
         ctx : commands.Context
             the context of the invokation command
+        timeout : Optional[float], optional
+            the timeout for when waiting, by default None
         embed_color : DiscordColor, optional
             the color of the game embed, by default DEFAULT_COLOR
         remove_reaction_after : bool, optional
@@ -136,7 +140,10 @@ class Tictactoe:
             def check(reaction: discord.Reaction, user: discord.Member) -> bool:
                 return str(reaction.emoji) in self._controls and user == self.turn and reaction.message == self.message
 
-            reaction, user = await ctx.bot.wait_for("reaction_add", check=check)
+            try:
+                reaction, user = await ctx.bot.wait_for("reaction_add", timeout=timeout, check=check)
+            except asyncio.TimeoutError:
+                break
 
             if self.is_game_over():
                 break

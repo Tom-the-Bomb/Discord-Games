@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from typing import Optional
 import random
+import asyncio
 
 import discord
 from discord.ext import commands
@@ -20,7 +22,7 @@ class RockPaperScissors:
     def check_win(self, bot_choice: str, user_choice: str) -> bool:
         return self.BEATS[user_choice] == bot_choice
     
-    async def wait_for_choice(self, ctx: commands.Context[commands.Bot]) -> str:
+    async def wait_for_choice(self, ctx: commands.Context[commands.Bot], *, timeout: float) -> str:
          
         def check(reaction: discord.Reaction, user: discord.Member) -> bool:
             return (
@@ -29,13 +31,14 @@ class RockPaperScissors:
                 reaction.message == self.message
             )
         
-        reaction, _ = await ctx.bot.wait_for('reaction_add', check=check)
+        reaction, _ = await ctx.bot.wait_for('reaction_add', timeout=timeout, check=check)
         return str(reaction.emoji)
 
     async def start(
         self, 
         ctx: commands.Context[commands.Bot], 
-        *, 
+        *,
+        timeout: Optional[float] = None,
         embed_color: DiscordColor = DEFAULT_COLOR
     ) -> discord.Message:
         """
@@ -45,6 +48,8 @@ class RockPaperScissors:
         ----------
         ctx : commands.Context
             the context of the invokation command
+        timeout : Optional[float], optional
+            the timeout for when waiting, by default None
         embed_color : DiscordColor, optional
             the color of the game embed, by default DEFAULT_COLOR
 
@@ -64,7 +69,11 @@ class RockPaperScissors:
             await self.message.add_reaction(option)
 
         bot_choice = random.choice(self.OPTIONS)
-        user_choice = await self.wait_for_choice(ctx)
+        
+        try:
+            user_choice = await self.wait_for_choice(ctx, timeout=timeout)
+        except asyncio.TimeoutError:
+            return self.message
         
         if user_choice == bot_choice:
             embed.description = f'**Tie!**\nWe both picked {user_choice}'  
