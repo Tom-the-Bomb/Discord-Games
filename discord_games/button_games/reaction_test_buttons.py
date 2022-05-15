@@ -55,10 +55,12 @@ class ReactionView(BaseView):
         self.add_item(self.button)
 
 class BetaReactionGame:
-    
+    """
+    Reaction(buttons) game
+    """
     async def start(
         self, 
-        ctx: commands.Context, 
+        ctx: commands.Context[commands.Bot], 
         *,
         author_only: bool = False,
         pause_range: tuple[float, float] = (1.0, 5.0),
@@ -68,8 +70,32 @@ class BetaReactionGame:
         ] = (discord.ButtonStyle.green, discord.ButtonStyle.red),
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None,
-    ) -> bool:
+    ) -> discord.Message:
+        """
+        starts the Reaction(buttons) Game
 
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        author_only : bool, optional
+            specifies whether or not tjhe view is only limited to the author, by default False
+        pause_range : tuple[float, float], optional
+            the time range to randomly pause for, by default (1.0, 5.0)
+        start_button_style : discord.ButtonStyle, optional
+            specifies the button style to start with, by default discord.ButtonStyle.blurple
+        end_button_style : Union[ discord.ButtonStyle, tuple[discord.ButtonStyle, ...] ], optional
+            specifies the button styles(s) to change to, by default (discord.ButtonStyle.green, discord.ButtonStyle.red)
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+        timeout : Optional[float], optional
+            the timeout for the view, by default None
+
+        Returns
+        -------
+        discord.Message
+            returns the game message
+        """
         self.finished_event = asyncio.Event()
 
         self.author_only = author_only
@@ -95,4 +121,5 @@ class BetaReactionGame:
         self.start_time = time.perf_counter()
         self.view.button.edited = True
 
-        return await self.finished_event.wait()
+        await self.finished_event.wait()
+        return self.message

@@ -76,7 +76,9 @@ class LightsOutView(SlideView):
                 self.add_item(button)
 
 class LightsOut:
-
+    """
+    Lights Out Game
+    """
     def __init__(self, count: Literal[1, 2, 3, 4, 5] = 4) -> None:
 
         if count not in range(1, 6):
@@ -109,13 +111,31 @@ class LightsOut:
 
     async def start(
         self, 
-        ctx: commands.Context[Any],
+        ctx: commands.Context[commands.Bot],
         *,
         button_style: discord.ButtonStyle = discord.ButtonStyle.green,
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None
-    ) -> bool:
+    ) -> discord.Message:
+        """
+        starts the Lights Out Game
 
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        button_style : discord.ButtonStyle, optional
+            the primary button style to use, by default discord.ButtonStyle.green
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+        timeout : Optional[float], optional
+            the timeout for the view, by default None
+
+        Returns
+        -------
+        discord.Message
+            returns the game message
+        """
         self.button_style = button_style
         self.player = ctx.author
 
@@ -128,7 +148,8 @@ class LightsOut:
 
         self.message = await ctx.send(embed=self.embed, view=self.view)
 
-        return await double_wait(
+        await double_wait(
             wait_for_delete(ctx, self.message), 
             self.view.wait(),
         )
+        return self.message

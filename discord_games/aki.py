@@ -23,6 +23,9 @@ class Options(Enum):
     pn  = "😕"
 
 class Akinator:
+    """
+    Akinator Game, utilizes reactions
+    """
     BAR: ClassVar[str] = "██"
     instructions: ClassVar[str] = (
         '✅ 🠒 `yes`\n'
@@ -90,7 +93,7 @@ class Akinator:
 
     async def start(
         self, 
-        ctx: commands.Context,
+        ctx: commands.Context[commands.Bot],
         *,
         embed_color: DiscordColor = DEFAULT_COLOR,
         remove_reaction_after: bool = False, 
@@ -100,7 +103,34 @@ class Akinator:
         delete_button: bool = False, 
         child_mode: bool = True, 
     ) -> Optional[discord.Message]:
-        
+        """
+        starts the akinator game
+
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+        remove_reaction_after : bool, optional
+            indicates whether to remove the user's reaction after or not, by default False
+        win_at : int, optional
+            indicates when to tell the akinator to make it's guess, by default 80
+        timeout : Optional[float], optional
+            indicates the timeout for when waiting, by default None
+        back_button : bool, optional
+            indicates whether to add a back button, by default False
+        delete_button : bool, optional
+            indicates whether to add a stop button to stop the game, by default False
+        child_mode : bool, optional
+            indicates to filter out NSFW content or not, by default True
+
+        Returns
+        -------
+        Optional[discord.Message]
+            returns the game message
+        """
+
         self.back_button = back_button
         self.delete_button = delete_button
         self.embed_color = embed_color

@@ -96,7 +96,9 @@ class MemoryView(BaseView):
                 self.add_item(button)
 
 class MemoryGame:
-
+    """
+    Memory Game
+    """
     def __init__(self) -> None:
         self.embed_color: Optional[DiscordColor] = None
         self.embed: Optional[discord.Embed] = None
@@ -104,15 +106,37 @@ class MemoryGame:
 
     async def start(
         self, 
-        ctx: commands.Context,
+        ctx: commands.Context[commands.Bot],
         *,
         embed_color: DiscordColor = DEFAULT_COLOR,
         items: list[str] = [],
         pause_time: float = 0.7,
         button_style: discord.ButtonStyle = discord.ButtonStyle.red,
         timeout: Optional[float] = None,
-    ) -> bool:
+    ) -> discord.Message:
+        """
+        starts the memory game
 
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+        items : list[str], optional
+            items to use for the game tiles, by default []
+        pause_time : float, optional
+            specifies the duration to pause for before hiding the tiles again, by default 0.7
+        button_style : discord.ButtonStyle, optional
+            the primary button style to use, by default discord.ButtonStyle.red
+        timeout : Optional[float], optional
+            the timeout for the view, by default None
+
+        Returns
+        -------
+        discord.Message
+            returns the game message
+        """
         self.embed_color = embed_color
         self.embed = discord.Embed(description='**Memory Game**', color=self.embed_color)
         self.embed.add_field(name='\u200b', value='Moves: `0`')
@@ -126,7 +150,8 @@ class MemoryGame:
         )
         self.message = await ctx.send(embed=self.embed, view=self.view)
 
-        return await double_wait(
+        await double_wait(
             wait_for_delete(ctx, self.message), 
             self.view.wait(),
         )
+        return self.message

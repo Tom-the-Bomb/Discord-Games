@@ -101,11 +101,28 @@ class BoggleView(BaseView):
     async def stop_button(self, interaction: discord.Interaction, _) -> None:
         self.disable_all()
 
-        await interaction.response.edit_message(view=self)
+        game = self.game
+        embed = discord.Embed(title='Game Over!', color=game.embed_color)
+        embed.description = '''
+        ```yml
+        3-letter-word: 1p
+        4-letter-word: 2p
+        5-letter-word: 3p
+        ...
+        wrong-word: -1p
+        ```
+        '''
+        words, points = game.get_results()
+        embed.add_field(name='\u200b', value=f'You found **{words}** words and earned **{points}** points!')
+        
+        await interaction.response.send_message(embed=embed)
+        await interaction.message.edit(view=self)
         return self.stop()
 
 class Boggle:
-    
+    """
+    Boggle Game
+    """
     def __init__(self) -> None:
         self.board = [random.choices(string.ascii_uppercase, k=4) for _ in range(4)]
 
@@ -120,6 +137,12 @@ class Boggle:
 
         self.embed_color: Optional[DiscordColor] = None
 
+    def get_results(self) -> tuple[int, int]:
+        words = len(guesses := self.correct_guesses)
+        points = sum(len(guess) - 2 for guess in guesses)
+        points -= sum([1] * len(self.wrong_guesses))
+        return words, points
+            
     def reset(self) -> None:
         for button in self.view.children:
             if isinstance(button, discord.ui.Button) and button.row != 4:
@@ -161,14 +184,34 @@ class Boggle:
 
     async def start(
         self, 
-        ctx: commands.Context,
+        ctx: commands.Context[commands.Bot],
         *,
         embed_color: DiscordColor = DEFAULT_COLOR,
         button_style: discord.ButtonStyle = discord.ButtonStyle.gray,
         selected_style: discord.ButtonStyle = discord.ButtonStyle.green,
         timeout: Optional[float] = None,
-    ) -> bool:
+    ) -> discord.Message:
+        """
+        starts the boggle game
 
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        embed_color : DiscordColor, optional
+            _description_, by default DEFAULT_COLOR
+        button_style : discord.ButtonStyle, optional
+            the primary button style to use, by default discord.ButtonStyle.gray
+        selected_style : discord.ButtonStyle, optional
+            the button style to use for selected tiles, by default discord.ButtonStyle.green
+        timeout : Optional[float], optional
+            the timeout for the view, by default None
+
+        Returns
+        -------
+        discord.Message
+            returns the game message
+        """
         self.embed_color = embed_color
 
         self.button_style = button_style
@@ -178,4 +221,5 @@ class Boggle:
         self.view = BoggleView(self, timeout=timeout)
         self.message = await ctx.send(view=self.view, embed=self.get_embed())
 
-        return await self.view.wait()
+        await self.view.wait()
+        return self.message

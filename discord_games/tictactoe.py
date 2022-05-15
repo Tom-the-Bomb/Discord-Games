@@ -2,13 +2,39 @@ from typing import Optional, ClassVar
 
 import discord
 from discord.ext import commands
+from regex import R
 
 from .utils import DiscordColor, DEFAULT_COLOR
 
 class Tictactoe:
+    """
+    TicTacToe Game
+    """
     BLANK: ClassVar[str] = "⬛"
     CIRCLE: ClassVar[str] = "⭕"
     CROSS: ClassVar[str] = "❌"
+    _conversion: ClassVar[dict[str, tuple[int, int]]] = {
+        '1️⃣': (0, 0), 
+        '2️⃣': (0, 1), 
+        '3️⃣': (0, 2), 
+        '4️⃣': (1, 0), 
+        '5️⃣': (1, 1), 
+        '6️⃣': (1, 2), 
+        '7️⃣': (2, 0), 
+        '8️⃣': (2, 1), 
+        '9️⃣': (2, 2), 
+    }
+
+    _WINNERS: ClassVar[tuple[tuple[tuple[int, int], ...], ...]] = (
+        ((0, 0), (0, 1), (0, 2)),
+        ((1, 0), (1, 1), (1, 2)),
+        ((2, 0), (2, 1), (2, 2)),
+        ((0, 0), (1, 0), (2, 0)),
+        ((0, 1), (1, 1), (2, 1)),
+        ((0, 2), (1, 2), (2, 2)),
+        ((0, 0), (1, 1), (2, 2)), 
+        ((0, 2), (1, 1), (2, 0)),
+    )
 
     def __init__(self, cross: discord.Member, circle: discord.Member) -> None:
         self.cross = cross
@@ -22,35 +48,22 @@ class Tictactoe:
         self.message: Optional[discord.Message] = None
 
         self._controls: list[str] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
-        self._conversion: dict[str, tuple[int, int]] = {
-            '1️⃣': (0, 0), 
-            '2️⃣': (0, 1), 
-            '3️⃣': (0, 2), 
-            '4️⃣': (1, 0), 
-            '5️⃣': (1, 1), 
-            '6️⃣': (1, 2), 
-            '7️⃣': (2, 0), 
-            '8️⃣': (2, 1), 
-            '9️⃣': (2, 2), 
-        }
-        self.emoji_to_player = {
+
+        self.emoji_to_player: dict[discord.Member, str] = {
             self.CIRCLE: self.circle, 
             self.CROSS : self.cross, 
         }
-        self.player_to_emoji = {
-            self.cross: self.CROSS, 
-            self.circle: self.CIRCLE, 
-        }
+        self.player_to_emoji: dict[str, discord.Member] = {v: k for k, v in self.emoji_to_player.items()}
 
     def board_string(self) -> str:
-        board = ""
+        board = ''
         for row in self.board:
-            board += "".join(row) + "\n"
+            board += ''.join(row) + '\n'
         return board
 
-    def make_embed(self, color: DiscordColor = DEFAULT_COLOR, *, tie: bool = False) -> discord.Embed:
-        embed = discord.Embed(color=color)
-        if self.is_game_over() or tie:
+    def make_embed(self, *, game_over: bool = False) -> discord.Embed:
+        embed = discord.Embed(color=self.embed_color)
+        if game_over:
             status = f"{self.winner.mention} won!" if self.winner else "Tie"
             embed.description = f"**Game over**\n{status}"
         else:
@@ -73,31 +86,13 @@ class Tictactoe:
 
     def is_game_over(self, *, tie: bool = False) -> bool:
 
-        for i in range(3):
+        for possibility in self._WINNERS:
+            row = [self.board[r][c] for r, c in possibility]
 
-            if (self.board[i][0] == self.board[i][1] == self.board[i][2]) and self.board[i][0] != self.BLANK:
-                self.winner = self.emoji_to_player[self.board[i][0]]
-                self.winning_indexes = [(i, 0), (i, 1), (i, 2)]
-
+            if len(set(row)) == 1 and row[0] != self.BLANK:
+                self.winner = self.emoji_to_player[row[0]]
+                self.winning_indexes = row
                 return True
-
-            if (self.board[0][i] == self.board[1][i] == self.board[2][i]) and self.board[0][i] != self.BLANK:
-                self.winner = self.emoji_to_player[self.board[0][i]]
-                self.winning_indexes = [(0, i), (1, i), (2, i)]
-
-                return True
-
-        if (self.board[0][0] == self.board[1][1] == self.board[2][2]) and self.board[0][0] != self.BLANK:
-            self.winner = self.emoji_to_player[self.board[0][0]]
-            self.winning_indexes = [(0, 0), (1, 1), (2, 2)]
-
-            return True
-           
-        if (self.board[0][2] == self.board[1][1] == self.board[2][0]) and self.board[0][2] != self.BLANK:
-            self.winner = self.emoji_to_player[self.board[0][2]]
-            self.winning_indexes = [(0, 2), (1, 1), (2, 0)]
-
-            return True
 
         if not self._controls or tie:
             return True
@@ -106,22 +101,40 @@ class Tictactoe:
 
     async def start(
         self, 
-        ctx: commands.Context, 
+        ctx: commands.Context[commands.Bot], 
         *, 
         embed_color: DiscordColor = DEFAULT_COLOR, 
         remove_reaction_after: bool = False, 
         **kwargs,
     ) -> discord.Message:
+        """
+        starts the tictactoe game
 
-        embed = self.make_embed(embed_color)
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+        remove_reaction_after : bool, optional
+            specifies whether or not to remove the move reaction each time, by default False
+
+        Returns
+        -------
+        discord.Message
+            returns the game emssage
+        """
+        self.embed_color = embed_color
+
+        embed = self.make_embed()
         self.message = await ctx.send(self.board_string(), embed=embed, **kwargs)
 
         for button in self._controls:
             await self.message.add_reaction(button)
 
-        while True:
+        while not ctx.bot.is_closed():
 
-            def check(reaction, user):
+            def check(reaction: discord.Reaction, user: discord.Member) -> bool:
                 return str(reaction.emoji) in self._controls and user == self.turn and reaction.message == self.message
 
             reaction, user = await ctx.bot.wait_for("reaction_add", check=check)
@@ -131,12 +144,14 @@ class Tictactoe:
             
             emoji = str(reaction.emoji)
             self.make_move(emoji, user)
-            embed = self.make_embed(embed_color)
+            embed = self.make_embed()
 
             if remove_reaction_after:
                 await self.message.remove_reaction(emoji, user)
 
             await self.message.edit(content=self.board_string(), embed=embed)
         
-        embed = self.make_embed(embed_color)
-        return await self.message.edit(content=self.board_string(), embed=embed)
+        embed = self.make_embed(game_over=True)
+        await self.message.edit(content=self.board_string(), embed=embed)
+
+        return self.message

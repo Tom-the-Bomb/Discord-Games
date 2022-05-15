@@ -80,10 +80,12 @@ class AkiView(BaseView):
         return await interaction.response.edit_message(embed=embed, view=self)
         
 class BetaAkinator(Akinator):
-
+    """
+    Akinator(buttons) Game
+    """
     async def start(
         self, 
-        ctx: commands.Context,
+        ctx: commands.Context[commands.Bot],
         *,
         back_button: bool = False,
         delete_button: bool = False,
@@ -91,8 +93,32 @@ class BetaAkinator(Akinator):
         win_at: int = 80, 
         timeout: Optional[float] = None,
         child_mode: bool = True,
-    ) -> bool:
+    ) -> discord.Message:
+        """
+        starts the Akinator(buttons) game
 
+        Parameters
+        ----------
+        ctx : commands.Context[commands.Bot]
+            the context of the invokation command
+        back_button : bool, optional
+            indicates whether or not to add a back button, by default False
+        delete_button : bool, optional
+            indicates whether to add a stop button to stop the game, by default False
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+        win_at : int, optional
+            indicates when to tell the akinator to make it's guess, by default 80
+        timeout : Optional[float], optional
+            the timeout for the view, by default None
+        child_mode : bool, optional
+            indicates to filter out NSFW content or not, by default True
+
+        Returns
+        -------
+        discord.Message
+            returns the game message
+        """
         self.back_button = back_button
         self.delete_button = delete_button
         self.embed_color = embed_color
@@ -106,4 +132,5 @@ class BetaAkinator(Akinator):
         embed = self.build_embed(instructions=False)
         self.message = await ctx.send(embed=embed, view=self.view)
 
-        return await self.view.wait()
+        await self.view.wait()
+        return self.message

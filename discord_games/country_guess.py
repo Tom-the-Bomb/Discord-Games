@@ -14,6 +14,9 @@ from PIL import Image, ImageFilter, ImageOps
 from .utils import *
 
 class CountryGuesser:
+    """
+    CountryGuesser Game
+    """
     embed: discord.Embed
     accepted_length: Optional[int]
     country: str
@@ -116,7 +119,7 @@ class CountryGuesser:
 
     async def wait_for_response(
         self, 
-        ctx: commands.Context, 
+        ctx: commands.Context[commands.Bot], 
         *, 
         options: tuple[str, ...] = (), 
         length: Optional[int] = None,
@@ -139,33 +142,51 @@ class CountryGuesser:
 
     async def start(
         self, 
-        ctx: commands.Context, 
+        ctx: commands.Context[commands.Bot], 
         *, 
         embed_color: DiscordColor = DEFAULT_COLOR,
         ignore_diff_len: bool = False
     ) -> discord.Message:
+        """
+        starts the country-guesser game
 
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+        ignore_diff_len : bool, optional
+            specifies whether or not to ignore guesses that are not of the same length as the correct answer, by default False
+
+        Returns
+        -------
+        discord.Message
+            returns the game message
+        """
         file = await self.get_country()
 
         self.embed_color = embed_color
         self.embed = self.get_embed()
         self.embed.set_footer(text='send your guess into the chat now!')
 
-        await ctx.send(embed=self.embed, file=file)
+        self.message = await ctx.send(embed=self.embed, file=file)
 
         self.accepted_length = len(self.country) if ignore_diff_len else None
 
-        while True:
+        while not ctx.bot.is_closed():
 
             msg, response = await self.wait_for_response(ctx, length=self.accepted_length)
 
             if response == self.country:
-                return await msg.reply(f'That is correct! The country was `{self.country.title()}`')
+                await msg.reply(f'That is correct! The country was `{self.country.title()}`')
+                break
             else:
                 self.guesses -= 1
 
                 if not self.guesses:
-                    return await msg.reply(f'Game Over! you lost, The country was `{self.country.title()}`')
+                    await msg.reply(f'Game Over! you lost, The country was `{self.country.title()}`')
+                    break
                 
                 acc = self.get_accuracy(response)
 
@@ -181,3 +202,5 @@ class CountryGuesser:
                         await hint_msg.reply(f'Here is your hint: `{hint}`', mention_author=False)
                     else:
                         await hint_msg.reply(f'Okay continue guessing! You have **{self.guesses}** guesses left.', mention_author=False)
+
+        return self.message

@@ -99,6 +99,9 @@ class RPSView(BaseView):
             self.add_item(RPSButton(option, style=self.button_style))
 
 class BetaRockPaperScissors(RockPaperScissors):
+    """
+    RockPaperScissors(buttons) game
+    """
     player1: discord.Member
     embed: discord.Embed
 
@@ -111,13 +114,31 @@ class BetaRockPaperScissors(RockPaperScissors):
 
     async def start(
         self, 
-        ctx: commands.Context, 
+        ctx: commands.Context[commands.Bot], 
         *,
         button_style: discord.ButtonStyle = discord.ButtonStyle.blurple,
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None,
-    ) -> bool:
+    ) -> discord.Message:
+        """
+        starts the rock-paper-scissors(buttons) game
 
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        button_style : discord.ButtonStyle, optional
+            the primary button style to use, by default discord.ButtonStyle.blurple
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+        timeout : Optional[float], optional
+            the timeout for the view, by default None
+
+        Returns
+        -------
+        discord.Message
+            returns the game mesage
+        """
         self.player1 = ctx.author
 
         self.embed = discord.Embed(
@@ -129,4 +150,5 @@ class BetaRockPaperScissors(RockPaperScissors):
         self.view = RPSView(self, button_style=button_style, timeout=timeout)
         self.message = await ctx.send(embed=self.embed, view=self.view)
 
-        return await self.view.wait()
+        await self.view.wait()
+        return self.message

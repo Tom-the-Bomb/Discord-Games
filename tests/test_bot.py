@@ -16,7 +16,7 @@ bot = TestBot(command_prefix='!!', intents=discord.Intents.all())
 
 @bot.command(name='test', aliases=['t'])
 @commands.is_owner()
-async def test(ctx: commands.Context) -> None:
+async def test(ctx: commands.Context[commands.Bot]) -> None:
 
     game = button_games.Boggle()
     await game.start(ctx)

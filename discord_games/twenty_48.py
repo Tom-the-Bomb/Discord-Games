@@ -19,6 +19,18 @@ if TYPE_CHECKING:
     Board: TypeAlias = list[list[int]]
 
 async def create_2048_emojis(guild: discord.Guild, names: Optional[list[str]] = None) -> None:
+    """
+    creates 2048 emojis in the specified Guild
+    intended to be ran once initially manually.
+
+    Parameters
+    ----------
+    guild : discord.Guild
+        the guild to create the emojis in
+    names : Optional[list[str]], optional
+        names to use for the emojis
+        if not specified, _<number> will be used, by default None
+    """
     directory = fr'{pathlib.Path(__file__).parent}\assets\2048-emoji-asset-examples'
     files = os.listdir(directory)
     names = map(lambda n: f'_{n[:-4]}', files) if not names else names
@@ -32,6 +44,9 @@ async def create_2048_emojis(guild: discord.Guild, names: Optional[list[str]] = 
             )
 
 class Twenty48:
+    """
+    Twenty48 Game
+    """
     player: discord.Member
 
     def __init__(
@@ -143,19 +158,20 @@ class Twenty48:
         stage = self._transp(stage)
         self.board = stage
 
-    def spawn_new(self) -> None:
+    def spawn_new(self) -> bool:
         board  = self.board
         zeroes = [(j, i) for j, sub in enumerate(board) for i, el in enumerate(sub) if el == 0]
 
         if not zeroes:
-            return
-
-        i, j = random.choice(zeroes)
-        board[i][j] = 2
+            return False
+        else:
+            i, j = random.choice(zeroes)
+            board[i][j] = 2
+            return True
 
     def number_to_emoji(self) -> str:
         board = self.board
-        game_string = ""
+        game_string = ''
 
         emoji_array = [
             [self._conversion.get(str(l), f'`{l}` ') for l in row] 
@@ -163,7 +179,7 @@ class Twenty48:
         ]
 
         for row in emoji_array:
-            game_string += "".join(row) + "\n"
+            game_string += ''.join(row) + '\n'
         return game_string
 
     def check_win(self) -> bool:
@@ -209,19 +225,42 @@ class Twenty48:
 
     async def start(
         self, 
-        ctx: commands.Context, 
+        ctx: commands.Context[commands.Bot], 
         *,
         win_at: Literal[2048, 4096, 8192] = 8192,
         timeout: Optional[float] = None,
-        remove_reaction_after: bool = True, 
+        remove_reaction_after: bool = False, 
         delete_button: bool = False,
         embed_color: DiscordColor = DEFAULT_COLOR,
         **kwargs,
-    ) -> None:
+    ) -> discord.Message:
+        """
+        starts the 2048 game
 
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        win_at : Literal[2048, 4096, 8192], optional
+            the tile to stop the game / win at, by default 8192
+        timeout : Optional[float], optional
+            the timeout when waiting, by default None
+        remove_reaction_after : bool, optional
+            specifies whether or not to remove the move reaction, by default False
+        delete_button : bool, optional
+            specifies whether or not to include a stop button or not, by default False
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+
+        Returns
+        -------
+        discord.Message
+            returns the game message
+        """
         self.win_at = win_at
         self.embed_color = embed_color
         self.player = ctx.author
+
         self.board[random.randrange(4)][random.randrange(4)] = 2
         self.board[random.randrange(4)][random.randrange(4)] = 2
         
@@ -238,20 +277,21 @@ class Twenty48:
         for button in self._controls:
             await self.message.add_reaction(button)
 
-        while True:
+        while not ctx.bot.is_closed():
 
-            def check(reaction, user):
+            def check(reaction: discord.Reaction, user: discord.Member) -> bool:
                 return str(reaction.emoji) in self._controls and user == self.player and reaction.message == self.message
             
             try:
                 reaction, user = await ctx.bot.wait_for("reaction_add", timeout=timeout, check=check)
             except asyncio.TimeoutError:
-                return False
+                break
 
             emoji = str(reaction.emoji)
 
-            if delete_button and emoji == "⏹️":
-                return await self.message.delete()
+            if delete_button and emoji == '⏹️':
+                await self.message.delete()
+                break
 
             if emoji == '➡️':
                 self.move_right()
@@ -271,8 +311,11 @@ class Twenty48:
                 except discord.DiscordException:
                     pass
 
-            self.spawn_new()
+            lost = self.spawn_new()
             won = self.check_win()
+
+            if lost:
+                self.embed.description = 'Game Over! You lost.'
 
             if self._render_image:
                 image = await self.render_image()
@@ -281,5 +324,7 @@ class Twenty48:
                 board_string = self.number_to_emoji()
                 await self.message.edit(content=board_string, embed=self.embed)
 
-            if won:
-                return
+            if won or lost:
+                break
+
+        return self.message

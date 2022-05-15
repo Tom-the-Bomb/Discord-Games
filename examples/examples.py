@@ -34,7 +34,7 @@ class Games(commands.Cog):
         # it would then default to sending out the plain numbers instead, not fancy, but works. 
 
     @commands.command(name='connect4')
-    async def connect4(self, ctx: commands.Context, member: discord.Member):
+    async def connect4(self, ctx: commands.Context[commands.Bot], member: discord.Member):
         game = games.ConnectFour(
             red  = ctx.author,         
             blue = member,             
@@ -42,12 +42,12 @@ class Games(commands.Cog):
         await game.start(ctx)
 
     @commands.command(name='hangman')
-    async def hangman(self, ctx: commands.Context):
+    async def hangman(self, ctx: commands.Context[commands.Bot]):
         game = games.Hangman()
         await game.start(ctx, delete_after_guess=True)
 
     @commands.command(name='chess')
-    async def chess(self, ctx: commands.Context, member: discord.Member):
+    async def chess(self, ctx: commands.Context[commands.Bot], member: discord.Member):
 
         game = games.Chess(
             white = ctx.author, 
@@ -56,13 +56,13 @@ class Games(commands.Cog):
         await game.start(ctx, timeout=60, add_reaction_after_move=True)
 
     @commands.command(name='typerace')
-    async def typerace(self, ctx: commands.Context):
+    async def typerace(self, ctx: commands.Context[commands.Bot]):
         
         game = games.TypeRacer()
         await game.start(ctx, timeout=30)
 
     @commands.command(name='battleship')
-    async def battleship(self, ctx: commands.Context, member: discord.Member):
+    async def battleship(self, ctx: commands.Context[commands.Bot], member: discord.Member):
 
         game = games.BattleShip(ctx.author, member)
         await game.start(ctx)
@@ -70,7 +70,7 @@ class Games(commands.Cog):
     # Button Games: Requires discord.py >= v2.0.0
 
     @commands.command(name='tictactoe')
-    async def tictactoe(self, ctx: commands.Context, member: discord.Member):
+    async def tictactoe(self, ctx: commands.Context[commands.Bot], member: discord.Member):
         game = button_games.BetaTictactoe(
             cross  = ctx.author, 
             circle = member
@@ -78,31 +78,31 @@ class Games(commands.Cog):
         await game.start(ctx)
 
     @commands.command(name='wordle')
-    async def worldle(self, ctx: commands.Context):
+    async def worldle(self, ctx: commands.Context[commands.Bot]):
 
         game = button_games.BetaWordle(color=ctx.bot.color)
         await game.start(ctx)
 
     @commands.command(name='guess')
-    async def guess(self, ctx: commands.Context):
+    async def guess(self, ctx: commands.Context[commands.Bot]):
 
         game = button_games.BetaAkinator()
         await game.start(ctx, timeout=120, delete_button=True)
 
     @commands.command(name='twenty48')
-    async def twenty48(self, ctx: commands.Context):
+    async def twenty48(self, ctx: commands.Context[commands.Bot]):
 
         game = button_games.BetaTwenty48(self.twenty_48_emojis)
         await game.start(ctx)
 
     @commands.command(name='memory')
-    async def memory_game(self, ctx: commands.Context):
+    async def memory_game(self, ctx: commands.Context[commands.Bot]):
 
         game = button_games.MemoryGame()
         await game.start(ctx)
 
     @commands.command(name='rps')
-    async def rps(self, ctx: commands.Context, player: discord.Member = None):
+    async def rps(self, ctx: commands.Context[commands.Bot], player: discord.Member = None):
 
         game = button_games.BetaRockPaperScissors(player) # defaults to playing with bot if player = None
         await game.start(ctx)

@@ -71,16 +71,34 @@ class HangmanView(BaseView):
         self.add_item(HangmanButton(cancel_button=True))
 
 class BetaHangman(Hangman):
-
+    """
+    Hangman(buttons) Game
+    """
     async def start(
         self, 
-        ctx: commands.Context,
+        ctx: commands.Context[commands.Bot],
         *,
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None,
         **kwargs,
-    ) -> bool:
+    ) -> discord.Message:
+        """
+        starts the Hangman(buttons) Game
 
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+        timeout : Optional[float], optional
+            the timeout for the view, by default None
+
+        Returns
+        -------
+        discord.Message
+            returns the game message
+        """
         self.player = ctx.author
         self.embed_color = embed_color
 
@@ -88,4 +106,5 @@ class BetaHangman(Hangman):
         self.view = HangmanView(self, timeout=timeout)
         self._message = await ctx.send(embed=embed, view=self.view, **kwargs)
 
-        return await self.view.wait()
+        await self.view.wait()
+        return self.message

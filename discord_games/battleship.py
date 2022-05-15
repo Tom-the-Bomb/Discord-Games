@@ -188,6 +188,9 @@ class Board:
 
 
 class BattleShip:
+    """
+    BattleShip Game
+    """
     inputpat: ClassVar[re.Pattern] = re.compile(r'([a-j])(10|[1-9])')
 
     def __init__(self, 
@@ -277,7 +280,7 @@ class BattleShip:
         else:
             return None
 
-    async def get_ship_inputs(self, ctx: commands.Context, user: discord.Member) -> bool:
+    async def get_ship_inputs(self, ctx: commands.Context[commands.Bot], user: discord.Member) -> bool:
         
         board = self.get_board(user)
 
@@ -333,12 +336,28 @@ class BattleShip:
 
     async def start(
         self, 
-        ctx: commands.Context, 
+        ctx: commands.Context[commands.Bot], 
         *, 
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None
-    ) -> discord.Message:
+    ) -> tuple[discord.Message, discord.Message]:
+        """
+        starts the battleship game
 
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+        timeout : Optional[float], optional
+            the timeout for when waiting, by default None
+
+        Returns
+        -------
+        tuple[discord.Message, discord.Message]
+            returns both player's messages respectively
+        """
         self.embed_color = embed_color
 
         await ctx.send('**Game Started!**\nI\'ve setup the boards in your dms!')
@@ -356,7 +375,7 @@ class BattleShip:
         self.message2 = await self.player2.send('**Game starting!**', embeds=[e4, e3], files=[f4, f3])
         self.timeout = timeout
 
-        while True:
+        while not ctx.bot.is_closed():
 
             def check(msg: discord.Message) -> bool:
                 if not msg.guild and msg.author == self.turn:
@@ -365,7 +384,8 @@ class BattleShip:
             try:
                 message: discord.Message = await ctx.bot.wait_for('message', check=check, timeout=self.timeout)
             except asyncio.TimeoutError:
-                return await ctx.send(f'The timeout of {timeout} seconds, has been reached. Aborting...')
+                await ctx.send(f'The timeout of {timeout} seconds, has been reached. Aborting...')
+                break
 
             raw, coords = self.get_coords(message.content)
 
@@ -397,4 +417,7 @@ class BattleShip:
                     await winner.send('Congrats, you won! :)')
 
                     other = self.player2 if winner == self.player1 else self.player1
-                    return await other.send('You lost, better luck next time :(')
+                    await other.send('You lost, better luck next time :(')
+                    break
+
+        return self.message1, self.message2

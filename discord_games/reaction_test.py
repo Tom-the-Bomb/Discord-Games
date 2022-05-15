@@ -10,28 +10,44 @@ from discord.ext import commands
 from .utils import DiscordColor, DEFAULT_COLOR
 
 class ReactionGame:
-
+    """
+    Reaction Game
+    """
     def __init__(self, emoji: str = '🖱️') -> None:
         self.emoji = emoji
 
-    async def wait_for_reaction(self, ctx: commands.Context) -> tuple[discord.Member, float]:
+    async def wait_for_reaction(self, ctx: commands.Context[commands.Bot]) -> tuple[discord.Member, float]:
         start = time.perf_counter()
 
-        def check(reaction: discord.Reaction, user: discord.Member) -> bool:
+        def check(reaction: discord.Reaction, _: discord.Member) -> bool:
             return str(reaction.emoji) == self.emoji and reaction.message == self.message
 
-        reaction, user = await ctx.bot.wait_for('reaction_add', check=check)
+        _, user = await ctx.bot.wait_for('reaction_add', check=check)
         end = time.perf_counter()
 
         return user, (end - start)
     
     async def start(
         self, 
-        ctx: commands.Context, 
+        ctx: commands.Context[commands.Bot], 
         *,
         embed_color: DiscordColor = DEFAULT_COLOR,
     ) -> discord.Message:
+        """
+        starts the reaction game
 
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+
+        Returns
+        -------
+        discord.Message
+            returns the game message
+        """
         embed = discord.Embed(
             title='Reaction Game',
             description=f'React with {self.emoji} when the embed is edited!',

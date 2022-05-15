@@ -5,13 +5,15 @@ from typing import Optional
 import discord
 from discord.ext import commands
 
-RED   = "🔴"
-BLUE  = "🔵"
+from .utils import DiscordColor, DEFAULT_COLOR
+
+RED = "🔴"
+BLUE = "🔵"
 BLANK = "⬛"
 
 class ConnectFour:
 
-    def __init__(self, *, red: discord.Member, blue: discord.Member):
+    def __init__(self, *, red: discord.Member, blue: discord.Member) -> None:
         self.red_player  = red
         self.blue_player = blue
 
@@ -23,22 +25,13 @@ class ConnectFour:
         self.winner: Optional[discord.Member] = None
 
         self._conversion: dict[str, int] = {
-            '1️⃣': 0, 
-            '2️⃣': 1, 
-            '3️⃣': 2, 
-            '4️⃣': 3, 
-            '5️⃣': 4, 
-            '6️⃣': 5, 
-            '7️⃣': 6, 
+            emoji: i for i, emoji in enumerate(self._controls)
         }
         self.player_to_emoji: dict[discord.Member, str]  = {
             self.red_player : RED, 
             self.blue_player: BLUE,
         }
-        self.emoji_to_player: dict[str, discord.Member] = {
-            RED: self.red_player, 
-            BLUE: self.blue_player,
-        }
+        self.emoji_to_player: dict[str, discord.Member] = {v: k for k, v in self.player_to_emoji.items()}
 
     def board_string(self) -> str:
         board = "1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣\n"
@@ -47,7 +40,7 @@ class ConnectFour:
         return board
 
     async def make_embed(self, *, status: bool) -> discord.Embed:
-        embed = discord.Embed()
+        embed = discord.Embed(color=self.embed_color)
         if not status:
             embed.description = f"**Turn:** {self.turn.name}\n**Piece:** `{self.player_to_emoji[self.turn]}`"
         else:
@@ -100,7 +93,32 @@ class ConnectFour:
 
         return False
     
-    async def start(self, ctx: commands.Context, *, remove_reaction_after: bool = False, **kwargs) -> discord.Message:
+    async def start(
+        self, 
+        ctx: commands.Context[commands.Bot], 
+        *,
+        embed_color: DiscordColor = DEFAULT_COLOR,
+        remove_reaction_after: bool = False, 
+        **kwargs
+    ) -> discord.Message:
+        """
+        starts the Connect-4 game
+
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+        remove_reaction_after : bool, optional
+            specifies whether or not to remove the user's move reaction, by default False
+
+        Returns
+        -------
+        discord.Message
+            returns the game message
+        """
+        self.embed_color = embed_color
 
         embed = await self.make_embed(status=False)
         self.message = await ctx.send(self.board_string(), embed=embed, **kwargs)
@@ -108,7 +126,7 @@ class ConnectFour:
         for button in self._controls:
             await self.message.add_reaction(button)
 
-        while True:
+        while not ctx.bot.is_closed():
 
             def check(reaction: discord.Reaction, user: discord.Member) -> bool:
                 return (
@@ -132,4 +150,6 @@ class ConnectFour:
             await self.message.edit(content=self.board_string(), embed=embed)
         
         embed = await self.make_embed(status=status)
-        return await self.message.edit(content=self.board_string(), embed=embed)
+        await self.message.edit(content=self.board_string(), embed=embed)
+
+        return self.message

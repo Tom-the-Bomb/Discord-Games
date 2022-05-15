@@ -34,15 +34,15 @@ class WordInput(discord.ui.Modal, title='Word Input'):
             embed = discord.Embed(title='Wordle!', color=self.view.game.embed_color)
             embed.set_image(url='attachment://wordle.png')
             file = discord.File(buf, 'wordle.png')
-
+            
             if won:
-                self.view.disable_all()
-                self.view.stop()
                 await interaction.message.reply('Game Over! You won!', mention_author=True)
-            elif len(game.guesses) >= 6:
+            elif lost := len(game.guesses) >= 6:
+                await interaction.message.reply(f'Game Over! You lose, the word was: **{game.word}**', mention_author=True)
+
+            if won or lost:
                 self.view.disable_all()
                 self.view.stop()
-                await interaction.message.reply(f'Game Over! You lose, the word was: **{game.word}**', mention_author=True)
             
             return await interaction.response.edit_message(embed=embed, attachments=[file], view=self.view)
 
@@ -77,15 +77,33 @@ class WordleView(BaseView):
     
 class BetaWordle(Wordle):
     player: discord.Member
-
+    """
+    Wordle(buttons) game
+    """
     async def start(
         self, 
-        ctx: commands.Context, 
+        ctx: commands.Context[commands.Bot], 
         *,
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None
-    ) -> bool:
+    ) -> discord.Message:
+        """
+        starts the wordle(buttons) game
 
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+        timeout : Optional[float], optional
+            the timeout for the view, by default None
+
+        Returns
+        -------
+        discord.Message
+            returns the game message
+        """
         self.embed_color = embed_color
         self.player = ctx.author
 
@@ -99,4 +117,5 @@ class BetaWordle(Wordle):
             file=discord.File(buf, 'wordle.png'), 
             view=self.view,
         )
-        return await self.view.wait()
+        await self.view.wait()
+        return self.message

@@ -292,6 +292,9 @@ class SetupView(BaseView):
             self.add_item(SetupButton(ship, size, color))
 
 class BetaBattleShip(BattleShip):
+    """
+    BattleShip(buttons) Game
+    """
     embed: discord.Embed
 
     def __init__(self, 
@@ -380,13 +383,31 @@ class BetaBattleShip(BattleShip):
         
     async def start(
         self, 
-        ctx: commands.Context, 
+        ctx: commands.Context[commands.Bot], 
         *,
         max_log_size: int = 10,
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None,
-    ) -> tuple[bool, bool]:
+    ) -> tuple[discord.Message, discord.Message]:
+        """
+        starts the battleship(buttons) game
 
+        Parameters
+        ----------
+        ctx : commands.Context[commands.Bot]
+            the context of the invokation command
+        max_log_size : int, optional
+            indicates the length of the move log to show, by default 10
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+        timeout : Optional[float], optional
+            the timeout for the view, by default None
+
+        Returns
+        -------
+        tuple[discord.Message, discord.Message]
+            returns the game messages respectively
+        """
         self.max_log_size = max_log_size
         self.timeout = timeout
         self.embed_color = embed_color
@@ -424,7 +445,8 @@ class BetaBattleShip(BattleShip):
             files=[f4, f3],
         )
 
-        return await asyncio.gather(
+        await asyncio.gather(
             self.view1.wait(),
             self.view2.wait(),
         )
+        return self.message1, self.message2

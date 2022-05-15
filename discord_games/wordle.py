@@ -24,8 +24,10 @@ GREEN = (105, 169, 99)
 LGRAY = (198, 201, 205)
 
 class Wordle:
-
-    def __init__(self, *, text_size: int = 55) -> None:
+    """
+    Wordle Game
+    """
+    def __init__(self, word: Optional[str] = None, *, text_size: int = 55) -> None:
         self.embed_color: Optional[DiscordColor] = None
 
         parent = pathlib.Path(__file__).parent
@@ -36,7 +38,11 @@ class Wordle:
         self._font = ImageFont.truetype(fr'{parent}\assets\HelveticaNeuBold.ttf', self._text_size)
 
         self.guesses: list[list[dict[str, str]]] = []
-        self.word: str = random.choice(self._valid_words)
+
+        if word:
+            self.word = word
+        else:
+            self.word: str = random.choice(self._valid_words)
 
     def parse_guess(self, guess: str) -> bool:
         self.guesses.append([])
@@ -76,8 +82,22 @@ class Wordle:
         buf.seek(0)
         return buf
 
-    async def start(self, ctx: commands.Context, *, embed_color: DiscordColor = DEFAULT_COLOR) -> Optional[discord.Message]:
+    async def start(self, ctx: commands.Context[commands.Bot], *, embed_color: DiscordColor = DEFAULT_COLOR) -> discord.Message:
+        """
+        starts the wordle game
 
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+
+        Returns
+        -------
+        discord.Message
+            returns the game message
+        """
         self.embed_color = embed_color
 
         buf = await self.render_image()
@@ -85,9 +105,9 @@ class Wordle:
         embed = discord.Embed(title='Wordle!', color=self.embed_color)
         embed.set_image(url='attachment://wordle.png')
 
-        message = await ctx.send(embed=embed, file=discord.File(buf, 'wordle.png'))
+        self.message = await ctx.send(embed=embed, file=discord.File(buf, 'wordle.png'))
         
-        while True:
+        while not ctx.bot.is_closed():
             
             def check(m):
                 return len(m.content) == 5 and m.author == ctx.author and m.channel == ctx.channel
@@ -101,14 +121,16 @@ class Wordle:
                 won = self.parse_guess(content)
                 buf = await self.render_image()
 
-                await message.delete()
+                await self.message.delete()
 
                 embed = discord.Embed(title='Wordle!', color=self.embed_color)
                 embed.set_image(url='attachment://wordle.png')
 
-                message = await ctx.send(embed=embed, file=discord.File(buf, 'wordle.png'))
+                self.message = await ctx.send(embed=embed, file=discord.File(buf, 'wordle.png'))
 
                 if won:
                     return await ctx.send('Game Over! You won!')
                 elif len(self.guesses) >= 6:
                     return await ctx.send(f'Game Over! You lose, the word was: **{self.word}**')
+
+        return self.message

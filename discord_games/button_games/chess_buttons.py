@@ -93,19 +93,39 @@ class ChessView(BaseView):
         self.add_item(ChessButton(cancel_button=True))
 
 class BetaChess(Chess):
-
+    """
+    Chess(buttons) Game
+    """
     async def start(
         self, 
-        ctx: commands.Context, 
+        ctx: commands.Context[commands.Bot], 
         *, 
         embed_color: DiscordColor = DEFAULT_COLOR, 
         timeout: Optional[float] = None, 
-    ) -> bool:
+    ) -> discord.Message:
+        """
+        starts the Chess(buttons) Game
 
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+        timeout : Optional[float], optional
+            the timeout for the view, by default None
+
+        Returns
+        -------
+        discord.Message
+            returns the game message
+        """
         self.embed_color = embed_color
 
         embed = await self.make_embed()
         self.view = ChessView(self, timeout=timeout)
 
         self.message = await ctx.send(embed=embed, view=self.view)
-        return await self.view.wait()
+
+        await self.view.wait()
+        return self.message

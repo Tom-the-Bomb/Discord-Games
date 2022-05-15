@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, ClassVar, Any
+from typing import Optional, ClassVar, TypedDict
 from datetime import datetime as dt
 from io import BytesIO
 
@@ -18,10 +18,18 @@ from discord.ext import commands
 
 from .utils import *
 
+class UserData(TypedDict):
+    user: discord.Member
+    time: float
+    wpm: float 
+    acc: float
 
 class TypeRacer:
-    SENTENCE_URL: ClassVar[str] = "https://api.quotable.io/random"
-    GRAMMAR_WORDS: ClassVar[tuple[str, ...]] = (
+    """
+    TypeRace Game
+    """
+    SENTENCE_URL: ClassVar[str] = 'https://api.quotable.io/random'
+    SHORT_WORDS: ClassVar[tuple[str, ...]] = (
         'the', 'of', 'to', 'and', 'a', 'in', 'is', 'it',
         'you', 'that', 'he', 'was', 'for', 'on', 'are',
         'with', 'as', 'his', 'they', 'be', 'at', 'one',
@@ -78,18 +86,18 @@ class TypeRacer:
             buffer.seek(0)
             return buffer
 
-    def format_line(self, i: int, x: dict[str, Any]) -> str:
-        return f" • {self.EMOJI_MAP[i]} | {x['user'].mention} in {x['time']:.2f}s | **WPM:** {x['wpm']:.2f} | **ACC:** {x['acc']:.2f}%"
+    def format_line(self, i: int, data: UserData) -> str:
+        return f" • {self.EMOJI_MAP[i]} | {data['user'].mention} in {data['time']:.2f}s | **WPM:** {data['wpm']:.2f} | **ACC:** {data['acc']:.2f}%"
 
-    async def wait_for_tr_response(self, ctx: commands.Context, text: str, *, timeout: float) -> discord.Message:
+    async def wait_for_tr_response(self, ctx: commands.Context[commands.Bot], text: str, *, timeout: float) -> discord.Message:
 
-        self._embed.description = ""
+        self.embed.description = ""
 
         text = text.lower().replace("\n", " ")
         winners = []
         start = time.perf_counter()
 
-        while True:
+        while not ctx.bot.is_closed():
 
             def check(m: discord.Message) -> bool:
                 content = m.content.lower().replace("\n", " ")
@@ -116,8 +124,8 @@ class TypeRacer:
                 "acc" : difflib.SequenceMatcher(None, content, text).ratio() * 100
             })
 
-            self._embed.description += self.format_line(len(winners), winners[len(winners) - 1]) + "\n"
-            await self._message.edit(embed=self._embed)
+            self.embed.description += self.format_line(len(winners), winners[len(winners) - 1]) + "\n"
+            await self.message.edit(embed=self.embed)
 
             await message.add_reaction(self.EMOJI_MAP[len(winners)])
 
@@ -136,16 +144,46 @@ class TypeRacer:
 
     async def start(
         self, 
-        ctx: commands.Context, 
+        ctx: commands.Context[commands.Bot], 
         *, 
-        embed_title: str = "Type the following sentence in the chat now!", 
+        embed_title: str = 'Type the following sentence in the chat now!', 
         embed_color: DiscordColor = DEFAULT_COLOR, 
         path_to_text_font: Optional[str] = None,
         timeout: float = 40, 
         words_mode: bool = False,
         show_author: bool = True,
     ) -> discord.Message:
+        """
+        starts the typerace game
 
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        embed_title : str, optional
+            the title of the game embed, by default 'Type the following sentence in the chat now!'
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+        path_to_text_font : Optional[str], optional
+            path to the font you want to use for the image
+            fallbacks to SegoeUI if not specified, by default None
+        timeout : float, optional
+            the game timeout, by default 40
+        words_mode : bool, optional
+            specifies whether or not to just use random words instead of a quote, by default False
+        show_author : bool, optional
+            specifies whether or not to show the command author in the embed, by default True
+
+        Returns
+        -------
+        discord.Message
+            the game message
+
+        Raises
+        ------
+        RuntimeError
+            requesting the quote failed
+        """
         self.embed_color = embed_color
 
         if not words_mode:
@@ -158,7 +196,7 @@ class TypeRacer:
                         raise RuntimeError(f"HTTP request raised an error: {r.status}; {r.reason}")
 
         else:
-            text = " ".join(random.choice(self.GRAMMAR_WORDS).lower() for _ in range(15))
+            text = " ".join(random.choice(self.SHORT_WORDS).lower() for _ in range(15))
 
         if not path_to_text_font:
             path_to_text_font = fr'{pathlib.Path(__file__).parent}\assets\segoe-ui-semilight-411.ttf'
@@ -179,10 +217,11 @@ class TypeRacer:
                 av = ctx.author.avatar_url
             embed.set_author(name=ctx.author.name, icon_url=av)
 
-        self._embed = embed
-        self._message = await ctx.send(
+        self.embed = embed
+        self.message = await ctx.send(
             embed=embed,
             file=discord.File(buffer, "tr.png")
         )
 
-        return await self.wait_for_tr_response(ctx, text, timeout=timeout)
+        await self.wait_for_tr_response(ctx, text, timeout=timeout)
+        return self.message

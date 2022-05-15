@@ -20,7 +20,7 @@ class RockPaperScissors:
     def check_win(self, bot_choice: str, user_choice: str) -> bool:
         return self.BEATS[user_choice] == bot_choice
     
-    async def wait_for_choice(self, ctx: commands.Context) -> str:
+    async def wait_for_choice(self, ctx: commands.Context[commands.Bot]) -> str:
          
         def check(reaction: discord.Reaction, user: discord.Member) -> bool:
             return (
@@ -32,7 +32,27 @@ class RockPaperScissors:
         reaction, _ = await ctx.bot.wait_for('reaction_add', check=check)
         return str(reaction.emoji)
 
-    async def start(self, ctx: commands.Context, *, embed_color: DiscordColor = DEFAULT_COLOR) -> discord.Message:
+    async def start(
+        self, 
+        ctx: commands.Context[commands.Bot], 
+        *, 
+        embed_color: DiscordColor = DEFAULT_COLOR
+    ) -> discord.Message:
+        """
+        starts the Rock Paper Scissor game
+
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+
+        Returns
+        -------
+        discord.Message
+            returns the game message
+        """
         embed = discord.Embed(
             title='Rock Paper Scissors',
             description='React to play!',
@@ -54,4 +74,5 @@ class RockPaperScissors:
             else:
                 embed.description = f'**You Lost!**\nI picked {bot_choice} and you picked {user_choice}.'
                 
-        return await self.message.edit(embed=embed)
+        await self.message.edit(embed=embed)
+        return self.message

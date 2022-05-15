@@ -56,7 +56,7 @@ def executor() -> Callable[[Callable[P, T]], Callable[P, Coroutine[Any, Any, T]]
     return decorator
 
 async def wait_for_delete(
-    ctx: commands.Context,
+    ctx: commands.Context[commands.Bot],
     message: discord.Message,
     *,
     emoji: str = '⏹️',

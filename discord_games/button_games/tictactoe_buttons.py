@@ -37,46 +37,36 @@ class TTTButton(discord.ui.Button['TTTView']):
 
         tie = all(button.disabled for button in self.view.children)
 
-        await interaction.response.edit_message(embed=game.make_embed(self.view.embed_color, tie=tie), view=self.view)
-
-        if game.is_game_over(tie=tie):
+        if game_over := game.is_game_over(tie=tie):
             if game.winning_indexes:
                 self.view.disable_all()
                 game.create_streak()
-                await interaction.message.edit(view=self.view)
-            return self.view.stop()
+            self.view.stop()
 
+        embed = game.make_embed(game_over=game_over or tie)
+        await interaction.response.edit_message(embed=embed, view=self.view)
 
 class TTTView(BaseView):
 
-    def __init__(self, 
-        game: BetaTictactoe, 
-        *,
-        embed_color: DiscordColor,
-        button_style: discord.ButtonStyle,
-        win_button_style: discord.ButtonStyle,
-        timeout: Optional[float] = None
-    ) -> None:
-
+    def __init__(self, game: BetaTictactoe, *, timeout: float) -> None:
         super().__init__(timeout=timeout)
 
         self.game = game
-        self.embed_color = embed_color
-        self.button_style = button_style
-        self.win_button_style = win_button_style
 
         for x, row in enumerate(game.board):
             for y, square in enumerate(row):
                 button = TTTButton(
                     label=square, 
-                    style=self.button_style,
+                    style=self.game.button_style,
                     row=x,
                     col=y,
                 )
                 self.add_item(button)
 
-
 class BetaTictactoe(Tictactoe):
+    """
+    Tictactoe(buttons) game
+    """
     BLANK: ClassVar[str] = '\u200b'
     CIRCLE: ClassVar[str] = 'O'
     CROSS: ClassVar[str] = 'X'
@@ -84,29 +74,49 @@ class BetaTictactoe(Tictactoe):
     def create_streak(self) -> None:
         chunked = chunk(self.view.children, count=3)
         for row, col in self.winning_indexes:
-            button = chunked[row][col]
-            button.style = self.view.win_button_style
+            button: TTTButton = chunked[row][col]
+            button.style = self.win_button_style
 
     async def start(
         self, 
-        ctx: commands.Context,
+        ctx: commands.Context[commands.Bot],
         button_style: discord.ButtonStyle = discord.ButtonStyle.green,
         *,
         embed_color: DiscordColor = DEFAULT_COLOR,
         win_button_style: discord.ButtonStyle = discord.ButtonStyle.red,
         timeout: Optional[float] = None,
-    ) -> bool:
+    ) -> discord.Message:
+        """
+        starts the tictactoe(buttons) game
 
-        self.view = TTTView(
-            self,
-            embed_color=embed_color,
-            button_style=button_style,
-            win_button_style=win_button_style,
-            timeout=timeout,
-        )
-        self.message = await ctx.send(embed=self.make_embed(embed_color), view=self.view)
+        Parameters
+        ----------
+        ctx : commands.Context
+            _description_
+        button_style : discord.ButtonStyle, optional
+            the primary button style to use, by default discord.ButtonStyle.green
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+        win_button_style : discord.ButtonStyle, optional
+            the button style to use to show the winning line, by default discord.ButtonStyle.red
+        timeout : Optional[float], optional
+            the timeout for the view, by default None
 
-        return await double_wait(
+        Returns
+        -------
+        discord.Message
+            returns the game message
+        """
+        self.embed_color = embed_color
+        self.button_style = button_style
+        self.win_button_style = win_button_style
+
+        self.view = TTTView(self, timeout=timeout)
+        self.message = await ctx.send(embed=self.make_embed(), view=self.view)
+
+        await double_wait(
             wait_for_delete(ctx, self.message, user=(self.cross, self.circle)),
             self.view.wait(),
         )
+
+        return self.message

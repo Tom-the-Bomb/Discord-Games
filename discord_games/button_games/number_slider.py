@@ -82,7 +82,9 @@ class SlideView(BaseView):
                 self.add_item(button)
         
 class NumberSlider:
-
+    """
+    Number Slider Game
+    """
     def __init__(self, count: Literal[1, 2, 3, 4, 5] = 4) -> None:
 
         if count not in range(1, 6):
@@ -123,14 +125,34 @@ class NumberSlider:
 
     async def start(
         self, 
-        ctx: commands.Context, 
+        ctx: commands.Context[commands.Bot], 
         *,
         wrong_style: discord.ButtonStyle = discord.ButtonStyle.gray,
         correct_style: discord.ButtonStyle = discord.ButtonStyle.green,
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None,
-    ) -> bool:
-        
+    ) -> discord.Message:
+        """
+        starts the number slider game
+
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        wrong_style : discord.ButtonStyle, optional
+            the button style to use for tiles that are in the wrong spot, by default discord.ButtonStyle.gray
+        correct_style : discord.ButtonStyle, optional
+            the button style to use for tiles that are in the right spot, by default discord.ButtonStyle.green
+        embed_color : DiscordColor, optional
+            the game embedd color, by default DEFAULT_COLOR
+        timeout : Optional[float], optional
+            the timeout for the view, by default None
+
+        Returns
+        -------
+        discord.Message
+            returns the game message
+        """
         self.player = ctx.author
         self.wrong_style = wrong_style
         self.correct_style = correct_style
@@ -150,7 +172,8 @@ class NumberSlider:
 
         self.message = await ctx.send(embed=self.embed, view=self.view)
 
-        return await double_wait(
+        await double_wait(
             wait_for_delete(ctx, self.message), 
             self.view.wait(),
         )
+        return self.message

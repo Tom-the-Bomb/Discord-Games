@@ -95,7 +95,11 @@ class CountryView(BaseView):
         return self.stop()
 
 class BetaCountryGuesser(CountryGuesser):
-    guesslog: str = ''
+    """
+    Country Guesser(buttons) Game
+    """
+    def __init__(self) -> None:
+        self.guesslog: str = ''
 
     def update_guesslog(self, log: str) -> None:
         self.guesslog += log + '\n'
@@ -103,13 +107,31 @@ class BetaCountryGuesser(CountryGuesser):
 
     async def start(
         self, 
-        ctx: commands.Context, 
+        ctx: commands.Context[commands.Bot], 
         *, 
         embed_color: DiscordColor = DEFAULT_COLOR,
         ignore_diff_len: bool = False,
         timeout: Optional[float] = None,
-    ) -> bool:
+    ) -> discord.Message:  
+        """
+        starts the Country Guesser(buttons) Game
 
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+        ignore_diff_len : bool, optional
+            specifies whether or not to ignore guesses that are not of the same length as the correct answer, by default False
+        timeout : Optional[float], optional
+            the timeout for the view, by default None
+
+        Returns
+        -------
+        discord.Message
+            returns the game message
+        """
         self.accepted_length = len(self.country) if ignore_diff_len else None
 
         file = await self.get_country()
@@ -121,4 +143,5 @@ class BetaCountryGuesser(CountryGuesser):
         self.view = CountryView(self, user=ctx.author, timeout=timeout)
         self.message = await ctx.send(embed=self.embed, file=file, view=self.view)
 
-        return await self.view.wait()
+        await self.view.wait()
+        return self.message

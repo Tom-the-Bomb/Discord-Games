@@ -13,10 +13,10 @@ from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
 class Twenty48_Button(discord.ui.Button['BaseView']):
     
     def __init__(self, game: BetaTwenty48, emoji: str) -> None:
+        self.game = game
 
         style = discord.ButtonStyle.red if emoji == '⏹️' else discord.ButtonStyle.blurple
-
-        self.game = game
+    
         super().__init__(
             style=style, 
             emoji=discord.PartialEmoji(name=emoji), 
@@ -24,8 +24,6 @@ class Twenty48_Button(discord.ui.Button['BaseView']):
         )
 
     async def callback(self, interaction: discord.Interaction) -> None:
-
-        assert self.view
 
         if interaction.user != self.game.player:
             return await interaction.response.send_message('This isn\'t your game!', ephemeral=True)
@@ -48,11 +46,15 @@ class Twenty48_Button(discord.ui.Button['BaseView']):
         elif emoji == '⬆️':
             self.game.move_up()
 
-        self.game.spawn_new()
+        lost = self.game.spawn_new()
         won = self.game.check_win()
 
-        if won:
+        if won or lost:
             self.view.disable_all()
+            self.view.stop()
+
+        if lost:
+            self.game.embed.description = 'Game Over! You lost.'
 
         if self.game._render_image:
             image = await self.game.render_image()
@@ -61,23 +63,42 @@ class Twenty48_Button(discord.ui.Button['BaseView']):
             board_string = self.game.number_to_emoji()
             await interaction.response.edit_message(content=board_string, embed=self.game.embed)
 
-        if won:
-            return self.view.stop()
-
 class BetaTwenty48(Twenty48):
     view: discord.ui.View
-
+    """
+    Twenty48(buttons) game
+    """
     async def start(
         self, 
-        ctx: commands.Context, 
+        ctx: commands.Context[commands.Bot], 
         *,
         win_at: Literal[2048, 4096, 8192] = 8192,
         timeout: Optional[float] = None, 
         delete_button: bool = False,
         embed_color: DiscordColor = DEFAULT_COLOR,
         **kwargs,
-    ) -> bool:
-        
+    ) -> discord.Message:
+        """
+        starts the 2048(button) game
+
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        win_at : Literal[2048, 4096, 8192], optional
+            the tile to stop the game / win at, by default 8192
+        timeout : Optional[float], optional
+            the timeout for the view, by default None
+        delete_button : bool, optional
+            specifies whether or not to add a stop button, by default False
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+
+        Returns
+        -------
+        discord.Message
+            returns the game message
+        """
         self.win_at = win_at
         self.embed_color = embed_color
 
@@ -100,4 +121,5 @@ class BetaTwenty48(Twenty48):
             board_string = self.number_to_emoji()
             self.message = await ctx.send(content=board_string, view=self.view, **kwargs)
 
-        return await self.view.wait()
+        await self.view.wait()
+        return self.message

@@ -70,20 +70,38 @@ class Chess:
 
     async def start(
         self, 
-        ctx: commands.Context, 
+        ctx: commands.Context[commands.Bot], 
         *, 
         timeout: Optional[float] = None, 
         embed_color: DiscordColor = DEFAULT_COLOR, 
         add_reaction_after_move: bool = False, 
         **kwargs,
-    ) -> Optional[discord.Message]:
+    ) -> discord.Message:
+        """
+        starts the chess game
 
+        Parameters
+        ----------
+        ctx : commands.Context
+            the context of the invokation command
+        timeout : Optional[float], optional
+            the timeout for when waiting, by default None
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
+        add_reaction_after_move : bool, optional
+            specifies whether or not to add a reaction to the user's move validating it, by default False
+
+        Returns
+        -------
+        Optional[discord.Message]
+            returns the game message
+        """
         self.embed_color = embed_color
 
         embed = await self.make_embed()
         self.message = await ctx.send(embed=embed, **kwargs)
 
-        while True:
+        while not ctx.bot.is_closed():
 
             def check(m: discord.Message) -> bool:
                 try:
@@ -112,5 +130,6 @@ class Chess:
 
         embed = await self.fetch_results()
         await self.message.edit(embed=embed)
+        await ctx.send("~ Game Over ~")
 
-        return await ctx.send("~ Game Over ~")
+        return self.message
