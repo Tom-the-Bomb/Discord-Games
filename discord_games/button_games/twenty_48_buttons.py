@@ -54,7 +54,10 @@ class Twenty48_Button(discord.ui.Button['BaseView']):
             self.view.stop()
 
         if lost:
-            self.game.embed.description = 'Game Over! You lost.'
+            self.game.embed = discord.Embed(
+                description='Game Over! You lost.', 
+                color=self.game.embed_color,
+            )
 
         if self.game._render_image:
             image = await self.game.render_image()

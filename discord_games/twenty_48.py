@@ -159,15 +159,23 @@ class Twenty48:
         self.board = stage
 
     def spawn_new(self) -> bool:
+        """
+        spawns a new `2`
+
+        Returns
+        -------
+        bool
+            returns whether or not the game is lost
+        """
         board  = self.board
         zeroes = [(j, i) for j, sub in enumerate(board) for i, el in enumerate(sub) if el == 0]
 
         if not zeroes:
-            return False
+            return True
         else:
             i, j = random.choice(zeroes)
             board[i][j] = 2
-            return True
+            return False
 
     def number_to_emoji(self) -> str:
         board = self.board
@@ -315,7 +323,10 @@ class Twenty48:
             won = self.check_win()
 
             if lost:
-                self.embed.description = 'Game Over! You lost.'
+                self.embed = discord.Embed(
+                    description='Game Over! You lost.', 
+                    color=self.embed_color,
+                )
 
             if self._render_image:
                 image = await self.render_image()

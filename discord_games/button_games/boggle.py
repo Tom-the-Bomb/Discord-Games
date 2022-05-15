@@ -103,15 +103,13 @@ class BoggleView(BaseView):
 
         game = self.game
         embed = discord.Embed(title='Game Over!', color=game.embed_color)
-        embed.description = '''
-        ```yml
-        3-letter-word: 1p
-        4-letter-word: 2p
-        5-letter-word: 3p
-        ...
-        wrong-word: -1p
-        ```
-        '''
+        embed.description = (
+            '```yml\n'
+            '3-letter-word: 1p\n'
+            '4-letter-word: 2p\n'
+            '5-letter-word: 3p\n'
+            '...\nwrong-word: -1p\n```'
+        )
         words, points = game.get_results()
         embed.add_field(name='\u200b', value=f'You found **{words}** words and earned **{points}** points!')
         
