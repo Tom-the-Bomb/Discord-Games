@@ -199,7 +199,7 @@ class TypeRacer:
             text = " ".join(random.choice(self.SHORT_WORDS).lower() for _ in range(15))
 
         if not path_to_text_font:
-            path_to_text_font = pathlib.Path(__file__).parent / 'assets/segoe-ui-semilight-411.ttf'
+            path_to_text_font = str(pathlib.Path(__file__).parent / 'assets/segoe-ui-semilight-411.ttf')
 
         buffer = await self._tr_img(text, path_to_text_font)
 

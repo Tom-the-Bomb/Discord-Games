@@ -98,7 +98,7 @@ class Twenty48:
             self.IMG_LENGTH = self.BORDER_W * 2 + self.SQ_S * 4 + self.SPACE_W * 3
 
             self._font = ImageFont.truetype(
-                pathlib.Path(__file__).parent / 'assets/ClearSans-Bold.ttf', 50
+                str(pathlib.Path(__file__).parent / 'assets/ClearSans-Bold.ttf'), 50
             )
         
     def _reverse(self, board: Board) -> Board:

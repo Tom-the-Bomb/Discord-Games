@@ -50,7 +50,7 @@ class CountryGuesser:
         self.all_countries = os.listdir(self._countries_path)
 
     @executor()
-    def invert_image(self, image_path: Union[BytesIO, str]) -> BytesIO:
+    def invert_image(self, image_path: Union[BytesIO, os.PathLike, str]) -> BytesIO:
         with Image.open(image_path) as img:
             img = img.convert('RGBA')
             r, g, b, a = img.split()
@@ -65,7 +65,7 @@ class CountryGuesser:
             return buf
 
     @executor()
-    def blur_image(self, image_path: Union[BytesIO, str]) -> BytesIO:
+    def blur_image(self, image_path: Union[BytesIO, os.PathLike, str]) -> BytesIO:
         with Image.open(image_path) as img:
             img = img.convert('RGBA')
             img = img.filter(ImageFilter.GaussianBlur(10))

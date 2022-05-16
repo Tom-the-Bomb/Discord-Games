@@ -36,7 +36,7 @@ class Wordle:
             open(parent / 'assets/words.txt', 'r').read().splitlines()
         )
         self._text_size = text_size
-        self._font = ImageFont.truetype(parent / 'assets/HelveticaNeuBold.ttf', self._text_size)
+        self._font = ImageFont.truetype(str(parent / 'assets/HelveticaNeuBold.ttf'), self._text_size)
 
         self.guesses: list[list[dict[str, str]]] = []
 
