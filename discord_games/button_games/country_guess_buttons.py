@@ -98,11 +98,10 @@ class BetaCountryGuesser(CountryGuesser):
     """
     Country Guesser(buttons) Game
     """
-    def __init__(self) -> None:
-        self.guesslog: str = ''
+    guesslog: str = ''
 
-    def update_guesslog(self, log: str) -> None:
-        self.guesslog += log + '\n'
+    def update_guesslog(self, entry: str) -> None:
+        self.guesslog += entry + '\n'
         self.embed.set_field_at(1, name='Guess Log', value=f'```diff\n{self.guesslog}\n```')
 
     async def start(
