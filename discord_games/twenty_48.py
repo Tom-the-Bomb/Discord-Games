@@ -31,7 +31,7 @@ async def create_2048_emojis(guild: discord.Guild, names: Optional[list[str]] = 
         names to use for the emojis
         if not specified, _<number> will be used, by default None
     """
-    directory = fr'{pathlib.Path(__file__).parent}\assets\2048-emoji-asset-examples'
+    directory = pathlib.Path(__file__).parent / 'assets/2048-emoji-asset-examples'
     files = os.listdir(directory)
     names = map(lambda n: f'_{n[:-4]}', files) if not names else names
 
@@ -98,7 +98,7 @@ class Twenty48:
             self.IMG_LENGTH = self.BORDER_W * 2 + self.SQ_S * 4 + self.SPACE_W * 3
 
             self._font = ImageFont.truetype(
-                fr'{pathlib.Path(__file__).parent}\assets\ClearSans-Bold.ttf', 50
+                pathlib.Path(__file__).parent / 'assets/ClearSans-Bold.ttf', 50
             )
         
     def _reverse(self, board: Board) -> Board:

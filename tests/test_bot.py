@@ -23,7 +23,7 @@ async def test(ctx: commands.Context[commands.Bot]) -> None:
     await ctx.reply('done!', mention_author=False)
 
 if __name__ == '__main__':
-    with open(f'{pathlib.Path(__file__).parent}/bot_config.json') as bot_config:
+    with open(pathlib.Path(__file__).parent / 'bot_config.json') as bot_config:
         bot_config = json.load(bot_config)
         token = bot_config['TOKEN']
     
