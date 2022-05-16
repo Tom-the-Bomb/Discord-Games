@@ -41,6 +41,12 @@ class Wordle:
         self.guesses: list[list[dict[str, str]]] = []
 
         if word:
+            if len(word) != 5:
+                raise ValueError('Word must be of length 5')
+
+            if not word.isalpha():
+                raise ValueError('Word must be an alphabetical string')
+
             self.word = word
         else:
             self.word: str = random.choice(self._valid_words)

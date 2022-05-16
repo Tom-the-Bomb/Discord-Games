@@ -104,6 +104,9 @@ class Hangman:
         self._all_words = tuple(english_words_lower_alpha_set)
 
         if word:
+            if not word.isalpha():
+                raise ValueError('Word must be an alphabetical string')
+                
             self.word = word
         else:
             self.word = self.get_word()
@@ -113,7 +116,7 @@ class Hangman:
         self.correct: list[str] = [r'\_' for _ in self.word]
         self.wrong_letters: list[str] = []
 
-        self._embed: discord.Embed = discord.Embed(title='HANGMAN')
+        self.embed: discord.Embed = discord.Embed(title='HANGMAN')
         self.message: Optional[discord.Message] = None
         self._counter: int = 8
 
@@ -132,8 +135,8 @@ class Hangman:
 
         if guess == self.word:
             self.game_over = True
-            self._embed.set_field_at(0, name='Word', value=self.word)
-            await self.message.edit(content="**YOU WON**", embed=self._embed)
+            self.embed.set_field_at(0, name='Word', value=self.word)
+            await self.message.edit(content="**YOU WON**", embed=self.embed)
 
         elif guess in self.letters:
             self._alpha.remove(guess)
@@ -142,8 +145,8 @@ class Hangman:
             for match in matches:
                 self.correct[match] = guess
 
-            self._embed.set_field_at(0, name='Word', value=f"{' '.join(self.correct)}")
-            await self.message.edit(embed=self._embed)
+            self.embed.set_field_at(0, name='Word', value=f"{' '.join(self.correct)}")
+            await self.message.edit(embed=self.embed)
         else:
             if len(guess) == 1:
                 self._alpha.remove(guess)
@@ -151,34 +154,34 @@ class Hangman:
 
             self._counter -= 1
 
-            self._embed.set_field_at(1, name='Wrong letters', value=f"{', '.join(self.wrong_letters) or BLANK}")
-            self._embed.set_field_at(2, name='Lives left', value=self.lives(), inline=False)
-            self._embed.description = f"```\n{STAGES[self._counter]}\n```"
-            await self.message.edit(embed=self._embed)
+            self.embed.set_field_at(1, name='Wrong letters', value=f"{', '.join(self.wrong_letters) or BLANK}")
+            self.embed.set_field_at(2, name='Lives left', value=self.lives(), inline=False)
+            self.embed.description = f"```\n{STAGES[self._counter]}\n```"
+            await self.message.edit(embed=self.embed)
 
     async def check_win(self) -> bool:
 
         if self._counter == 0:
             self.game_over = True
-            self._embed.set_field_at(0, name='Word', value=self.word)
-            await self.message.edit(content="**YOU LOST**", embed=self._embed)
+            self.embed.set_field_at(0, name='Word', value=self.word)
+            await self.message.edit(content="**YOU LOST**", embed=self.embed)
 
         elif r'\_' not in self.correct:
             self.game_over = True
-            self._embed.set_field_at(0, name='Word', value=self.word)
-            await self.message.edit(content="**YOU WON**", embed=self._embed)
+            self.embed.set_field_at(0, name='Word', value=self.word)
+            await self.message.edit(content="**YOU WON**", embed=self.embed)
 
         return self.game_over
 
     def initialize_embed(self) -> discord.Embed:
-        self._embed.description = f"```\n{STAGES[self._counter]}\n```"
-        self._embed.color = self.embed_color
-        self._embed.add_field(name='Word', value=f"{' '.join(self.correct)}")
+        self.embed.description = f"```\n{STAGES[self._counter]}\n```"
+        self.embed.color = self.embed_color
+        self.embed.add_field(name='Word', value=f"{' '.join(self.correct)}")
         
         wrong_letters = ', '.join(self.wrong_letters) or BLANK
-        self._embed.add_field(name='Wrong letters', value=wrong_letters)
-        self._embed.add_field(name='Lives left', value=self.lives(), inline=False)
-        return self._embed
+        self.embed.add_field(name='Wrong letters', value=wrong_letters)
+        self.embed.add_field(name='Lives left', value=self.lives(), inline=False)
+        return self.embed
 
     async def start(
         self, 
