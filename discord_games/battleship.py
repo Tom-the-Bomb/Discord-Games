@@ -368,11 +368,11 @@ class BattleShip:
                 self.get_ship_inputs(ctx, self.player2),
             )
     
-        e1, f1, e2, f2 = await self.get_file(self.player1)
-        e3, f3, e4, f4 = await self.get_file(self.player2)
+        _, f1, _, f2 = await self.get_file(self.player1)
+        _, f3, _, f4 = await self.get_file(self.player2)
         
-        self.message1 = await self.player1.send('**Game starting!**', embeds=[e2, e1], files=[f2, f1])
-        self.message2 = await self.player2.send('**Game starting!**', embeds=[e4, e3], files=[f4, f3])
+        self.message1 = await self.player1.send('**Game starting!**', files=[f2, f1])
+        self.message2 = await self.player2.send('**Game starting!**', files=[f4, f3])
         self.timeout = timeout
 
         while not ctx.bot.is_closed():
@@ -406,11 +406,11 @@ class BattleShip:
                     await self.turn.send(f'`{raw}` was a miss :(')
                     await next_turn.send(f'They went for `{raw}`, and it was a miss! :)')
 
-                e1, f1, e2, f2  = await self.get_file(self.player1)
-                e3, f3, e4, f4 = await self.get_file(self.player2)
+                _, f1, _, f2  = await self.get_file(self.player1)
+                _, f3, _, f4 = await self.get_file(self.player2)
                 
-                await self.player1.send(embeds=[e2, e1], files=[f2, f1])
-                await self.player2.send(embeds=[e4, e3], files=[f4, f3])
+                await self.player1.send(files=[f2, f1])
+                await self.player2.send(files=[f4, f3])
                 self.turn = next_turn
 
                 if winner := self.who_won():
