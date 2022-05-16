@@ -338,7 +338,6 @@ class BattleShip:
         self, 
         ctx: commands.Context[commands.Bot], 
         *, 
-        embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None
     ) -> tuple[discord.Message, discord.Message]:
         """
@@ -348,8 +347,6 @@ class BattleShip:
         ----------
         ctx : commands.Context
             the context of the invokation command
-        embed_color : DiscordColor, optional
-            the color of the game embed, by default DEFAULT_COLOR
         timeout : Optional[float], optional
             the timeout for when waiting, by default None
 
@@ -358,7 +355,6 @@ class BattleShip:
         tuple[discord.Message, discord.Message]
             returns both player's messages respectively
         """
-        self.embed_color = embed_color
 
         await ctx.send('**Game Started!**\nI\'ve setup the boards in your dms!')
 
