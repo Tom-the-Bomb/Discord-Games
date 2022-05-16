@@ -104,7 +104,7 @@ class BetaHangman(Hangman):
 
         embed = self.initialize_embed()
         self.view = HangmanView(self, timeout=timeout)
-        self._message = await ctx.send(embed=embed, view=self.view, **kwargs)
+        self.message = await ctx.send(embed=embed, view=self.view, **kwargs)
 
         await self.view.wait()
         return self.message
