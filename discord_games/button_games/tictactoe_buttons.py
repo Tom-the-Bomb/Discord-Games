@@ -92,7 +92,7 @@ class BetaTictactoe(Tictactoe):
         Parameters
         ----------
         ctx : commands.Context
-            _description_
+            the context of the invokation command
         button_style : discord.ButtonStyle, optional
             the primary button style to use, by default discord.ButtonStyle.green
         embed_color : DiscordColor, optional

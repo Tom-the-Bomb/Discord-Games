@@ -32,7 +32,9 @@ class ConnectFour:
             self.red_player : RED, 
             self.blue_player: BLUE,
         }
-        self.emoji_to_player: dict[str, discord.Member] = {v: k for k, v in self.player_to_emoji.items()}
+        self.emoji_to_player: dict[str, discord.Member] = {
+            v: k for k, v in self.player_to_emoji.items()
+        }
 
     def board_string(self) -> str:
         board = "1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣\n"
@@ -40,7 +42,7 @@ class ConnectFour:
             board += "".join(row) + "\n"
         return board
 
-    async def make_embed(self, *, status: bool) -> discord.Embed:
+    def make_embed(self, *, status: bool) -> discord.Embed:
         embed = discord.Embed(color=self.embed_color)
         if not status:
             embed.description = f"**Turn:** {self.turn.name}\n**Piece:** `{self.player_to_emoji[self.turn]}`"
@@ -49,7 +51,7 @@ class ConnectFour:
             embed.description = f"**Game over**\n{status_}"
         return embed
         
-    async def PlacePiece(self, emoji: str, user) -> list:
+    def place_move(self, emoji: str, user) -> list:
         
         if emoji not in self._controls:
             raise KeyError("Provided emoji is not one of the valid controls")
@@ -63,7 +65,7 @@ class ConnectFour:
         self.turn = self.red_player if user == self.blue_player else self.blue_player
         return self.board
 
-    async def is_game_over(self) -> bool:
+    def is_game_over(self) -> bool:
 
         if all(i != BLANK for i in self.board[0]):
             return True
@@ -124,7 +126,7 @@ class ConnectFour:
         """
         self.embed_color = embed_color
 
-        embed = await self.make_embed(status=False)
+        embed = self.make_embed(status=False)
         self.message = await ctx.send(self.board_string(), embed=embed, **kwargs)
 
         for button in self._controls:
@@ -145,18 +147,18 @@ class ConnectFour:
                 break
 
             emoji = str(reaction.emoji)
-            await self.PlacePiece(emoji, user)
+            self.place_move(emoji, user)
 
-            if status := await self.is_game_over():
+            if status := self.is_game_over():
                 break
 
             if remove_reaction_after:
                 await self.message.remove_reaction(emoji, user)
                 
-            embed = await self.make_embed(status=False)
+            embed = self.make_embed(status=False)
             await self.message.edit(content=self.board_string(), embed=embed)
         
-        embed = await self.make_embed(status=status)
+        embed = self.make_embed(status=status)
         await self.message.edit(content=self.board_string(), embed=embed)
 
         return self.message

@@ -235,7 +235,7 @@ class Boggle:
         ctx : commands.Context
             the context of the invokation command
         embed_color : DiscordColor, optional
-            _description_, by default DEFAULT_COLOR
+            the color of the game embed, by default DEFAULT_COLOR
         button_style : discord.ButtonStyle, optional
             the primary button style to use, by default discord.ButtonStyle.gray
         selected_style : discord.ButtonStyle, optional

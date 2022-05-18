@@ -1,6 +1,6 @@
 discord.py>=1.7.3
 english-words
 chess
-akinator.py[async]
+akinator.py[fast_async]
 Pillow
 typing_extensions
