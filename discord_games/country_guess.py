@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import Union, Optional
-from io import BytesIO
+import asyncio
+import difflib
 import os
 import pathlib
 import random
-import difflib
-import asyncio
+
+from typing import Union, Optional, TYPE_CHECKING
+from io import BytesIO
 
 import discord
 from discord.ext import commands
@@ -18,9 +19,10 @@ class CountryGuesser:
     """
     CountryGuesser Game
     """
-    embed: discord.Embed
-    accepted_length: Optional[int]
-    country: str
+    if TYPE_CHECKING:
+        embed: discord.Embed
+        accepted_length: Optional[int]
+        country: str
 
     def __init__(
         self, 
@@ -215,3 +217,4 @@ class CountryGuesser:
                             await hint_msg.reply(f'Okay continue guessing! You have **{self.guesses}** guesses left.', mention_author=False)
 
         return self.message
+    
