@@ -1,9 +1,9 @@
 from __future__  import annotations
-from typing import Optional
 
 import pathlib
 import random
 import asyncio
+from typing import Optional
 from io import BytesIO
 
 import discord
