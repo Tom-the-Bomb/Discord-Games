@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import Optional
-import random
 import asyncio
+import random
+from typing import ClassVar, Optional, TYPE_CHECKING
 
 import discord
 from discord.ext import commands
@@ -11,9 +11,11 @@ from .utils import DiscordColor, DEFAULT_COLOR
 
 
 class RockPaperScissors:
-    message: discord.Message
-    OPTIONS: tuple[str, str, str] = ('\U0001faa8', '\U00002702', '\U0001f4f0')
-    BEATS: dict[str, str] = {
+    if TYPE_CHECKING:
+        message: discord.Message
+
+    OPTIONS: ClassVar[tuple[str, str, str]] = ('\U0001faa8', '\U00002702', '\U0001f4f0')
+    BEATS: ClassVar[dict[str, str]] = {
         OPTIONS[0]: OPTIONS[1],
         OPTIONS[1]: OPTIONS[2],
         OPTIONS[2]: OPTIONS[0],
