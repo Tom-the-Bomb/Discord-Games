@@ -3,7 +3,7 @@ from __future__  import annotations
 import pathlib
 import random
 import asyncio
-from typing import Optional
+from typing import Optional, Final
 from io import BytesIO
 
 import discord
@@ -12,17 +12,17 @@ from PIL import Image, ImageDraw, ImageFont
 
 from .utils import *
 
-BORDER = 40
-SQ = 100  
-SPACE = 10
+BORDER: Final[int] = 40
+SQ: Final[int] = 100  
+SPACE: Final[int] = 10
 
-WIDTH = BORDER * 2 + SQ * 5 + SPACE * 4
-HEIGHT = BORDER * 2 + SQ * 6 + SPACE * 5
+WIDTH: Final[int] = BORDER * 2 + SQ * 5 + SPACE * 4
+HEIGHT: Final[int] = BORDER * 2 + SQ * 6 + SPACE * 5
 
-GRAY = (119, 123, 125)
-ORANGE = (200, 179, 87)
-GREEN = (105, 169, 99)
-LGRAY = (198, 201, 205)
+GRAY: Final[tuple[int, int, int]] = (119, 123, 125)
+ORANGE: Final[tuple[int, int, int]] = (200, 179, 87)
+GREEN: Final[tuple[int, int, int]] = (105, 169, 99)
+LGRAY: Final[tuple[int, int, int]] = (198, 201, 205)
 
 class Wordle:
     """
