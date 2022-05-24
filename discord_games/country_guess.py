@@ -6,7 +6,7 @@ import os
 import pathlib
 import random
 
-from typing import Union, Optional, TYPE_CHECKING
+from typing import Union, Optional
 from io import BytesIO
 
 import discord
@@ -19,10 +19,9 @@ class CountryGuesser:
     """
     CountryGuesser Game
     """
-    if TYPE_CHECKING:
-        embed: discord.Embed
-        accepted_length: Optional[int]
-        country: str
+    embed: discord.Embed
+    accepted_length: Optional[int]
+    country: str
 
     def __init__(
         self, 
