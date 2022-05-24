@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import Union, Optional
-from io import BytesIO
+import asyncio
+import difflib
 import os
 import pathlib
 import random
-import difflib
-import asyncio
+
+from typing import Union, Optional
+from io import BytesIO
 
 import discord
 from discord.ext import commands
@@ -215,3 +216,4 @@ class CountryGuesser:
                             await hint_msg.reply(f'Okay continue guessing! You have **{self.guesses}** guesses left.', mention_author=False)
 
         return self.message
+    
