@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import random
-from typing import ClassVar, Optional, TYPE_CHECKING
+from typing import ClassVar, Optional
 
 import discord
 from discord.ext import commands
@@ -11,8 +11,7 @@ from .utils import DiscordColor, DEFAULT_COLOR
 
 
 class RockPaperScissors:
-    if TYPE_CHECKING:
-        message: discord.Message
+    message: discord.Message
 
     OPTIONS: ClassVar[tuple[str, str, str]] = ('\U0001faa8', '\U00002702', '\U0001f4f0')
     BEATS: ClassVar[dict[str, str]] = {
