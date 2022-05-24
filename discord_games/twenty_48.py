@@ -47,8 +47,7 @@ class Twenty48:
     """
     Twenty48 Game
     """
-    if TYPE_CHECKING:
-        player: discord.Member
+    player: discord.Member
 
     def __init__(
         self, 
