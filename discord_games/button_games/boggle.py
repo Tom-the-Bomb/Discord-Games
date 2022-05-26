@@ -91,7 +91,7 @@ class BoggleView(BaseView):
             return await interaction.response.send_message('Word must be of at least 3 letters in length!', ephemeral=True)
 
         if game.current_word in game.correct_guesses:
-            return await interaction.response.send_message('You have guessed this word before!')
+            return await interaction.response.send_message('You have guessed this word before!', ephemeral=True)
 
         if game.current_word.lower() in english_words_alpha_set:
             game.correct_guesses.append(game.current_word)
@@ -126,7 +126,7 @@ class Boggle:
     """
     Boggle Game
     """
-    DICE_CONFIG: ClassVar[tuple[tuple[str]]] = (
+    DICE_MATRIX: ClassVar[tuple[tuple[str]]] = (
         ("RIFOBX", "IFEHEY", "DENOWS", "UTOKND"),
         ("HMSRAO", "LUPETS", "ACITOA", "YLGKUE"),
         ("5BMJOA", "EHISPN", "VETIGN", "BALIYT"),
@@ -148,7 +148,7 @@ class Boggle:
         self.embed_color: Optional[DiscordColor] = None
 
     def generate_board(self) -> list[list[str]]:
-        return [[random.choice(die) for die in row] for row in self.DICE_CONFIG]
+        return [[random.choice(die) for die in row] for row in self.DICE_MATRIX]
 
     def get_results(self) -> tuple[int, int, int]:
         corr = len(guesses := self.correct_guesses)
