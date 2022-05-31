@@ -152,6 +152,7 @@ class TypeRacer:
         timeout: float = 40, 
         words_mode: bool = False,
         show_author: bool = True,
+        max_quote_length: Optional[int] = None,
     ) -> discord.Message:
         """
         starts the typerace game
@@ -173,6 +174,8 @@ class TypeRacer:
             specifies whether or not to just use random words instead of a quote, by default False
         show_author : bool, optional
             specifies whether or not to show the command author in the embed, by default True
+        max_quote_length : int, optional
+            specifies the maximum length of the quote to truncate to if necessary, by default None
 
         Returns
         -------
@@ -190,13 +193,17 @@ class TypeRacer:
             async with aiohttp.ClientSession() as session:
                 async with session.get(self.SENTENCE_URL) as r:
                     if r.ok:
-                        text = await r.json()
-                        text = text.get("content")
+                        text: dict = await r.json()
+                        text = text.get('content', '')
                     else:
                         raise RuntimeError(f"HTTP request raised an error: {r.status}; {r.reason}")
 
         else:
             text = " ".join(random.choice(self.SHORT_WORDS).lower() for _ in range(15))
+
+        if max_quote_length is not None:
+            if len(text) > max_quote_length:
+                text = textwrap.shorten(text, width=max_quote_length, placeholder='')
 
         if not path_to_text_font:
             path_to_text_font = str(pathlib.Path(__file__).parent / 'assets/segoe-ui-semilight-411.ttf')
