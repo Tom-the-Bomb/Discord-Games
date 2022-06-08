@@ -93,7 +93,10 @@ async def double_wait(
     task2: Coroutine[Any, Any, B],
     *,
     loop: Optional[asyncio.AbstractEventLoop] = None,
-) -> tuple[set[asyncio.Task[Union[A, B]]], set[asyncio.Task[Union[A, B]]]]:
+) -> tuple[
+        set[asyncio.Task[Union[A, B]]], 
+        set[asyncio.Task[Union[A, B]]],
+    ]:
 
     if not loop:
         loop = asyncio.get_event_loop()
@@ -101,7 +104,7 @@ async def double_wait(
     return await asyncio.wait(
         [
             loop.create_task(task1), 
-            loop.create_task(task2)
+            loop.create_task(task2),
         ],
         return_when=asyncio.FIRST_COMPLETED,
     )
