@@ -25,32 +25,29 @@ class BoggleButton(discord.ui.Button['BoggleView']):
     async def callback(self, interaction: discord.Interaction) -> None:
         game = self.view.game
 
-        if interaction.user != game.player:
-            return await interaction.response.send_message('This is not your game!', ephemeral=True)
-        else:
-            if self.style == game.button_style:
-                if game.indices:
-                    beside_current = game.beside_current(*game.indices[-1])
-                else:
-                    beside_current = [(self.row, self.col)]
+        if self.style == game.button_style:
+            if game.indices:
+                beside_current = game.beside_current(*game.indices[-1])
+            else:
+                beside_current = [(self.row, self.col)]
 
-                if (self.row, self.col) in beside_current:
-                    game.current_word += self.label
-                    game.indices.append((self.row, self.col))
+            if (self.row, self.col) in beside_current:
+                game.current_word += self.label
+                game.indices.append((self.row, self.col))
 
-                    self.style = game.selected_style
-                else:
-                    return await interaction.response.defer()
-
-            elif (self.row, self.col) == game.indices[-1]:
-                self.style = game.button_style
-                game.current_word = game.current_word[:-1]
-                game.indices.pop(-1)
+                self.style = game.selected_style
             else:
                 return await interaction.response.defer()
-            
-            embed = game.get_embed()
-            await interaction.response.edit_message(view=self.view, embed=embed)
+
+        elif (self.row, self.col) == game.indices[-1]:
+            self.style = game.button_style
+            game.current_word = game.current_word[:-1]
+            game.indices.pop(-1)
+        else:
+            return await interaction.response.defer()
+        
+        embed = game.get_embed()
+        await interaction.response.edit_message(view=self.view, embed=embed)
 
 class BoggleView(BaseView):
 
@@ -79,6 +76,11 @@ class BoggleView(BaseView):
         await message.edit(view=self)
         await message.reply(embed=embed)
         return self.stop()
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        if check := interaction.user != self.game.player:
+            await interaction.response.send_message('This is not your game!', ephemeral=True)
+        return check
 
     @discord.ui.button(label='Enter', style=discord.ButtonStyle.green, row=4)
     async def enter_button(self, interaction: discord.Interaction, _) -> None:
