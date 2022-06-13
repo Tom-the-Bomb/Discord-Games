@@ -3,10 +3,11 @@ import discord_games as games
 from discord_games import button_games
 # import button_games module
 
+# import respective discord.py modules
 import discord
 from discord.ext import commands
 
-# initialize games Cog
+# define games Cog
 class Games(commands.Cog):
 
     def __init__(self, bot: commands.Bot) -> None:
@@ -27,9 +28,14 @@ class Games(commands.Cog):
             '4096': '<:4096:821397135043067915>',
             '8192': '<:8192:821397156127965274>',
         }
-        # emoji mapping for 2048, replace values with your own emojis: <:name:id> ; 
-        # can be obtained by sending \:emoji: 
-        # alternatively if you have v2.0, pass render_image=True into the class constructor instead
+        # the emoji mapping for 2048, replace values with your own created emojis: <:name:id> ;
+        # The helper function `twenty48.create_2048_emojis` could be ran manually to automatically create such emojis onto the specified guild`
+        # or manually using your own assets OR the assets provided in `/assets/2048-emoji-asset-examples/`
+
+        # note: emojis can be obtained by sending \:emoji: 
+        # alternatively if you have discord.py >= 2.0.0, pass render_image=True into the class constructor instead
+        # this will render an image for the board if you want
+
         # the worst but easiest option would be to not pass anything into the constructor:
         # it would then default to sending out the plain numbers instead, not fancy, but works. 
 
@@ -107,6 +113,6 @@ class Games(commands.Cog):
         game = button_games.BetaRockPaperScissors(player) # defaults to playing with bot if player = None
         await game.start(ctx)
 
-# add cog
+# add cog, entry point for cog setup
 async def setup(bot: commands.Bot) -> None:
     await bot.add_cog(Games(bot))

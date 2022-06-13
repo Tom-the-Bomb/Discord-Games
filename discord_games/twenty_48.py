@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from typing_extensions import TypeAlias
     Board: TypeAlias = list[list[int]]
 
-async def create_2048_emojis(guild: discord.Guild, names: Optional[list[str]] = None) -> None:
+async def create_2048_emojis(guild: discord.Guild, names: Optional[list[str]] = None) -> list[discord.Emoji]:
     """
     creates 2048 emojis in the specified Guild
     intended to be ran once initially manually.
@@ -30,18 +30,26 @@ async def create_2048_emojis(guild: discord.Guild, names: Optional[list[str]] = 
     names : Optional[list[str]], optional
         names to use for the emojis
         if not specified, _<number> will be used, by default None
+
+    Returns
+    -------
+    list[Emoji]
+        returns the list of emojis created
     """
+    result: list[discord.Emoji] = []
+
     directory = pathlib.Path(__file__).parent / 'assets/2048-emoji-asset-examples'
     files = os.listdir(directory)
     names = map(lambda n: f'_{n[:-4]}', files) if not names else names
 
     for name, file in zip(names, files):
         with open(os.path.join(directory, file), 'rb') as fp:
-            await guild.create_custom_emoji(
+            result.append(await guild.create_custom_emoji(
                 name=name, 
                 image=fp.read(),
                 reason='2048 emojis'
-            )
+            ))
+    return result
 
 class Twenty48:
     """
