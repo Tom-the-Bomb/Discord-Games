@@ -17,20 +17,20 @@ class ReactionGame:
     def __init__(self, emoji: str = '🖱️') -> None:
         self.emoji = emoji
 
-    async def wait_for_reaction(self, ctx: commands.Context[commands.Bot], *, timeout: float) -> tuple[discord.Member, float]:
+    async def wait_for_reaction(self, ctx: commands.Context[commands.Bot], *, timeout: float) -> tuple[discord.User, float]:
         start = time.perf_counter()
 
-        def check(reaction: discord.Reaction, _: discord.Member) -> bool:
+        def check(reaction: discord.Reaction, _: discord.User) -> bool:
             return str(reaction.emoji) == self.emoji and reaction.message == self.message
 
         _, user = await ctx.bot.wait_for('reaction_add', timeout=timeout, check=check)
         end = time.perf_counter()
 
         return user, (end - start)
-    
+
     async def start(
-        self, 
-        ctx: commands.Context[commands.Bot], 
+        self,
+        ctx: commands.Context[commands.Bot],
         *,
         timeout: Optional[float] = None,
         embed_color: DiscordColor = DEFAULT_COLOR,

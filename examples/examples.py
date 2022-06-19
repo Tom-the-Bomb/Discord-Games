@@ -13,13 +13,13 @@ class Games(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.twenty_48_emojis = {
-            '0':    '<:grey:821404552783855658>', 
-            '2':    '<:twoo:821396924619161650>', 
-            '4':    '<:fourr:821396936870723602>', 
-            '8':    '<:eightt:821396947029983302>', 
-            '16':   '<:sixteen:821396959616958534>', 
-            '32':   '<:thirtytwo:821396969632169994>', 
-            '64':   '<:sixtyfour:821396982869524563>', 
+            '0':    '<:grey:821404552783855658>',
+            '2':    '<:twoo:821396924619161650>',
+            '4':    '<:fourr:821396936870723602>',
+            '8':    '<:eightt:821396947029983302>',
+            '16':   '<:sixteen:821396959616958534>',
+            '32':   '<:thirtytwo:821396969632169994>',
+            '64':   '<:sixtyfour:821396982869524563>',
             '128':  '<:onetwentyeight:821396997776998472>',
             '256':  '<:256:821397009394827306>',
             '512':  '<:512:821397040247865384>',
@@ -32,18 +32,18 @@ class Games(commands.Cog):
         # The helper function `twenty48.create_2048_emojis` could be ran manually to automatically create such emojis onto the specified guild`
         # or manually using your own assets OR the assets provided in `/assets/2048-emoji-asset-examples/`
 
-        # note: emojis can be obtained by sending \:emoji: 
+        # note: emojis can be obtained by sending \:emoji:
         # alternatively if you have discord.py >= 2.0.0, pass render_image=True into the class constructor instead
         # this will render an image for the board if you want
 
         # the worst but easiest option would be to not pass anything into the constructor:
-        # it would then default to sending out the plain numbers instead, not fancy, but works. 
+        # it would then default to sending out the plain numbers instead, not fancy, but works.
 
     @commands.command(name='connect4')
-    async def connect4(self, ctx: commands.Context[commands.Bot], member: discord.Member):
+    async def connect4(self, ctx: commands.Context[commands.Bot], member: discord.User):
         game = games.ConnectFour(
-            red  = ctx.author,         
-            blue = member,             
+            red  = ctx.author,
+            blue = member,
         )
         await game.start(ctx)
 
@@ -53,22 +53,22 @@ class Games(commands.Cog):
         await game.start(ctx, delete_after_guess=True)
 
     @commands.command(name='chess')
-    async def chess(self, ctx: commands.Context[commands.Bot], member: discord.Member):
+    async def chess(self, ctx: commands.Context[commands.Bot], member: discord.User):
 
         game = games.Chess(
-            white = ctx.author, 
+            white = ctx.author,
             black = member,
         )
         await game.start(ctx, timeout=60, add_reaction_after_move=True)
 
     @commands.command(name='typerace')
     async def typerace(self, ctx: commands.Context[commands.Bot]):
-        
+
         game = games.TypeRacer()
         await game.start(ctx, timeout=30)
 
     @commands.command(name='battleship')
-    async def battleship(self, ctx: commands.Context[commands.Bot], member: discord.Member):
+    async def battleship(self, ctx: commands.Context[commands.Bot], member: discord.User):
 
         game = games.BattleShip(ctx.author, member)
         await game.start(ctx)
@@ -76,9 +76,9 @@ class Games(commands.Cog):
     # Button Games: Requires discord.py >= v2.0.0
 
     @commands.command(name='tictactoe')
-    async def tictactoe(self, ctx: commands.Context[commands.Bot], member: discord.Member):
+    async def tictactoe(self, ctx: commands.Context[commands.Bot], member: discord.User):
         game = button_games.BetaTictactoe(
-            cross  = ctx.author, 
+            cross  = ctx.author,
             circle = member
         )
         await game.start(ctx)
@@ -108,7 +108,7 @@ class Games(commands.Cog):
         await game.start(ctx)
 
     @commands.command(name='rps')
-    async def rps(self, ctx: commands.Context[commands.Bot], player: discord.Member = None):
+    async def rps(self, ctx: commands.Context[commands.Bot], player: discord.User = None):
 
         game = button_games.BetaRockPaperScissors(player) # defaults to playing with bot if player = None
         await game.start(ctx)

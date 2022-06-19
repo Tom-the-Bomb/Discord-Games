@@ -13,7 +13,7 @@ from PIL import Image, ImageDraw, ImageFont
 from .utils import *
 
 BORDER: Final[int] = 40
-SQ: Final[int] = 100  
+SQ: Final[int] = 100
 SPACE: Final[int] = 10
 
 WIDTH: Final[int] = BORDER * 2 + SQ * 5 + SPACE * 4
@@ -83,15 +83,15 @@ class Wordle:
                     x += SQ + SPACE
                 x = BORDER
                 y += SQ + SPACE
-        
+
             buf = BytesIO()
             img.save(buf, 'PNG')
         buf.seek(0)
         return buf
 
     async def start(
-        self, 
-        ctx: commands.Context[commands.Bot], 
+        self,
+        ctx: commands.Context[commands.Bot],
         *,
         timeout: Optional[float] = None,
         embed_color: DiscordColor = DEFAULT_COLOR
@@ -122,12 +122,12 @@ class Wordle:
         embed.set_footer(text='Say "stop" to cancel the game!')
 
         self.message = await ctx.send(embed=embed, file=discord.File(buf, 'wordle.png'))
-        
+
         while not ctx.bot.is_closed():
-            
+
             def check(m: discord.Message) -> bool:
                 return (len(m.content) == 5 or m.content.lower() == 'stop') and m.author == ctx.author and m.channel == ctx.channel
-            
+
             try:
                 guess: discord.Message = await ctx.bot.wait_for('message', timeout=timeout, check=check)
             except asyncio.TimeoutError:

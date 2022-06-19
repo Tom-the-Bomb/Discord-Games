@@ -38,7 +38,7 @@ class Akinator:
     def __init__(self) -> None:
         self.aki: AkinatorGame = AkinatorGame()
 
-        self.player: Optional[discord.Member] = None
+        self.player: Optional[discord.User] = None
         self.win_at: Optional[int] = None
         self.guess: Optional[dict[str, Any]] = None
         self.message: Optional[discord.Message] = None
@@ -46,7 +46,7 @@ class Akinator:
         self.embed_color: Optional[DiscordColor] = None
         self.back_button: bool = False
         self.delete_button: bool = False
-        
+
         self.bar: str = ''
         self.questions: int = 0
 
@@ -58,17 +58,17 @@ class Akinator:
     def build_embed(self, *, instructions: bool = True) -> discord.Embed:
 
         embed = discord.Embed(
-            title = "Guess your character!", 
+            title = "Guess your character!",
             description = (
                 "```swift\n"
                 f"Question-Number  : {self.questions}\n"
                 f"Progression-Level: {self.aki.progression:.2f}\n```\n"
                 f"{self.build_bar()}"
-            ), 
+            ),
             color = self.embed_color,
         )
         embed.add_field(name="- Question -", value=self.aki.question)
-        
+
         if instructions:
             embed.add_field(name="\u200b", value=self.instructions, inline=False)
 
@@ -92,16 +92,16 @@ class Akinator:
         return embed
 
     async def start(
-        self, 
+        self,
         ctx: commands.Context[commands.Bot],
         *,
         embed_color: DiscordColor = DEFAULT_COLOR,
-        remove_reaction_after: bool = False, 
-        win_at: int = 80, 
+        remove_reaction_after: bool = False,
+        win_at: int = 80,
         timeout: Optional[float] = None,
         back_button: bool = False,
-        delete_button: bool = False, 
-        child_mode: bool = True, 
+        delete_button: bool = False,
+        child_mode: bool = True,
     ) -> Optional[discord.Message]:
         """
         starts the akinator game
@@ -159,7 +159,7 @@ class Akinator:
 
         while self.aki.progression <= self.win_at:
 
-            def check(reaction: discord.Reaction, user: discord.Member) -> bool:
+            def check(reaction: discord.Reaction, user: discord.User) -> bool:
                 emoji = str(reaction.emoji)
                 if reaction.message == self.message and user == ctx.author:
                     try:
@@ -193,9 +193,9 @@ class Akinator:
                 self.questions += 1
 
                 await self.aki.answer(Options(emoji).name)
-                
+
             embed = self.build_embed()
             await self.message.edit(embed=embed)
-            
+
         embed = await self.win()
         return await self.message.edit(embed=embed)

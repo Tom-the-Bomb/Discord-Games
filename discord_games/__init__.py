@@ -21,11 +21,11 @@ from .wordle import Wordle
 __all__: tuple[str, ...] = (
     'Akinator',
     'BattleShip',
-    'Chess', 
+    'Chess',
     'ConnectFour',
-    'Hangman', 
+    'Hangman',
     'Tictactoe',
-    'Twenty48', 
+    'Twenty48',
     'create_2048_emojis',
     'TypeRacer',
     'RockPaperScissors',
@@ -46,8 +46,8 @@ class VersionInfo(NamedTuple):
     micro: int
 
 version_info: VersionInfo = VersionInfo(
-    major=1, 
-    minor=10, 
+    major=1,
+    minor=10,
     micro=3,
 )
 

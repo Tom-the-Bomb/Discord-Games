@@ -92,7 +92,7 @@ class NumberSlider:
 
         self.all_numbers = list(range(1, count ** 2))
 
-        self.player: Optional[discord.Member] = None
+        self.player: Optional[discord.User] = None
 
         self.moves: int = 0
         self.count = count

@@ -24,12 +24,12 @@ class CountryGuesser:
     country: str
 
     def __init__(
-        self, 
-        *, 
+        self,
+        *,
         is_flags: bool = False,
         light_mode: bool = False,
         hard_mode: bool = False,
-        guesses: int = 5, 
+        guesses: int = 5,
         hints: int = 1
     ) -> None:
 
@@ -84,7 +84,7 @@ class CountryGuesser:
 
         if self.hard_mode:
             file = await self.blur_image(file)
-        
+
         if self.light_mode:
             file = await self.invert_image(file)
 
@@ -112,7 +112,7 @@ class CountryGuesser:
             color=self.embed_color,
         )
         embed.add_field(
-            name='\u200b', 
+            name='\u200b',
             value=f'```yml\nblurred: {str(self.hard_mode).lower()}\nflag-mode: {str(self.is_flags).lower()}\n```',
             inline=False,
         )
@@ -120,10 +120,10 @@ class CountryGuesser:
         return embed
 
     async def wait_for_response(
-        self, 
-        ctx: commands.Context[commands.Bot], 
-        *, 
-        options: tuple[str, ...] = (), 
+        self,
+        ctx: commands.Context[commands.Bot],
+        *,
+        options: tuple[str, ...] = (),
         length: Optional[int] = None,
     ) -> Optional[tuple[discord.Message, str]]:
 
@@ -139,12 +139,12 @@ class CountryGuesser:
         if options:
             if not content in options:
                 return
-            
+
         return message, content
 
     async def start(
-        self, 
-        ctx: commands.Context[commands.Bot], 
+        self,
+        ctx: commands.Context[commands.Bot],
         *,
         timeout: Optional[float] = None,
         embed_color: DiscordColor = DEFAULT_COLOR,
@@ -195,7 +195,7 @@ class CountryGuesser:
                 if not self.guesses:
                     await msg.reply(f'Game Over! you lost, The country was `{self.country.title()}`')
                     break
-                
+
                 acc = self.get_accuracy(response)
 
                 if not self.hints:
@@ -216,4 +216,4 @@ class CountryGuesser:
                             await hint_msg.reply(f'Okay continue guessing! You have **{self.guesses}** guesses left.', mention_author=False)
 
         return self.message
-    
+

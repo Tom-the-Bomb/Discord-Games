@@ -14,7 +14,7 @@ BLANK = "⬛"
 
 class ConnectFour:
 
-    def __init__(self, *, red: discord.Member, blue: discord.Member) -> None:
+    def __init__(self, *, red: discord.User, blue: discord.User) -> None:
         self.red_player  = red
         self.blue_player = blue
 
@@ -23,16 +23,16 @@ class ConnectFour:
 
         self.turn = self.red_player
         self.message: Optional[discord.Message] = None
-        self.winner: Optional[discord.Member] = None
+        self.winner: Optional[discord.User] = None
 
         self._conversion: dict[str, int] = {
             emoji: i for i, emoji in enumerate(self._controls)
         }
-        self.player_to_emoji: dict[discord.Member, str]  = {
-            self.red_player : RED, 
+        self.player_to_emoji: dict[discord.User, str]  = {
+            self.red_player : RED,
             self.blue_player: BLUE,
         }
-        self.emoji_to_player: dict[str, discord.Member] = {
+        self.emoji_to_player: dict[str, discord.User] = {
             v: k for k, v in self.player_to_emoji.items()
         }
 
@@ -50,9 +50,9 @@ class ConnectFour:
             status_ = f"{self.winner} won!" if self.winner else "Tie"
             embed.description = f"**Game over**\n{status_}"
         return embed
-        
+
     def place_move(self, emoji: str, user) -> list:
-        
+
         if emoji not in self._controls:
             raise KeyError("Provided emoji is not one of the valid controls")
         y = self._conversion[emoji]
@@ -95,14 +95,14 @@ class ConnectFour:
                     return True
 
         return False
-    
+
     async def start(
-        self, 
-        ctx: commands.Context[commands.Bot], 
+        self,
+        ctx: commands.Context[commands.Bot],
         *,
         timeout: Optional[float] = None,
         embed_color: DiscordColor = DEFAULT_COLOR,
-        remove_reaction_after: bool = False, 
+        remove_reaction_after: bool = False,
         **kwargs
     ) -> discord.Message:
         """
@@ -134,10 +134,10 @@ class ConnectFour:
 
         while not ctx.bot.is_closed():
 
-            def check(reaction: discord.Reaction, user: discord.Member) -> bool:
+            def check(reaction: discord.Reaction, user: discord.User) -> bool:
                 return (
-                    str(reaction.emoji) in self._controls and 
-                    user == self.turn and reaction.message == self.message and 
+                    str(reaction.emoji) in self._controls and
+                    user == self.turn and reaction.message == self.message and
                     self.board[0][self._conversion[str(reaction.emoji)]] == BLANK
                 )
 
@@ -154,10 +154,10 @@ class ConnectFour:
 
             if remove_reaction_after:
                 await self.message.remove_reaction(emoji, user)
-                
+
             embed = self.make_embed(status=False)
             await self.message.edit(content=self.board_string(), embed=embed)
-        
+
         embed = self.make_embed(status=status)
         await self.message.edit(content=self.board_string(), embed=embed)
 

@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from typing import (
-    Optional, 
-    Coroutine, 
-    Callable, 
-    Final, 
-    Union, 
-    TypeVar, 
-    TYPE_CHECKING, 
+    Optional,
+    Coroutine,
+    Callable,
+    Final,
+    Union,
+    TypeVar,
+    TYPE_CHECKING,
     Any,
 )
 
@@ -19,7 +19,7 @@ from discord.ext import commands
 
 if TYPE_CHECKING:
     from typing_extensions import ParamSpec, TypeAlias
-    
+
     P = ParamSpec('P')
     T = TypeVar('T')
 
@@ -44,7 +44,7 @@ def chunk(iterable: list[int], *, count: int) -> list[list[int]]:
     return [iterable[i:i + count] for i in range(0, len(iterable), count)]
 
 def executor() -> Callable[[Callable[P, T]], Callable[P, Coroutine[Any, Any, T]]]:
-    
+
     def decorator(func: Callable[P, T]) -> Callable[P, Coroutine[Any, Any, T]]:
         @functools.wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs):
@@ -62,7 +62,7 @@ async def wait_for_delete(
     emoji: str = '⏹️',
     bot: Optional[discord.Client] = None,
     user: Optional[Union[discord.User, tuple[discord.User, ...]]] = None,
-    timeout: Optional[float] = None, 
+    timeout: Optional[float] = None,
 ) -> bool:
 
     if not user:
@@ -94,7 +94,7 @@ async def double_wait(
     *,
     loop: Optional[asyncio.AbstractEventLoop] = None,
 ) -> tuple[
-        set[asyncio.Task[Union[A, B]]], 
+        set[asyncio.Task[Union[A, B]]],
         set[asyncio.Task[Union[A, B]]],
     ]:
 
@@ -103,7 +103,7 @@ async def double_wait(
 
     return await asyncio.wait(
         [
-            loop.create_task(task1), 
+            loop.create_task(task1),
             loop.create_task(task2),
         ],
         return_when=asyncio.FIRST_COMPLETED,

@@ -16,15 +16,15 @@ class Tictactoe:
     CIRCLE: ClassVar[str] = "⭕"
     CROSS: ClassVar[str] = "❌"
     _conversion: ClassVar[dict[str, tuple[int, int]]] = {
-        '1️⃣': (0, 0), 
-        '2️⃣': (0, 1), 
-        '3️⃣': (0, 2), 
-        '4️⃣': (1, 0), 
-        '5️⃣': (1, 1), 
-        '6️⃣': (1, 2), 
-        '7️⃣': (2, 0), 
-        '8️⃣': (2, 1), 
-        '9️⃣': (2, 2), 
+        '1️⃣': (0, 0),
+        '2️⃣': (0, 1),
+        '3️⃣': (0, 2),
+        '4️⃣': (1, 0),
+        '5️⃣': (1, 1),
+        '6️⃣': (1, 2),
+        '7️⃣': (2, 0),
+        '8️⃣': (2, 1),
+        '9️⃣': (2, 2),
     }
 
     _WINNERS: ClassVar[tuple[tuple[tuple[int, int], ...], ...]] = (
@@ -34,28 +34,28 @@ class Tictactoe:
         ((0, 0), (1, 0), (2, 0)),
         ((0, 1), (1, 1), (2, 1)),
         ((0, 2), (1, 2), (2, 2)),
-        ((0, 0), (1, 1), (2, 2)), 
+        ((0, 0), (1, 1), (2, 2)),
         ((0, 2), (1, 1), (2, 0)),
     )
 
-    def __init__(self, cross: discord.Member, circle: discord.Member) -> None:
+    def __init__(self, cross: discord.User, circle: discord.User) -> None:
         self.cross = cross
         self.circle = circle
 
         self.board: list[list[str]] = [[self.BLANK for _ in range(3)] for _ in range(3)]
-        self.turn: discord.Member  = self.cross
+        self.turn: discord.User  = self.cross
 
-        self.winner: Optional[discord.Member] = None
+        self.winner: Optional[discord.User] = None
         self.winning_indexes: list[tuple[int, int]] = []
         self.message: Optional[discord.Message] = None
 
         self._controls: list[str] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
 
-        self.emoji_to_player: dict[discord.Member, str] = {
-            self.CIRCLE: self.circle, 
-            self.CROSS : self.cross, 
+        self.emoji_to_player: dict[discord.User, str] = {
+            self.CIRCLE: self.circle,
+            self.CROSS : self.cross,
         }
-        self.player_to_emoji: dict[str, discord.Member] = {v: k for k, v in self.emoji_to_player.items()}
+        self.player_to_emoji: dict[str, discord.User] = {v: k for k, v in self.emoji_to_player.items()}
 
     def board_string(self) -> str:
         board = ''
@@ -72,7 +72,7 @@ class Tictactoe:
             embed.description = f"**Turn:** {self.turn.mention}\n**Piece:** `{self.player_to_emoji[self.turn]}`"
         return embed
 
-    def make_move(self, emoji: str, user: discord.Member) -> list:
+    def make_move(self, emoji: str, user: discord.User) -> list:
 
         if emoji not in self._controls:
             raise KeyError("Provided emoji is not one of the valid controls")
@@ -98,16 +98,16 @@ class Tictactoe:
 
         if not self._controls or tie:
             return True
-           
+
         return False
 
     async def start(
-        self, 
-        ctx: commands.Context[commands.Bot], 
+        self,
+        ctx: commands.Context[commands.Bot],
         *,
         timeout: Optional[float] = None,
-        embed_color: DiscordColor = DEFAULT_COLOR, 
-        remove_reaction_after: bool = False, 
+        embed_color: DiscordColor = DEFAULT_COLOR,
+        remove_reaction_after: bool = False,
         **kwargs,
     ) -> discord.Message:
         """
@@ -139,7 +139,7 @@ class Tictactoe:
 
         while not ctx.bot.is_closed():
 
-            def check(reaction: discord.Reaction, user: discord.Member) -> bool:
+            def check(reaction: discord.Reaction, user: discord.User) -> bool:
                 return str(reaction.emoji) in self._controls and user == self.turn and reaction.message == self.message
 
             try:
@@ -149,7 +149,7 @@ class Tictactoe:
 
             if self.is_game_over():
                 break
-            
+
             emoji = str(reaction.emoji)
             self.make_move(emoji, user)
             embed = self.make_embed()
@@ -158,7 +158,7 @@ class Tictactoe:
                 await self.message.remove_reaction(emoji, user)
 
             await self.message.edit(content=self.board_string(), embed=embed)
-        
+
         embed = self.make_embed(game_over=True)
         await self.message.edit(content=self.board_string(), embed=embed)
 

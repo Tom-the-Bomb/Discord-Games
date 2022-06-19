@@ -12,12 +12,12 @@ from .utils import DiscordColor, DEFAULT_COLOR
 class Chess:
     BASE_URL: ClassVar[str] = 'http://www.fen-to-image.com/image/64/double/coords/'
 
-    def __init__(self, *, white: discord.Member, black: discord.Member) -> None:
+    def __init__(self, *, white: discord.User, black: discord.User) -> None:
         self.white = white
         self.black = black
         self.turn = self.white
 
-        self.winner: Optional[discord.Member] = None
+        self.winner: Optional[discord.User] = None
         self.message: Optional[discord.Message] = None
 
         self.board: chess.Board = chess.Board()
@@ -33,7 +33,7 @@ class Chess:
         embed.set_image(url=f"{self.BASE_URL}{self.board.board_fen()}")
 
         embed.add_field(
-            name='Last Move', 
+            name='Last Move',
             value=f"```yml\n{self.last_move.get('color', '-')}: {self.last_move.get('move', '-')}\n```"
         )
         return embed
@@ -43,7 +43,7 @@ class Chess:
             'color': self.get_color(),
             'move': f'{uci[:2]} -> {uci[2:]}'
         }
-        
+
         self.board.push_uci(uci)
         self.turn = self.white if self.turn == self.black else self.black
         return self.board
@@ -69,12 +69,12 @@ class Chess:
         return embed
 
     async def start(
-        self, 
-        ctx: commands.Context[commands.Bot], 
-        *, 
-        timeout: Optional[float] = None, 
-        embed_color: DiscordColor = DEFAULT_COLOR, 
-        add_reaction_after_move: bool = False, 
+        self,
+        ctx: commands.Context[commands.Bot],
+        *,
+        timeout: Optional[float] = None,
+        embed_color: DiscordColor = DEFAULT_COLOR,
+        add_reaction_after_move: bool = False,
         **kwargs,
     ) -> discord.Message:
         """
@@ -125,7 +125,7 @@ class Chess:
 
             if self.board.is_game_over():
                 break
-            
+
             await self.message.edit(embed=embed)
 
         embed = await self.fetch_results()

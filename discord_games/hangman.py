@@ -61,7 +61,7 @@ STAGES: Final[tuple[str, ...]] = ('''
             _________\t
             |/      |\t
             |      😦\t
-            |        
+            |
             |
             |
          ___|___
@@ -69,25 +69,25 @@ STAGES: Final[tuple[str, ...]] = ('''
             '''
             _________\t
             |/      |\t
-            |      
+            |
             |
             |
             |
          ___|___
-            ''', 
+            ''',
             '''
             _________\t
-            |/     
-            |      
+            |/
+            |
             |
             |
             |
          ___|___
-            ''', 
+            ''',
             '''
             ___      \t
-            |/      
-            |      
+            |/
+            |
             |
             |
             |
@@ -106,13 +106,13 @@ class Hangman:
         if word:
             if not word.isalpha():
                 raise ValueError('Word must be an alphabetical string')
-                
+
             self.word = word
         else:
             self.word = self.get_word()
 
         self.letters: tuple[str, ...] = tuple(self.word)
-        
+
         self.correct: list[str] = [r'\_' for _ in self.word]
         self.wrong_letters: list[str] = []
 
@@ -177,23 +177,23 @@ class Hangman:
         self.embed.description = f"```\n{STAGES[self._counter]}\n```"
         self.embed.color = self.embed_color
         self.embed.add_field(name='Word', value=f"{' '.join(self.correct)}")
-        
+
         wrong_letters = ', '.join(self.wrong_letters) or BLANK
         self.embed.add_field(name='Wrong letters', value=wrong_letters)
         self.embed.add_field(name='Lives left', value=self.lives(), inline=False)
         return self.embed
 
     async def start(
-        self, 
-        ctx: commands.Context[commands.Bot], 
+        self,
+        ctx: commands.Context[commands.Bot],
         *,
         timeout: Optional[float] = None,
-        embed_color: DiscordColor = DEFAULT_COLOR, 
-        delete_after_guess: bool = False, 
+        embed_color: DiscordColor = DEFAULT_COLOR,
+        delete_after_guess: bool = False,
         **kwargs
     ) -> discord.Message:
         """
-        starts the hangman game 
+        starts the hangman game
 
         Parameters
         ----------

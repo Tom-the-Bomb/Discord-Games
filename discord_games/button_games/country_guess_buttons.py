@@ -56,7 +56,7 @@ class CountryInput(discord.ui.Modal, title='Input your guess!'):
 
 class CountryView(BaseView):
     
-    def __init__(self, game: BetaCountryGuesser, *, user: discord.Member, timeout: float) -> None:
+    def __init__(self, game: BetaCountryGuesser, *, user: discord.User, timeout: float) -> None:
         super().__init__(timeout=timeout)
 
         self.game = game

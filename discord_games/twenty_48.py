@@ -45,7 +45,7 @@ async def create_2048_emojis(guild: discord.Guild, names: Optional[list[str]] = 
     for name, file in zip(names, files):
         with open(os.path.join(directory, file), 'rb') as fp:
             result.append(await guild.create_custom_emoji(
-                name=name, 
+                name=name,
                 image=fp.read(),
                 reason='2048 emojis'
             ))
@@ -55,21 +55,21 @@ class Twenty48:
     """
     Twenty48 Game
     """
-    player: discord.Member
+    player: discord.User
 
     def __init__(
-        self, 
+        self,
         number_to_display_mapping: dict[str, str] = {},
         *,
         render_image: bool = False,
     ) -> None:
-        
+
         self.embed_color: Optional[DiscordColor] = None
         self.embed: Optional[discord.Embed] = None
-        
+
         self.board: Board = [[0 for _ in range(4)] for _ in range(4)]
         self.message: Optional[discord.Message] = None
-        
+
         self._controls = ['⬅️', '➡️', '⬆️', '⬇️']
         self._conversion = number_to_display_mapping
         self._render_image = render_image
@@ -79,13 +79,13 @@ class Twenty48:
 
         if self._render_image:
             self._color_mapping: dict[str, tuple[tuple[int, int, int], int]] = {
-                "0": ((204, 192, 179), 50), 
-                "2": ((237, 227, 217), 50), 
-                "4": ((237, 224, 200), 50), 
-                "8":  ((242, 177, 121), 50), 
-                "16": ((245, 149, 100), 50), 
-                "32": ((246, 124, 95), 50), 
-                "64": ((246, 94, 59), 50), 
+                "0": ((204, 192, 179), 50),
+                "2": ((237, 227, 217), 50),
+                "4": ((237, 224, 200), 50),
+                "8":  ((242, 177, 121), 50),
+                "16": ((245, 149, 100), 50),
+                "32": ((246, 124, 95), 50),
+                "64": ((246, 94, 59), 50),
                 "128": ((236, 206, 113), 40),
                 "256": ((236, 203, 96), 40),
                 "512": ((236, 199, 80), 40),
@@ -100,7 +100,7 @@ class Twenty48:
             self.BG_CLR = (187, 173, 160)
 
             self.BORDER_W = 20
-            self.SQ_S = 100  
+            self.SQ_S = 100
             self.SPACE_W = 15
 
             self.IMG_LENGTH = self.BORDER_W * 2 + self.SQ_S * 4 + self.SPACE_W * 3
@@ -108,7 +108,7 @@ class Twenty48:
             self._font = ImageFont.truetype(
                 str(pathlib.Path(__file__).parent / 'assets/ClearSans-Bold.ttf'), 50
             )
-        
+
     def _reverse(self, board: Board) -> Board:
         return [row[::-1] for row in board]
 
@@ -123,7 +123,7 @@ class Twenty48:
                     board[i][j] *= 2
                     board[i][j + 1] = 0
         return board
-            
+
     def _compress(self, board: Board) -> Board:
         new_board = [[0 for _ in range(4)] for _ in range(4)]
         for i in range(4):
@@ -139,7 +139,7 @@ class Twenty48:
         stage = self._merge(stage)
         stage = self._compress(stage)
         self.board = stage
-        
+
     def move_right(self) -> None:
         stage = self._reverse(self.board)
         stage = self._compress(stage)
@@ -147,7 +147,7 @@ class Twenty48:
         stage = self._compress(stage)
         stage = self._reverse(stage)
         self.board = stage
-        
+
     def move_up(self) -> None:
         stage = self._transp(self.board)
         stage = self._compress(stage)
@@ -155,7 +155,7 @@ class Twenty48:
         stage = self._compress(stage)
         stage = self._transp(stage)
         self.board = stage
-        
+
     def move_down(self) -> None:
         stage = self._transp(self.board)
         stage = self._reverse(stage)
@@ -190,7 +190,7 @@ class Twenty48:
         game_string = ''
 
         emoji_array = [
-            [self._conversion.get(str(l), f'`{l}` ') for l in row] 
+            [self._conversion.get(str(l), f'`{l}` ') for l in row]
             for row in board
         ]
 
@@ -200,7 +200,7 @@ class Twenty48:
 
     def check_win(self) -> bool:
         flattened = itertools.chain(*self.board)
-            
+
         for num in (2048, 4096, 8192):
             if num in flattened:
                 if num == 2048:
@@ -217,7 +217,7 @@ class Twenty48:
         SQ = self.SQ_S
         with Image.new('RGB', (self.IMG_LENGTH, self.IMG_LENGTH), self.BG_CLR) as img:
             cursor = ImageDraw.Draw(img)
-            
+
             x = y = self.BORDER_W
             for row in self.board:
                 for tile in row:
@@ -233,19 +233,19 @@ class Twenty48:
                     x += SQ + self.SPACE_W
                 x = self.BORDER_W
                 y += SQ + self.SPACE_W
-        
+
             buf = BytesIO()
             img.save(buf, 'PNG')
         buf.seek(0)
         return discord.File(buf, '2048.png')
 
     async def start(
-        self, 
-        ctx: commands.Context[commands.Bot], 
+        self,
+        ctx: commands.Context[commands.Bot],
         *,
         win_at: Literal[2048, 4096, 8192] = 8192,
         timeout: Optional[float] = None,
-        remove_reaction_after: bool = False, 
+        remove_reaction_after: bool = False,
         delete_button: bool = False,
         embed_color: DiscordColor = DEFAULT_COLOR,
         **kwargs,
@@ -279,7 +279,7 @@ class Twenty48:
 
         self.board[random.randrange(4)][random.randrange(4)] = 2
         self.board[random.randrange(4)][random.randrange(4)] = 2
-        
+
         if self._render_image:
             image = await self.render_image()
             self.message = await ctx.send(file=image, **kwargs)
@@ -295,9 +295,9 @@ class Twenty48:
 
         while not ctx.bot.is_closed():
 
-            def check(reaction: discord.Reaction, user: discord.Member) -> bool:
+            def check(reaction: discord.Reaction, user: discord.User) -> bool:
                 return str(reaction.emoji) in self._controls and user == self.player and reaction.message == self.message
-            
+
             try:
                 reaction, user = await ctx.bot.wait_for("reaction_add", timeout=timeout, check=check)
             except asyncio.TimeoutError:
@@ -332,7 +332,7 @@ class Twenty48:
 
             if lost:
                 self.embed = discord.Embed(
-                    description='Game Over! You lost.', 
+                    description='Game Over! You lost.',
                     color=self.embed_color,
                 )
 

@@ -76,7 +76,7 @@ class WordleView(BaseView):
         self.add_item(WordInputButton(cancel_button=True))
     
 class BetaWordle(Wordle):
-    player: discord.Member
+    player: discord.User
     """
     Wordle(buttons) game
     """

@@ -19,7 +19,7 @@ from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
 
 class Player:
 
-    def __init__(self, player: discord.Member, *, game: BetaBattleShip) -> None:
+    def __init__(self, player: discord.User, *, game: BetaBattleShip) -> None:
         self.game = game
         self.player = player
 
@@ -298,8 +298,8 @@ class BetaBattleShip(BattleShip):
     embed: discord.Embed
 
     def __init__(self, 
-        player1: discord.Member, 
-        player2: discord.Member,
+        player1: discord.User, 
+        player2: discord.User,
         *,
         random: bool = True,
     ) -> None:
@@ -311,7 +311,7 @@ class BetaBattleShip(BattleShip):
 
         self.turn: Player = self.player1
 
-    def get_board(self, player: discord.Member, other: bool = False) -> Board:
+    def get_board(self, player: discord.User, other: bool = False) -> Board:
         player = getattr(player, 'player', player)
         if other:
             return (

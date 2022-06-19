@@ -18,7 +18,7 @@ class RPSButton(discord.ui.Button['RPSView']):
             style=style, 
         )
 
-    def get_choice(self, user: discord.Member, other: bool = False) -> Optional[str]:
+    def get_choice(self, user: discord.User, other: bool = False) -> Optional[str]:
         game = self.view.game
         if other:
             return game.player2_choice if user == game.player1 else game.player1_choice
@@ -102,10 +102,10 @@ class BetaRockPaperScissors(RockPaperScissors):
     """
     RockPaperScissors(buttons) game
     """
-    player1: discord.Member
+    player1: discord.User
     embed: discord.Embed
 
-    def __init__(self, other_player: Optional[discord.Member] = None) -> None:
+    def __init__(self, other_player: Optional[discord.User] = None) -> None:
         self.player2 = other_player
 
         if self.player2:

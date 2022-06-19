@@ -90,7 +90,7 @@ class LightsOut:
         self.completed: Final[Board] = [[None] * self.count for _ in range(self.count)]
         self.tiles: Board = []
 
-        self.player: Optional[discord.Member] = None
+        self.player: Optional[discord.User] = None
         self.button_style: discord.ButtonStyle = discord.ButtonStyle.green
 
     def toggle(self, row: int, col: int) -> None:

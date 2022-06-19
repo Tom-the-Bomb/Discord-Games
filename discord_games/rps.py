@@ -22,22 +22,22 @@ class RockPaperScissors:
 
     def check_win(self, bot_choice: str, user_choice: str) -> bool:
         return self.BEATS[user_choice] == bot_choice
-    
+
     async def wait_for_choice(self, ctx: commands.Context[commands.Bot], *, timeout: float) -> str:
-         
-        def check(reaction: discord.Reaction, user: discord.Member) -> bool:
+
+        def check(reaction: discord.Reaction, user: discord.User) -> bool:
             return (
-                str(reaction.emoji) in self.OPTIONS and 
-                user == ctx.author and 
+                str(reaction.emoji) in self.OPTIONS and
+                user == ctx.author and
                 reaction.message == self.message
             )
-        
+
         reaction, _ = await ctx.bot.wait_for('reaction_add', timeout=timeout, check=check)
         return str(reaction.emoji)
 
     async def start(
-        self, 
-        ctx: commands.Context[commands.Bot], 
+        self,
+        ctx: commands.Context[commands.Bot],
         *,
         timeout: Optional[float] = None,
         embed_color: DiscordColor = DEFAULT_COLOR
@@ -65,24 +65,24 @@ class RockPaperScissors:
             color=embed_color,
         )
         self.message = await ctx.send(embed=embed)
-        
+
         for option in self.OPTIONS:
             await self.message.add_reaction(option)
 
         bot_choice = random.choice(self.OPTIONS)
-        
+
         try:
             user_choice = await self.wait_for_choice(ctx, timeout=timeout)
         except asyncio.TimeoutError:
             return self.message
-        
+
         if user_choice == bot_choice:
-            embed.description = f'**Tie!**\nWe both picked {user_choice}'  
+            embed.description = f'**Tie!**\nWe both picked {user_choice}'
         else:
             if self.check_win(bot_choice, user_choice):
                 embed.description = f'**You Won!**\nYou picked {user_choice} and I picked {bot_choice}.'
             else:
                 embed.description = f'**You Lost!**\nI picked {bot_choice} and you picked {user_choice}.'
-                
+
         await self.message.edit(embed=embed)
         return self.message

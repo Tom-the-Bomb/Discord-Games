@@ -19,9 +19,9 @@ from discord.ext import commands
 from .utils import *
 
 class UserData(TypedDict):
-    user: discord.Member
+    user: discord.User
     time: float
-    wpm: float 
+    wpm: float
     acc: float
 
 class TypeRacer:
@@ -64,8 +64,8 @@ class TypeRacer:
         'night', 'real', 'life', 'few', 'north'
     )
     EMOJI_MAP: ClassVar[dict[int, str]] = {
-        1: "🥇", 
-        2: "🥈", 
+        1: "🥇",
+        2: "🥈",
         3: "🥉",
     }
 
@@ -118,9 +118,9 @@ class TypeRacer:
             timeout -= round(end - start)
 
             winners.append({
-                "user": message.author, 
-                "time": end - start, 
-                "wpm" : len(text.split()) / ((end - start) / 60), 
+                "user": message.author,
+                "time": end - start,
+                "wpm" : len(text.split()) / ((end - start) / 60),
                 "acc" : difflib.SequenceMatcher(None, content, text).ratio() * 100
             })
 
@@ -131,11 +131,11 @@ class TypeRacer:
 
             if len(winners) >= 3:
                 break
-        
+
         desc = [self.format_line(i, x) for i, x in enumerate(winners, 1)]
         embed = discord.Embed(
             title="Typerace results",
-            color=self.embed_color, 
+            color=self.embed_color,
             timestamp=dt.utcnow()
         )
         embed.add_field(name="Winners", value="\n".join(desc))
@@ -143,13 +143,13 @@ class TypeRacer:
         return await ctx.reply(embed=embed, allowed_mentions=discord.AllowedMentions.none())
 
     async def start(
-        self, 
-        ctx: commands.Context[commands.Bot], 
-        *, 
-        embed_title: str = 'Type the following sentence in the chat now!', 
-        embed_color: DiscordColor = DEFAULT_COLOR, 
+        self,
+        ctx: commands.Context[commands.Bot],
+        *,
+        embed_title: str = 'Type the following sentence in the chat now!',
+        embed_color: DiscordColor = DEFAULT_COLOR,
         path_to_text_font: Optional[str] = None,
-        timeout: float = 40, 
+        timeout: float = 40,
         words_mode: bool = False,
         show_author: bool = True,
         max_quote_length: Optional[int] = None,
@@ -212,7 +212,7 @@ class TypeRacer:
 
         embed = discord.Embed(
             title=embed_title,
-            color=self.embed_color, 
+            color=self.embed_color,
             timestamp=dt.utcnow()
         )
         embed.set_image(url="attachment://tr.png")
