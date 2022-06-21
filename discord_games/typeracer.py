@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, ClassVar, TypedDict
+from typing import Optional, ClassVar, TypedDict, Any
 from datetime import datetime as dt
 from io import BytesIO
 
@@ -89,7 +89,14 @@ class TypeRacer:
     def format_line(self, i: int, data: UserData) -> str:
         return f" • {self.EMOJI_MAP[i]} | {data['user'].mention} in {data['time']:.2f}s | **WPM:** {data['wpm']:.2f} | **ACC:** {data['acc']:.2f}%"
 
-    async def wait_for_tr_response(self, ctx: commands.Context[commands.Bot], text: str, *, timeout: float) -> discord.Message:
+    async def wait_for_tr_response(
+        self,
+        ctx: commands.Context[commands.Bot],
+        text: str,
+        *,
+        timeout: float,
+        min_accuracy: float,
+    ) -> discord.Message:
 
         self.embed.description = ""
 
@@ -103,7 +110,7 @@ class TypeRacer:
                 content = m.content.lower().replace("\n", " ")
                 if m.channel == ctx.channel and not m.author.bot and m.author not in map(lambda m: m["user"], winners):
                     sim = difflib.SequenceMatcher(None, content, text).ratio()
-                    return sim >= 0.9
+                    return sim >= min_accuracy
 
             try:
                 message: discord.Message = await ctx.bot.wait_for("message", timeout=timeout, check=check)
@@ -153,6 +160,7 @@ class TypeRacer:
         words_mode: bool = False,
         show_author: bool = True,
         max_quote_length: Optional[int] = None,
+        min_accuracy: float = 0.9,
     ) -> discord.Message:
         """
         starts the typerace game
@@ -176,6 +184,8 @@ class TypeRacer:
             specifies whether or not to show the command author in the embed, by default True
         max_quote_length : int, optional
             specifies the maximum length of the quote to truncate to if necessary, by default None
+        min_accuracy : float, optional
+            specifies the minimum accuracy an attempt needs to be for it to be accepted by the bot
 
         Returns
         -------
@@ -193,7 +203,7 @@ class TypeRacer:
             async with aiohttp.ClientSession() as session:
                 async with session.get(self.SENTENCE_URL) as r:
                     if r.ok:
-                        text: dict = await r.json()
+                        text: dict[str, Any] = await r.json()
                         text = text.get('content', '')
                     else:
                         raise RuntimeError(f"HTTP request raised an error: {r.status}; {r.reason}")
@@ -230,5 +240,5 @@ class TypeRacer:
             file=discord.File(buffer, "tr.png")
         )
 
-        await self.wait_for_tr_response(ctx, text, timeout=timeout)
+        await self.wait_for_tr_response(ctx, text, timeout=timeout, min_accuracy=min_accuracy)
         return self.message
