@@ -15,9 +15,9 @@ with open("discord_games/__init__.py") as f:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE).group(1)
 
 setuptools.setup(
-    name="discord_games", 
-    author="Tom-the-Bomb", 
-    version= version, 
+    name="discord_games",
+    author="Tom-the-Bomb",
+    version= version,
     description="A library to help users easily implement games within their discord bot",
     long_description=readme,
     long_description_content_type = "text/markdown",
@@ -41,13 +41,13 @@ setuptools.setup(
     include_package_data=True,
     package_data={
         '': [
-            'assets/**', 
+            'assets/**',
             'assets/country-data/**',
             'assets/country-flags/**',
         ]
     },
     packages=[
-        'discord_games', 
+        'discord_games',
         'discord_games.button_games'
     ],
     install_requires=requirements,
