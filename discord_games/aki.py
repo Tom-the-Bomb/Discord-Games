@@ -7,8 +7,11 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from akinator import CantGoBackAnyFurther
-from akinator.async_aki import Akinator as AkinatorGame
+from akinator import (
+    AsyncAkinator as AkinatorGame,
+    CantGoBackAnyFurther,
+    Answer,
+)
 
 from .utils import DiscordColor, DEFAULT_COLOR
 
@@ -48,7 +51,6 @@ class Akinator:
         self.delete_button: bool = False
 
         self.bar: str = ''
-        self.questions: int = 0
 
     def build_bar(self) -> str:
         prog = round(self.aki.progression / 8)
@@ -61,7 +63,7 @@ class Akinator:
             title = "Guess your character!",
             description = (
                 "```swift\n"
-                f"Question-Number  : {self.questions}\n"
+                f"Question-Number  : {self.aki.step + 1}\n"
                 f"Progression-Level: {self.aki.progression:.2f}\n```\n"
                 f"{self.build_bar()}"
             ),
@@ -82,11 +84,11 @@ class Akinator:
 
         embed = discord.Embed(color=self.embed_color)
         embed.title = "Character Guesser Engine Results"
-        embed.description = f"Total Questions: `{self.questions}`"
+        embed.description = f"Total Questions: `{self.aki.step + 1}`"
 
-        embed.add_field(name="Character Guessed", value=f"\n**Name:** {self.guess['name']}\n{self.guess['description']}")
+        embed.add_field(name="Character Guessed", value=f"\n**Name:** {self.guess.name}\n{self.guess.description}")
 
-        embed.set_image(url=self.guess['absolute_picture_path'])
+        embed.set_image(url=self.guess.absolute_picture_path)
         embed.set_footer(text="Was I correct?")
 
         return embed
@@ -143,7 +145,8 @@ class Akinator:
         if self.delete_button:
             self.instructions += f'{STOP} 🠒 `cancel`\n'
 
-        await self.aki.start_game(child_mode=child_mode)
+        self.aki.child_mode = child_mode
+        await self.aki.start_game()
 
         embed = self.build_embed()
         self.message = await ctx.send(embed=embed)
@@ -190,9 +193,8 @@ class Akinator:
                 except CantGoBackAnyFurther:
                     await self.message.reply('I cannot go back any further', delete_after=10)
             else:
-                self.questions += 1
-
-                await self.aki.answer(Options(emoji).name)
+                answer = Answer.from_str(Options(emoji).name)
+                await self.aki.answer(answer)
 
             embed = self.build_embed()
             await self.message.edit(embed=embed)

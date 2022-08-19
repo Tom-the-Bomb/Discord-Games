@@ -4,7 +4,7 @@ from typing import Optional, ClassVar
 
 import discord
 from discord.ext import commands
-from akinator import CantGoBackAnyFurther
+from akinator import Answer, CantGoBackAnyFurther
 
 from ..aki import Akinator
 from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
@@ -34,16 +34,16 @@ class AkiView(BaseView):
 
         if self.game.back_button:
             delete = AkiButton(
-                label='back', 
-                style=discord.ButtonStyle.red, 
+                label='back',
+                style=discord.ButtonStyle.red,
                 row=1
             )
             self.add_item(delete)
 
         if self.game.delete_button:
             delete = AkiButton(
-                label='Cancel', 
-                style=discord.ButtonStyle.red, 
+                label='Cancel',
+                style=discord.ButtonStyle.red,
                 row=1
             )
             self.add_item(delete)
@@ -54,7 +54,7 @@ class AkiView(BaseView):
 
         if interaction.user != game.player:
             return await interaction.response.send_message(content="This isn't your game", ephemeral=True)
-        
+
         if answer == "cancel":
             await interaction.message.reply("Session ended", mention_author=True)
             self.stop()
@@ -67,9 +67,8 @@ class AkiView(BaseView):
             except CantGoBackAnyFurther:
                 return await interaction.response.send_message('I cant go back any further!', ephemeral=True)
         else:
-            game.questions += 1
-            await game.aki.answer(answer)
-            
+            await game.aki.answer(Answer.from_str(answer))
+
             if game.aki.progression >= game.win_at:
                 self.disable_all()
                 embed = await game.win()
@@ -78,19 +77,19 @@ class AkiView(BaseView):
                 embed = game.build_embed(instructions=False)
 
         return await interaction.response.edit_message(embed=embed, view=self)
-        
+
 class BetaAkinator(Akinator):
     """
     Akinator(buttons) Game
     """
     async def start(
-        self, 
+        self,
         ctx: commands.Context[commands.Bot],
         *,
         back_button: bool = False,
         delete_button: bool = False,
         embed_color: DiscordColor = DEFAULT_COLOR,
-        win_at: int = 80, 
+        win_at: int = 80,
         timeout: Optional[float] = None,
         child_mode: bool = True,
     ) -> discord.Message:
@@ -127,7 +126,8 @@ class BetaAkinator(Akinator):
         self.win_at = win_at
         self.view = AkiView(self, timeout=timeout)
 
-        await self.aki.start_game(child_mode=child_mode)
+        self.aki.child_mode = child_mode
+        await self.aki.start_game()
 
         embed = self.build_embed(instructions=False)
         self.message = await ctx.send(embed=embed, view=self.view)
