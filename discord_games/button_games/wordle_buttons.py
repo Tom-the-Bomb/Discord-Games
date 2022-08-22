@@ -10,13 +10,13 @@ from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
 
 class WordInput(discord.ui.Modal, title='Word Input'):
     word = discord.ui.TextInput(
-        label=f'Input your guess', 
+        label=f'Input your guess',
         style=discord.TextStyle.short,
         required=True,
-        min_length=5, 
+        min_length=5,
         max_length=5,
     )
-    
+
     def __init__(self, view: WordleView) -> None:
         super().__init__()
         self.view = view
@@ -34,7 +34,7 @@ class WordInput(discord.ui.Modal, title='Word Input'):
             embed = discord.Embed(title='Wordle!', color=self.view.game.embed_color)
             embed.set_image(url='attachment://wordle.png')
             file = discord.File(buf, 'wordle.png')
-            
+
             if won:
                 await interaction.message.reply('Game Over! You won!', mention_author=True)
             elif lost := len(game.guesses) >= 6:
@@ -43,7 +43,7 @@ class WordInput(discord.ui.Modal, title='Word Input'):
             if won or lost:
                 self.view.disable_all()
                 self.view.stop()
-            
+
             return await interaction.response.edit_message(embed=embed, attachments=[file], view=self.view)
 
 class WordInputButton(discord.ui.Button['WordleView']):
@@ -53,7 +53,7 @@ class WordInputButton(discord.ui.Button['WordleView']):
             label='Cancel' if cancel_button else 'Make a guess!',
             style=discord.ButtonStyle.red if cancel_button else discord.ButtonStyle.blurple,
         )
-    
+
     async def callback(self, interaction: discord.Interaction) -> None:
         game = self.view.game
         if interaction.user != game.player:
@@ -67,22 +67,22 @@ class WordInputButton(discord.ui.Button['WordleView']):
                 return await interaction.response.send_modal(WordInput(self.view))
 
 class WordleView(BaseView):
-    
+
     def __init__(self, game: BetaWordle, *, timeout: float):
         super().__init__(timeout=timeout)
 
         self.game = game
         self.add_item(WordInputButton())
         self.add_item(WordInputButton(cancel_button=True))
-    
+
 class BetaWordle(Wordle):
     player: discord.User
     """
     Wordle(buttons) game
     """
     async def start(
-        self, 
-        ctx: commands.Context[commands.Bot], 
+        self,
+        ctx: commands.Context[commands.Bot],
         *,
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None
@@ -114,7 +114,7 @@ class BetaWordle(Wordle):
         self.view = WordleView(self, timeout=timeout)
         self.message = await ctx.send(
             embed=embed,
-            file=discord.File(buf, 'wordle.png'), 
+            file=discord.File(buf, 'wordle.png'),
             view=self.view,
         )
         await self.view.wait()

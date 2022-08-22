@@ -10,7 +10,7 @@ from ..utils import *
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
-    Board: TypeAlias = list[list[Optional[int]]] 
+    Board: TypeAlias = list[list[Optional[int]]]
 
 
 class SlideButton(discord.ui.Button['SlideView']):
@@ -50,9 +50,9 @@ class SlideButton(discord.ui.Button['SlideView']):
                     self.view.disable_all()
                     self.view.stop()
                     game.embed.description = '**Congrats! You won!**'
-                        
+
                 return await interaction.response.edit_message(embed=game.embed, view=self.view)
-            
+
 class SlideView(BaseView):
 
     def __init__(self, game: NumberSlider, *, timeout: float) -> None:
@@ -63,10 +63,10 @@ class SlideView(BaseView):
         self.update_board()
 
     def update_board(self, *, clear: bool = False) -> None:
-        
+
         if clear:
             self.clear_items()
-            
+
         for i, row in enumerate(self.game.numbers):
             for j, number in enumerate(row):
                 if number == self.game.completed[i][j]:
@@ -75,12 +75,12 @@ class SlideView(BaseView):
                     style = self.game.wrong_style
 
                 button = SlideButton(
-                    label=number or '\u200b', 
+                    label=number or '\u200b',
                     style=style,
                     row=i,
                 )
                 self.add_item(button)
-        
+
 class NumberSlider:
     """
     Number Slider Game
@@ -111,9 +111,9 @@ class NumberSlider:
         nx, ny = self.get_item()
 
         beside_item = [
-            (nx-1, ny), 
-            (nx, ny-1), 
-            (nx+1, ny), 
+            (nx-1, ny),
+            (nx, ny-1),
+            (nx+1, ny),
             (nx, ny+1),
         ]
 
@@ -124,8 +124,8 @@ class NumberSlider:
         return data
 
     async def start(
-        self, 
-        ctx: commands.Context[commands.Bot], 
+        self,
+        ctx: commands.Context[commands.Bot],
         *,
         wrong_style: discord.ButtonStyle = discord.ButtonStyle.gray,
         correct_style: discord.ButtonStyle = discord.ButtonStyle.green,
@@ -165,7 +165,7 @@ class NumberSlider:
         self.numbers = chunk(numbers, count=self.count)
 
         self.completed = chunk(self.all_numbers + [None], count=self.count)
-        
+
         self.view = SlideView(self, timeout=timeout)
         self.embed = discord.Embed(description='Slide the tiles back in ascending order!', color=embed_color)
         self.embed.add_field(name='\u200b', value='Moves: `0`')
@@ -173,7 +173,7 @@ class NumberSlider:
         self.message = await ctx.send(embed=self.embed, view=self.view)
 
         await double_wait(
-            wait_for_delete(ctx, self.message), 
+            wait_for_delete(ctx, self.message),
             self.view.wait(),
         )
         return self.message

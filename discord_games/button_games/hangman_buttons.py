@@ -10,7 +10,7 @@ from ..hangman import Hangman
 from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
 
 class HangmanInput(discord.ui.Modal, title='Make a guess!'):
-    
+
     def __init__(self, view: HangmanView) -> None:
         super().__init__()
         self.view = view
@@ -34,7 +34,7 @@ class HangmanInput(discord.ui.Modal, title='Make a guess!'):
 
         elif len(content) > 1 and content not in game._all_words:
             return await interaction.response.send_message('This is not a valid word!', ephemeral=True)
-            
+
         else:
             await game.make_guess(content)
 
@@ -75,7 +75,7 @@ class BetaHangman(Hangman):
     Hangman(buttons) Game
     """
     async def start(
-        self, 
+        self,
         ctx: commands.Context[commands.Bot],
         *,
         embed_color: DiscordColor = DEFAULT_COLOR,

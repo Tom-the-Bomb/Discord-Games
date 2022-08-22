@@ -17,7 +17,7 @@ class ReactionButton(discord.ui.Button['ReactionView']):
 
         self.edited: bool = False
         self.clicked: bool = False
-    
+
     async def callback(self, interaction: discord.Interaction) -> None:
         game = self.view.game
 
@@ -32,7 +32,7 @@ class ReactionButton(discord.ui.Button['ReactionView']):
 
             game.embed.description = f'{interaction.user.mention} reacted first in `{elapsed:.2f}s` !'
             await interaction.response.edit_message(embed=game.embed)
-            
+
             self.clicked = True
             return game.finished_event.set()
 
@@ -40,10 +40,10 @@ class ReactionView(BaseView):
     game: BetaReactionGame
 
     def __init__(
-        self, 
+        self,
         game: BetaReactionGame,
         *,
-        button_style: discord.ButtonStyle,  
+        button_style: discord.ButtonStyle,
         timeout: float
     ) -> None:
 
@@ -59,12 +59,12 @@ class BetaReactionGame:
     Reaction(buttons) game
     """
     async def start(
-        self, 
-        ctx: commands.Context[commands.Bot], 
+        self,
+        ctx: commands.Context[commands.Bot],
         *,
         author_only: bool = False,
         pause_range: tuple[float, float] = (1.0, 5.0),
-        start_button_style: discord.ButtonStyle = discord.ButtonStyle.blurple, 
+        start_button_style: discord.ButtonStyle = discord.ButtonStyle.blurple,
         end_button_style: Union[
             discord.ButtonStyle, tuple[discord.ButtonStyle, ...]
         ] = (discord.ButtonStyle.green, discord.ButtonStyle.red),
@@ -108,7 +108,7 @@ class BetaReactionGame:
         )
         self.view = ReactionView(self, button_style=start_button_style, timeout=timeout)
         self.message = await ctx.send(embed=self.embed, view=self.view)
-        
+
         pause = random.uniform(*pause_range)
         await asyncio.sleep(pause)
 

@@ -45,7 +45,7 @@ class BoggleButton(discord.ui.Button['BoggleView']):
             game.indices.pop(-1)
         else:
             return await interaction.response.defer()
-        
+
         embed = game.get_embed()
         await interaction.response.edit_message(view=self.view, embed=embed)
 
@@ -59,9 +59,9 @@ class BoggleView(BaseView):
         for i, row in enumerate(self.game.board):
             for j, letter in enumerate(row):
                 button = BoggleButton(
-                    label=letter, 
+                    label=letter,
                     style=self.game.button_style,
-                    row=i, 
+                    row=i,
                     col=j,
                 )
                 self.add_item(button)
@@ -112,14 +112,14 @@ class BoggleView(BaseView):
             return await interaction.response.send_message('You have no current guesses to clear!', ephemeral=True)
 
         self.game.reset()
-        
+
         embed = self.game.get_embed()
         return await interaction.response.edit_message(view=self, embed=embed)
 
     @discord.ui.button(label='Stop', style=discord.ButtonStyle.red, row=4)
     async def stop_button(self, interaction: discord.Interaction, _) -> None:
         embed = self.game.win()
-        
+
         await interaction.response.send_message(embed=embed)
         await interaction.message.edit(view=self)
         return self.stop()
@@ -159,7 +159,7 @@ class Boggle:
         points = sum(len(guess) - 2 for guess in guesses)
         points -= sum([1] * len(self.wrong_guesses))
         return corr, wrong, points
-            
+
     def reset(self) -> None:
         self.current_word = ''
         self.indices = []
@@ -197,13 +197,13 @@ class Boggle:
         )
         corr, wrong, points = self.get_results()
         embed.add_field(
-            name='\u200b', 
+            name='\u200b',
             value=f'You found **{corr}** correct words (plus **{wrong}** wrong guesses)\nand earned **{points}** points!'
         )
         return embed
 
     def beside_current(self, row: int, col: int) -> list[tuple[int, int]]:
-        
+
         indexes = (
             (row - 1, col),
             (row + 1, col),
@@ -216,12 +216,12 @@ class Boggle:
         )
 
         return [
-            (i, j) for (i, j) in indexes if i in range(4) and j in range(4) and 
+            (i, j) for (i, j) in indexes if i in range(4) and j in range(4) and
             self.view.nested_children[i][j].style != self.selected_style
         ]
 
     async def start(
-        self, 
+        self,
         ctx: commands.Context[commands.Bot],
         *,
         embed_color: DiscordColor = DEFAULT_COLOR,

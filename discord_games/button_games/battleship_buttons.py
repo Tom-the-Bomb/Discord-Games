@@ -8,7 +8,7 @@ import discord
 from discord.ext import commands
 
 from ..battleship import (
-    BattleShip, 
+    BattleShip,
     SHIPS,
     Ship,
     Board,
@@ -24,7 +24,7 @@ class Player:
         self.player = player
 
         self.embed = discord.Embed(title='Log', description='```\n\u200b\n```')
-        
+
         self._logs: list[str] = []
         self.log: str = ''
 
@@ -106,7 +106,7 @@ class BattleshipButton(WordInputButton):
 
                 await game.message1.edit(view=game.view1)
                 await game.message2.edit(view=game.view2)
-                
+
                 game.view1.stop()
                 return game.view2.stop()
         else:
@@ -116,7 +116,7 @@ class BattleshipButton(WordInputButton):
                 return await interaction.response.send_modal(BattleshipInput(self.view))
 
 class CoordButton(discord.ui.Button['BattleshipView']):
-    
+
     def __init__(self, letter_or_num: Union[str, int]) -> None:
         super().__init__(
             label=str(letter_or_num),
@@ -164,7 +164,7 @@ class BattleshipView(BaseView):
     def update_views(self) -> None:
         game = self.game
         self.disable()
-        
+
         other_view = game.view1 if game.turn == game.player2 else game.view2
 
         other_view.clear_items()
@@ -203,7 +203,7 @@ class SetupInput(discord.ui.Modal):
     def __init__(self, button: SetupButton) -> None:
         self.button = button
         self.ship = self.button.label
-    
+
         super().__init__(title=f'{self.ship} Setup')
 
         self.start_coord = discord.ui.TextInput(
@@ -246,9 +246,9 @@ class SetupInput(discord.ui.Modal):
         _, start = game.get_coords(start)
 
         new_ship = Ship(
-            name=self.ship, 
-            size=self.button.ship_size, 
-            start=start, 
+            name=self.ship,
+            size=self.button.ship_size,
+            start=start,
             vertical=vertical,
             color=self.button.ship_color,
         )
@@ -257,7 +257,7 @@ class SetupInput(discord.ui.Modal):
             self.button.disabled = True
             board.ships.append(new_ship)
 
-            embed, file, _, _ = await game.get_file(interaction.user, hide=False) 
+            embed, file, _, _ = await game.get_file(interaction.user, hide=False)
 
             await interaction.response.edit_message(attachments=[file], embed=embed, view=self.button.view)
 
@@ -297,8 +297,8 @@ class BetaBattleShip(BattleShip):
     """
     embed: discord.Embed
 
-    def __init__(self, 
-        player1: discord.User, 
+    def __init__(self,
+        player1: discord.User,
         player2: discord.User,
         *,
         random: bool = True,
@@ -315,7 +315,7 @@ class BetaBattleShip(BattleShip):
         player = getattr(player, 'player', player)
         if other:
             return (
-                self.player2_board if player == self.player1.player 
+                self.player2_board if player == self.player1.player
                 else self.player1_board
             )
         else:
@@ -330,7 +330,7 @@ class BetaBattleShip(BattleShip):
         embed1 = discord.Embed(
             description='**Press the buttons to place your ships!**',
             color=self.embed_color,
-        ) 
+        )
 
         view = SetupView(self, timeout=self.timeout)
         await user.send(file=file, embeds=[embed, embed1], view=view)
@@ -358,17 +358,17 @@ class BetaBattleShip(BattleShip):
 
         self.player1.embed.set_field_at(0, name='\u200b', value=f'```yml\nturn: {self.turn.player}\n```')
         self.player2.embed.set_field_at(0, name='\u200b', value=f'```yml\nturn: {self.turn.player}\n```')
-        
+
         await self.message1.edit(
             view=self.view1,
-            content='**Battleship**', 
-            embeds=[e2, e1, self.player1.embed], 
+            content='**Battleship**',
+            embeds=[e2, e1, self.player1.embed],
             attachments=[f2, f1],
         )
         await self.message2.edit(
             view=self.view2,
-            content='**Battleship**', 
-            embeds=[e4, e3, self.player2.embed], 
+            content='**Battleship**',
+            embeds=[e4, e3, self.player2.embed],
             attachments=[f4, f3],
         )
 
@@ -377,13 +377,13 @@ class BetaBattleShip(BattleShip):
 
             other = self.player2 if winner == self.player1 else self.player1
             await other.send('You lost, better luck next time :(')
-            
+
             self.view1.stop()
             return self.view2.stop()
-        
+
     async def start(
-        self, 
-        ctx: commands.Context[commands.Bot], 
+        self,
+        ctx: commands.Context[commands.Bot],
         *,
         max_log_size: int = 10,
         embed_color: DiscordColor = DEFAULT_COLOR,
@@ -431,16 +431,16 @@ class BetaBattleShip(BattleShip):
 
         self.player1.embed.add_field(name='\u200b', value=f'```yml\nturn: {self.turn.player}\n```')
         self.player2.embed.add_field(name='\u200b', value=f'```yml\nturn: {self.turn.player}\n```')
-        
+
         self.message1 = await self.player1.send(
-            content='**Game starting!**', 
-            view=self.view1, 
+            content='**Game starting!**',
+            view=self.view1,
             embeds=[e2, e1, self.player1.embed],
             files=[f2, f1],
         )
         self.message2 = await self.player2.send(
-            content='**Game starting!**', 
-            view=self.view2, 
+            content='**Game starting!**',
+            view=self.view2,
             embeds=[e4, e3, self.player2.embed],
             files=[f4, f3],
         )

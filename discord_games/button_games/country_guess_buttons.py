@@ -9,7 +9,7 @@ from ..country_guess import CountryGuesser
 from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
 
 class CountryInput(discord.ui.Modal, title='Input your guess!'):
-    
+
     def __init__(self, view: CountryView) -> None:
         super().__init__()
         self.view = view
@@ -22,7 +22,7 @@ class CountryInput(discord.ui.Modal, title='Input your guess!'):
         )
 
         self.add_item(self.guess)
-        
+
     async def on_submit(self, interaction: discord.Interaction) -> None:
         guess = self.guess.value.strip().lower()
         game = self.view.game
@@ -55,7 +55,7 @@ class CountryInput(discord.ui.Modal, title='Input your guess!'):
                 await interaction.response.edit_message(embed=game.embed)
 
 class CountryView(BaseView):
-    
+
     def __init__(self, game: BetaCountryGuesser, *, user: discord.User, timeout: float) -> None:
         super().__init__(timeout=timeout)
 
@@ -82,7 +82,7 @@ class CountryView(BaseView):
         if not self.game.hints:
             button.disabled = True
             await interaction.message.edit(view=self)
-            
+
     @discord.ui.button(label='Cancel', style=discord.ButtonStyle.red)
     async def cancel_button(self, interaction: discord.Interaction, _) -> None:
         self.disable_all()
@@ -105,13 +105,13 @@ class BetaCountryGuesser(CountryGuesser):
         self.embed.set_field_at(1, name='Guess Log', value=f'```diff\n{self.guesslog}\n```')
 
     async def start(
-        self, 
-        ctx: commands.Context[commands.Bot], 
-        *, 
+        self,
+        ctx: commands.Context[commands.Bot],
+        *,
         embed_color: DiscordColor = DEFAULT_COLOR,
         ignore_diff_len: bool = False,
         timeout: Optional[float] = None,
-    ) -> discord.Message:  
+    ) -> discord.Message:
         """
         starts the Country Guesser(buttons) Game
 

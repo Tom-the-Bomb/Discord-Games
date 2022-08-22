@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     Board: TypeAlias = list[list[Optional[Literal['💡']]]]
 
 BULB: Final[Literal['💡']] = '💡'
-    
+
 
 class LightsOutButton(discord.ui.Button['LightsOutView']):
 
@@ -51,7 +51,7 @@ class LightsOutButton(discord.ui.Button['LightsOutView']):
                 self.view.disable_all()
                 self.view.stop()
                 game.embed.description = '**Congrats! You won!**'
-                    
+
             return await interaction.response.edit_message(embed=game.embed, view=self.view)
 
 class LightsOutView(SlideView):
@@ -64,7 +64,7 @@ class LightsOutView(SlideView):
 
         if clear:
             self.clear_items()
-            
+
         for i, row in enumerate(self.game.tiles):
             for j, tile in enumerate(row):
                 button = LightsOutButton(
@@ -98,9 +98,9 @@ class LightsOut:
 
     def beside_item(self, row: int, col: int) -> list[tuple[int, int]]:
         beside = [
-            (row - 1, col), 
-            (row, col - 1), 
-            (row + 1, col), 
+            (row - 1, col),
+            (row, col - 1),
+            (row + 1, col),
             (row, col + 1),
         ]
 
@@ -110,7 +110,7 @@ class LightsOut:
         return data
 
     async def start(
-        self, 
+        self,
         ctx: commands.Context[commands.Bot],
         *,
         button_style: discord.ButtonStyle = discord.ButtonStyle.green,
@@ -149,7 +149,7 @@ class LightsOut:
         self.message = await ctx.send(embed=self.embed, view=self.view)
 
         await double_wait(
-            wait_for_delete(ctx, self.message), 
+            wait_for_delete(ctx, self.message),
             self.view.wait(),
         )
         return self.message

@@ -10,7 +10,7 @@ from discord.ext import commands
 from ..utils import *
 
 class MemoryButton(discord.ui.Button['MemoryView']):
-    
+
     def __init__(self, emoji: str, *, style: discord.ButtonStyle, row: int = 0) -> None:
         self.value = emoji
 
@@ -22,7 +22,7 @@ class MemoryButton(discord.ui.Button['MemoryView']):
 
     async def callback(self, interaction: discord.Interaction) -> None:
         game = self.view.game
-        
+
         if opened := self.view.opened:
             game.moves += 1
             game.embed.set_field_at(0, name='\u200b', value=f'Moves: `{game.moves}`')
@@ -57,12 +57,12 @@ class MemoryButton(discord.ui.Button['MemoryView']):
 class MemoryView(BaseView):
     board: list[list[str]]
     DEFAULT_ITEMS: ClassVar[list[str]] = ['🥝', '🍓', '🍹', '🍋', '🥭', '🍎', '🍊', '🍍', '🍑', '🍇', '🍉', '🥬']
-    
+
     def __init__(
         self,
         game: MemoryGame,
-        items: list[str], 
-        *, 
+        items: list[str],
+        *,
         button_style: discord.ButtonStyle,
         pause_time: float,
         timeout: Optional[float] = None,
@@ -75,7 +75,7 @@ class MemoryView(BaseView):
         self.button_style = button_style
         self.pause_time = pause_time
         self.opened: Optional[MemoryButton] = None
-        
+
         if not items:
             items = self.DEFAULT_ITEMS[:]
         assert len(items) == 12
@@ -90,7 +90,7 @@ class MemoryView(BaseView):
         for i, row in enumerate(self.board):
             for item in row:
                 button = MemoryButton(item, style=self.button_style, row=i)
-                
+
                 if not item:
                     button.disabled = True
                 self.add_item(button)
@@ -105,7 +105,7 @@ class MemoryGame:
         self.moves: int = 0
 
     async def start(
-        self, 
+        self,
         ctx: commands.Context[commands.Bot],
         *,
         embed_color: DiscordColor = DEFAULT_COLOR,
@@ -143,15 +143,15 @@ class MemoryGame:
 
         self.view = MemoryView(
             game=self,
-            items=items, 
-            button_style=button_style, 
+            items=items,
+            button_style=button_style,
             pause_time=pause_time,
             timeout=timeout
         )
         self.message = await ctx.send(embed=self.embed, view=self.view)
 
         await double_wait(
-            wait_for_delete(ctx, self.message), 
+            wait_for_delete(ctx, self.message),
             self.view.wait(),
         )
         return self.message

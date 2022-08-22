@@ -12,7 +12,7 @@ class TTTButton(discord.ui.Button['TTTView']):
 
     def __init__(self, label: str, style: discord.ButtonStyle, *, row: int, col: int):
         super().__init__(
-            label=label, 
+            label=label,
             style=style,
             row=row,
         )
@@ -56,7 +56,7 @@ class TTTView(BaseView):
         for x, row in enumerate(game.board):
             for y, square in enumerate(row):
                 button = TTTButton(
-                    label=square, 
+                    label=square,
                     style=self.game.button_style,
                     row=x,
                     col=y,
@@ -78,7 +78,7 @@ class BetaTictactoe(Tictactoe):
             button.style = self.win_button_style
 
     async def start(
-        self, 
+        self,
         ctx: commands.Context[commands.Bot],
         button_style: discord.ButtonStyle = discord.ButtonStyle.green,
         *,

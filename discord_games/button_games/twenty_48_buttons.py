@@ -11,15 +11,15 @@ from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
 
 
 class Twenty48_Button(discord.ui.Button['BaseView']):
-    
+
     def __init__(self, game: BetaTwenty48, emoji: str) -> None:
         self.game = game
 
         style = discord.ButtonStyle.red if emoji == '⏹️' else discord.ButtonStyle.blurple
-    
+
         super().__init__(
-            style=style, 
-            emoji=discord.PartialEmoji(name=emoji), 
+            style=style,
+            emoji=discord.PartialEmoji(name=emoji),
             label="\u200b"
         )
 
@@ -55,7 +55,7 @@ class Twenty48_Button(discord.ui.Button['BaseView']):
 
         if lost:
             self.game.embed = discord.Embed(
-                description='Game Over! You lost.', 
+                description='Game Over! You lost.',
                 color=self.game.embed_color,
             )
 
@@ -72,11 +72,11 @@ class BetaTwenty48(Twenty48):
     Twenty48(buttons) game
     """
     async def start(
-        self, 
-        ctx: commands.Context[commands.Bot], 
+        self,
+        ctx: commands.Context[commands.Bot],
         *,
         win_at: Literal[2048, 4096, 8192] = 8192,
-        timeout: Optional[float] = None, 
+        timeout: Optional[float] = None,
         delete_button: bool = False,
         embed_color: DiscordColor = DEFAULT_COLOR,
         **kwargs,
@@ -116,7 +116,7 @@ class BetaTwenty48(Twenty48):
 
         for button in self._controls:
             self.view.add_item(Twenty48_Button(self, button))
-        
+
         if self._render_image:
             image = await self.render_image()
             self.message = await ctx.send(file=image, view=self.view, **kwargs)

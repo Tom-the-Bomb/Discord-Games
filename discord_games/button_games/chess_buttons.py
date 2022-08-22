@@ -33,7 +33,7 @@ class ChessInput(discord.ui.Modal, title='Make your move'):
 
         self.add_item(self.move_from)
         self.add_item(self.move_to)
-        
+
     async def on_submit(self, interaction: discord.Interaction) -> discord.Message:
         game = self.view.game
         from_coord = self.move_from.value.strip().lower()
@@ -45,7 +45,7 @@ class ChessInput(discord.ui.Modal, title='Make your move'):
             is_valid_uci = game.board.parse_uci(uci)
         except ValueError:
             is_valid_uci = False
-        
+
         if not is_valid_uci:
             return await interaction.response.send_message(f'Invalid coordinates for move: `{from_coord} -> {to_coord}`', ephemeral=True)
         else:
@@ -80,7 +80,7 @@ class ChessButton(WordInputButton):
                     return await interaction.response.send_modal(ChessInput(self.view))
 
 class ChessView(BaseView):
-    
+
     def __init__(self, game: BetaChess, *, timeout: float) -> None:
         super().__init__(timeout=timeout)
 
@@ -97,11 +97,11 @@ class BetaChess(Chess):
     Chess(buttons) Game
     """
     async def start(
-        self, 
-        ctx: commands.Context[commands.Bot], 
-        *, 
-        embed_color: DiscordColor = DEFAULT_COLOR, 
-        timeout: Optional[float] = None, 
+        self,
+        ctx: commands.Context[commands.Bot],
+        *,
+        embed_color: DiscordColor = DEFAULT_COLOR,
+        timeout: Optional[float] = None,
     ) -> discord.Message:
         """
         starts the Chess(buttons) Game

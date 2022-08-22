@@ -15,7 +15,7 @@ class RPSButton(discord.ui.Button['RPSView']):
         super().__init__(
             label='\u200b',
             emoji=emoji,
-            style=style, 
+            style=style,
         )
 
     def get_choice(self, user: discord.User, other: bool = False) -> Optional[str]:
@@ -38,13 +38,13 @@ class RPSButton(discord.ui.Button['RPSView']):
                 user_choice = self.emoji.name
 
                 if user_choice == bot_choice:
-                    game.embed.description = f'**Tie!**\nWe both picked {user_choice}'  
+                    game.embed.description = f'**Tie!**\nWe both picked {user_choice}'
                 else:
                     if game.check_win(bot_choice, user_choice):
                         game.embed.description = f'**You Won!**\nYou picked {user_choice} and I picked {bot_choice}.'
                     else:
                         game.embed.description = f'**You Lost!**\nI picked {bot_choice} and you picked {user_choice}.'
-                
+
                 self.view.disable_all()
                 self.view.stop()
 
@@ -64,7 +64,7 @@ class RPSButton(discord.ui.Button['RPSView']):
 
                     if not other_player_choice:
                         game.embed.description += f'\n\n{game.player2.mention} has chosen...\n*Waiting for {game.player1.mention} to choose...*'
-                    
+
                 if game.player1_choice and game.player2_choice:
                     who_won = game.player1 if game.BEATS[game.player1_choice] == game.player2_choice else game.player2
 
@@ -83,8 +83,8 @@ class RPSView(BaseView):
     game: BetaRockPaperScissors
 
     def __init__(
-        self, 
-        game: BetaRockPaperScissors, 
+        self,
+        game: BetaRockPaperScissors,
         *,
         button_style: discord.ButtonStyle,
         timeout: float,
@@ -113,8 +113,8 @@ class BetaRockPaperScissors(RockPaperScissors):
             self.player2_choice: Optional[str] = None
 
     async def start(
-        self, 
-        ctx: commands.Context[commands.Bot], 
+        self,
+        ctx: commands.Context[commands.Bot],
         *,
         button_style: discord.ButtonStyle = discord.ButtonStyle.blurple,
         embed_color: DiscordColor = DEFAULT_COLOR,
