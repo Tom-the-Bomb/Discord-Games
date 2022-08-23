@@ -12,7 +12,7 @@ from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
 class AkiButton(discord.ui.Button['AkiView']):
 
     async def callback(self, interaction: discord.Interaction) -> None:
-        return await self.view.process_input(interaction, self.label.lower())
+        await self.view.process_input(interaction, self.label.lower())
 
 class AkiView(BaseView):
     OPTIONS: ClassVar[dict[str, discord.ButtonStyle]] = {
@@ -48,8 +48,7 @@ class AkiView(BaseView):
             )
             self.add_item(delete)
 
-    async def process_input(self, interaction: discord.Interaction, answer: str) -> None:
-
+    async def process_input(self, interaction: discord.Interaction, answer: str) -> discord.Message:
         game = self.game
 
         if interaction.user != game.player:
@@ -75,8 +74,10 @@ class AkiView(BaseView):
                 self.stop()
             else:
                 embed = game.build_embed(instructions=False)
-
-        return await interaction.response.edit_message(embed=embed, view=self)
+        try:
+            return await interaction.response.edit_message(embed=embed, view=self)
+        except discord.NotFound:
+            pass
 
 class BetaAkinator(Akinator):
     """

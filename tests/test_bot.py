@@ -16,9 +16,9 @@ bot = TestBot(command_prefix='!!', intents=discord.Intents.all())
 
 @bot.command(name='test', aliases=['t'])
 @commands.is_owner()
-async def test(ctx: commands.Context[commands.Bot], *, member: discord.Member) -> None:
+async def test(ctx: commands.Context[commands.Bot]) -> None:
 
-    game = button_games.BetaConnectFour(red=ctx.author, blue=member)
+    game = button_games.BetaAkinator()
     await game.start(ctx)
     await ctx.reply('done!', mention_author=False)
 
