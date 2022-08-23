@@ -82,7 +82,7 @@ class BetaTwenty48(Twenty48):
         **kwargs,
     ) -> discord.Message:
         """
-        starts the 2048(button) game
+        starts the 2048(buttons) game
 
         Parameters
         ----------

@@ -84,7 +84,7 @@ class BetaReactionGame:
             the time range to randomly pause for, by default (1.0, 5.0)
         start_button_style : discord.ButtonStyle, optional
             specifies the button style to start with, by default discord.ButtonStyle.blurple
-        end_button_style : Union[ discord.ButtonStyle, tuple[discord.ButtonStyle, ...] ], optional
+        end_button_style : Union[discord.ButtonStyle, tuple[discord.ButtonStyle, ...]], optional
             specifies the button styles(s) to change to, by default (discord.ButtonStyle.green, discord.ButtonStyle.red)
         embed_color : DiscordColor, optional
             the color of the game embed, by default DEFAULT_COLOR

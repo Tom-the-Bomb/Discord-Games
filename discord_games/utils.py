@@ -40,7 +40,7 @@ DiscordColor: TypeAlias = Union[discord.Color, int]
 
 DEFAULT_COLOR: Final[discord.Color] = discord.Color(0x2F3136)
 
-def chunk(iterable: list[int], *, count: int) -> list[list[int]]:
+def chunk(iterable: list[T], *, count: int) -> list[list[T]]:
     return [iterable[i:i + count] for i in range(0, len(iterable), count)]
 
 def executor() -> Callable[[Callable[P, T]], Callable[P, Coroutine[Any, Any, T]]]:

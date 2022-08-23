@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Union
 import asyncio
 
 import discord
@@ -53,15 +53,17 @@ class ConnectFour:
             embed.description = f"**Game over**\n{status_}"
         return embed
 
-    def place_move(self, emoji: str, user) -> list[list[str]]:
+    def place_move(self, column: Union[str, int], user) -> list[list[str]]:
 
-        if emoji not in self._controls:
-            raise KeyError("Provided emoji is not one of the valid controls")
-        y = self._conversion[emoji]
+        if isinstance(column, str):
+            if column not in self._controls:
+                raise KeyError("Provided emoji is not one of the valid controls")
+
+            column = self._conversion[column]
 
         for x in range(5, -1, -1):
-            if self.board[x][y] == BLANK:
-                self.board[x][y] = self.player_to_emoji[user]
+            if self.board[x][column] == BLANK:
+                self.board[x][column] = self.player_to_emoji[user]
                 break
 
         self.turn = self.red_player if user == self.blue_player else self.blue_player
