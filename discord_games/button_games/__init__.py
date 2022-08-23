@@ -22,6 +22,7 @@ from .connect_four_buttons import BetaConnectFour
 
 
 __all__: tuple[str, ...] = (
+    'BetaConnectFour',
     'BetaAkinator',
     'BetaTwenty48',
     'BetaWordle',
