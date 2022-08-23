@@ -18,6 +18,8 @@ from .battleship_buttons import BetaBattleShip
 from .number_slider import NumberSlider
 from .lights_out import LightsOut
 from .boggle import Boggle
+from .connect_four_buttons import BetaConnectFour
+
 
 __all__: tuple[str, ...] = (
     'BetaAkinator',

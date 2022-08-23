@@ -15,7 +15,7 @@ class ConnectFourButton(discord.ui.Button['ConnectFourView']):
 
         super().__init__(
             label=str(self.number),
-            style=style
+            style=style,
         )
 
     async def callback(self, interaction: discord.Interaction) -> None:
@@ -41,7 +41,7 @@ class ConnectFourButton(discord.ui.Button['ConnectFourView']):
             self.view.stop()
 
         return await interaction.response.edit_message(
-            view=self,
+            view=self.view,
             embed=embed,
             content=game.board_string(),
         )
@@ -93,10 +93,14 @@ class BetaConnectFour(ConnectFour):
         self.embed_color = embed_color
         self.button_style = button_style
 
-        self.view = ConnectFourView(timeout=timeout)
+        self.view = ConnectFourView(self, timeout=timeout)
 
         embed = self.make_embed(status=False)
-        self.message = await ctx.send(view=self.view, embed=embed)
+        self.message = await ctx.send(
+            content=self.board_string(),
+            view=self.view,
+            embed=embed,
+        )
 
         await self.view.wait()
         return self.message
