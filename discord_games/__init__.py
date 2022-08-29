@@ -1,5 +1,6 @@
-"""
-Discord-Games
+"""Discord-Games
+
+A library designed for simple implementation of various classical games into a discord.py bot
 """
 from __future__ import annotations
 

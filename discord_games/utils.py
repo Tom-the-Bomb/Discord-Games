@@ -109,12 +109,13 @@ async def double_wait(
         return_when=asyncio.FIRST_COMPLETED,
     )
 
-class BaseView(discord.ui.View):
+if hasattr(discord, 'ui'):
+    class BaseView(discord.ui.View):
 
-    def disable_all(self) -> None:
-        for button in self.children:
-            if isinstance(button, discord.ui.Button):
-                button.disabled = True
+        def disable_all(self) -> None:
+            for button in self.children:
+                if isinstance(button, discord.ui.Button):
+                    button.disabled = True
 
-    async def on_timeout(self) -> None:
-        return self.stop()
+        async def on_timeout(self) -> None:
+            return self.stop()
