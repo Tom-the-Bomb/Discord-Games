@@ -10,7 +10,9 @@ from discord.ext import commands
 from akinator import (
     AsyncAkinator as AkinatorGame,
     CantGoBackAnyFurther,
+    Language,
     Answer,
+    Theme,
 )
 
 from .utils import DiscordColor, DEFAULT_COLOR
@@ -109,6 +111,8 @@ class Akinator:
         timeout: Optional[float] = None,
         back_button: bool = False,
         delete_button: bool = False,
+        aki_theme: str = "Characters",
+        aki_language: str = "English",
         child_mode: bool = True,
     ) -> Optional[discord.Message]:
         """
@@ -151,6 +155,8 @@ class Akinator:
         if self.delete_button:
             self.instructions += f"{STOP} 🠒 `cancel`\n"
 
+        self.aki.theme = Theme.from_str(aki_theme)
+        self.aki.language = Language.from_str(aki_language)
         self.aki.child_mode = child_mode
         await self.aki.start_game()
 

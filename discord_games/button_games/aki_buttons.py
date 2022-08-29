@@ -4,7 +4,7 @@ from typing import Optional, ClassVar
 
 import discord
 from discord.ext import commands
-from akinator import Answer, CantGoBackAnyFurther
+from akinator import Theme, Language, Answer, CantGoBackAnyFurther
 
 from ..aki import Akinator
 from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
@@ -93,6 +93,8 @@ class BetaAkinator(Akinator):
         embed_color: DiscordColor = DEFAULT_COLOR,
         win_at: int = 80,
         timeout: Optional[float] = None,
+        aki_theme: str = "Characters",
+        aki_language: str = "English",
         child_mode: bool = True,
     ) -> discord.Message:
         """
@@ -128,6 +130,8 @@ class BetaAkinator(Akinator):
         self.win_at = win_at
         self.view = AkiView(self, timeout=timeout)
 
+        self.aki.theme = Theme.from_str(aki_theme)
+        self.aki.language = Language.from_str(aki_language)
         self.aki.child_mode = child_mode
         await self.aki.start_game()
 
