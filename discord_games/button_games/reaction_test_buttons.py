@@ -10,10 +10,10 @@ from discord.ext import commands
 
 from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
 
-class ReactionButton(discord.ui.Button['ReactionView']):
 
+class ReactionButton(discord.ui.Button["ReactionView"]):
     def __init__(self, style: discord.ButtonStyle) -> None:
-        super().__init__(label='\u200b', style=style)
+        super().__init__(label="\u200b", style=style)
 
         self.edited: bool = False
         self.clicked: bool = False
@@ -22,7 +22,9 @@ class ReactionButton(discord.ui.Button['ReactionView']):
         game = self.view.game
 
         if game.author_only and interaction.user != game.author:
-            return await interaction.response.send_message('This game is only for the author!', ephemeral=True)
+            return await interaction.response.send_message(
+                "This game is only for the author!", ephemeral=True
+            )
 
         if not self.edited or self.clicked:
             return await interaction.response.defer()
@@ -30,11 +32,14 @@ class ReactionButton(discord.ui.Button['ReactionView']):
             end_time = time.perf_counter()
             elapsed = end_time - self.view.game.start_time
 
-            game.embed.description = f'{interaction.user.mention} reacted first in `{elapsed:.2f}s` !'
+            game.embed.description = (
+                f"{interaction.user.mention} reacted first in `{elapsed:.2f}s` !"
+            )
             await interaction.response.edit_message(embed=game.embed)
 
             self.clicked = True
             return game.finished_event.set()
+
 
 class ReactionView(BaseView):
     game: BetaReactionGame
@@ -44,7 +49,7 @@ class ReactionView(BaseView):
         game: BetaReactionGame,
         *,
         button_style: discord.ButtonStyle,
-        timeout: float
+        timeout: float,
     ) -> None:
 
         super().__init__(timeout=timeout)
@@ -54,10 +59,12 @@ class ReactionView(BaseView):
         self.button = ReactionButton(self.button_style)
         self.add_item(self.button)
 
+
 class BetaReactionGame:
     """
     Reaction(buttons) game
     """
+
     async def start(
         self,
         ctx: commands.Context[commands.Bot],
@@ -102,8 +109,8 @@ class BetaReactionGame:
         self.author = ctx.author
 
         self.embed = discord.Embed(
-            title='Reaction Game',
-            description=f'Click the button below, when the button changes color!',
+            title="Reaction Game",
+            description=f"Click the button below, when the button changes color!",
             color=embed_color,
         )
         self.view = ReactionView(self, button_style=start_button_style, timeout=timeout)

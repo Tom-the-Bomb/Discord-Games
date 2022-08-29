@@ -20,31 +20,33 @@ from .country_guess import CountryGuesser
 from .wordle import Wordle
 
 __all__: tuple[str, ...] = (
-    'Akinator',
-    'BattleShip',
-    'Chess',
-    'ConnectFour',
-    'Hangman',
-    'Tictactoe',
-    'Twenty48',
-    'create_2048_emojis',
-    'TypeRacer',
-    'RockPaperScissors',
-    'ReactionGame',
-    'CountryGuesser',
-    'Wordle',
+    "Akinator",
+    "BattleShip",
+    "Chess",
+    "ConnectFour",
+    "Hangman",
+    "Tictactoe",
+    "Twenty48",
+    "create_2048_emojis",
+    "TypeRacer",
+    "RockPaperScissors",
+    "ReactionGame",
+    "CountryGuesser",
+    "Wordle",
 )
 
 __title__ = "discord_games"
-__version__  = "1.10.5"
-__author__   = "Tom-the-Bomb"
-__license__  = "MIT"
+__version__ = "1.10.5"
+__author__ = "Tom-the-Bomb"
+__license__ = "MIT"
 __copyright__ = "Copyright 2021-present Tom-the-Bomb"
+
 
 class VersionInfo(NamedTuple):
     major: int
     minor: int
     micro: int
+
 
 version_info: VersionInfo = VersionInfo(
     major=1,

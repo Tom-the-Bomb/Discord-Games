@@ -16,9 +16,13 @@ from .utils import *
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
+
     Board: TypeAlias = list[list[int]]
 
-async def create_2048_emojis(guild: discord.Guild, names: Optional[list[str]] = None) -> list[discord.Emoji]:
+
+async def create_2048_emojis(
+    guild: discord.Guild, names: Optional[list[str]] = None
+) -> list[discord.Emoji]:
     """
     creates 2048 emojis in the specified Guild
     intended to be ran once initially manually.
@@ -38,23 +42,25 @@ async def create_2048_emojis(guild: discord.Guild, names: Optional[list[str]] = 
     """
     result: list[discord.Emoji] = []
 
-    directory = pathlib.Path(__file__).parent / 'assets/2048-emoji-asset-examples'
+    directory = pathlib.Path(__file__).parent / "assets/2048-emoji-asset-examples"
     files = os.listdir(directory)
-    names = map(lambda n: f'_{n[:-4]}', files) if not names else names
+    names = map(lambda n: f"_{n[:-4]}", files) if not names else names
 
     for name, file in zip(names, files):
-        with open(os.path.join(directory, file), 'rb') as fp:
-            result.append(await guild.create_custom_emoji(
-                name=name,
-                image=fp.read(),
-                reason='2048 emojis'
-            ))
+        with open(os.path.join(directory, file), "rb") as fp:
+            result.append(
+                await guild.create_custom_emoji(
+                    name=name, image=fp.read(), reason="2048 emojis"
+                )
+            )
     return result
+
 
 class Twenty48:
     """
     Twenty48 Game
     """
+
     player: discord.User
 
     def __init__(
@@ -70,19 +76,21 @@ class Twenty48:
         self.board: Board = [[0 for _ in range(4)] for _ in range(4)]
         self.message: Optional[discord.Message] = None
 
-        self._controls = ['⬅️', '➡️', '⬆️', '⬇️']
+        self._controls = ["⬅️", "➡️", "⬆️", "⬇️"]
         self._conversion = number_to_display_mapping
         self._render_image = render_image
 
         if self._render_image and discord.version_info.major < 2:
-            raise ValueError('discord.py versions under v2.0.0 do not support rendering images since editing files is new in 2.0')
+            raise ValueError(
+                "discord.py versions under v2.0.0 do not support rendering images since editing files is new in 2.0"
+            )
 
         if self._render_image:
             self._color_mapping: dict[str, tuple[tuple[int, int, int], int]] = {
                 "0": ((204, 192, 179), 50),
                 "2": ((237, 227, 217), 50),
                 "4": ((237, 224, 200), 50),
-                "8":  ((242, 177, 121), 50),
+                "8": ((242, 177, 121), 50),
                 "16": ((245, 149, 100), 50),
                 "32": ((246, 124, 95), 50),
                 "64": ((246, 94, 59), 50),
@@ -106,7 +114,7 @@ class Twenty48:
             self.IMG_LENGTH = self.BORDER_W * 2 + self.SQ_S * 4 + self.SPACE_W * 3
 
             self._font = ImageFont.truetype(
-                str(pathlib.Path(__file__).parent / 'assets/ClearSans-Bold.ttf'), 50
+                str(pathlib.Path(__file__).parent / "assets/ClearSans-Bold.ttf"), 50
             )
 
     def _reverse(self, board: Board) -> Board:
@@ -175,8 +183,10 @@ class Twenty48:
         bool
             returns whether or not the game is lost
         """
-        board  = self.board
-        zeroes = [(j, i) for j, sub in enumerate(board) for i, el in enumerate(sub) if el == 0]
+        board = self.board
+        zeroes = [
+            (j, i) for j, sub in enumerate(board) for i, el in enumerate(sub) if el == 0
+        ]
 
         if not zeroes:
             return True
@@ -187,15 +197,14 @@ class Twenty48:
 
     def number_to_emoji(self) -> str:
         board = self.board
-        game_string = ''
+        game_string = ""
 
         emoji_array = [
-            [self._conversion.get(str(l), f'`{l}` ') for l in row]
-            for row in board
+            [self._conversion.get(str(l), f"`{l}` ") for l in row] for row in board
         ]
 
         for row in emoji_array:
-            game_string += ''.join(row) + '\n'
+            game_string += "".join(row) + "\n"
         return game_string
 
     def check_win(self) -> bool:
@@ -204,18 +213,18 @@ class Twenty48:
         for num in (2048, 4096, 8192):
             if num in flattened:
                 if num == 2048:
-                    self.embed = discord.Embed(description='', color=self.embed_color)
-                self.embed.description += f'⭐: Congrats! You hit **{num}**!\n'
+                    self.embed = discord.Embed(description="", color=self.embed_color)
+                self.embed.description += f"⭐: Congrats! You hit **{num}**!\n"
 
                 if num == self.win_at:
-                    self.embed.description += '**Game Over! You Won**\n'
+                    self.embed.description += "**Game Over! You Won**\n"
                     return True
         return False
 
     @executor()
     def render_image(self) -> discord.File:
         SQ = self.SQ_S
-        with Image.new('RGB', (self.IMG_LENGTH, self.IMG_LENGTH), self.BG_CLR) as img:
+        with Image.new("RGB", (self.IMG_LENGTH, self.IMG_LENGTH), self.BG_CLR) as img:
             cursor = ImageDraw.Draw(img)
 
             x = y = self.BORDER_W
@@ -224,20 +233,30 @@ class Twenty48:
                     tile = str(tile)
                     color, fsize = self._color_mapping.get(tile)
                     font = self._font.font_variant(size=fsize)
-                    cursor.rounded_rectangle((x, y, x+SQ, y+SQ), radius=5, width=0, fill=color)
+                    cursor.rounded_rectangle(
+                        (x, y, x + SQ, y + SQ), radius=5, width=0, fill=color
+                    )
 
-                    if tile != '0':
-                        text_fill = self.DARK_CLR if tile in ('2', '4') else self.LIGHT_CLR
-                        cursor.text((x+SQ/2, y+SQ/2), tile, font=font, anchor='mm', fill=text_fill)
+                    if tile != "0":
+                        text_fill = (
+                            self.DARK_CLR if tile in ("2", "4") else self.LIGHT_CLR
+                        )
+                        cursor.text(
+                            (x + SQ / 2, y + SQ / 2),
+                            tile,
+                            font=font,
+                            anchor="mm",
+                            fill=text_fill,
+                        )
 
                     x += SQ + self.SPACE_W
                 x = self.BORDER_W
                 y += SQ + self.SPACE_W
 
             buf = BytesIO()
-            img.save(buf, 'PNG')
+            img.save(buf, "PNG")
         buf.seek(0)
-        return discord.File(buf, '2048.png')
+        return discord.File(buf, "2048.png")
 
     async def start(
         self,
@@ -296,29 +315,35 @@ class Twenty48:
         while not ctx.bot.is_closed():
 
             def check(reaction: discord.Reaction, user: discord.User) -> bool:
-                return str(reaction.emoji) in self._controls and user == self.player and reaction.message == self.message
+                return (
+                    str(reaction.emoji) in self._controls
+                    and user == self.player
+                    and reaction.message == self.message
+                )
 
             try:
-                reaction, user = await ctx.bot.wait_for("reaction_add", timeout=timeout, check=check)
+                reaction, user = await ctx.bot.wait_for(
+                    "reaction_add", timeout=timeout, check=check
+                )
             except asyncio.TimeoutError:
                 break
 
             emoji = str(reaction.emoji)
 
-            if delete_button and emoji == '⏹️':
+            if delete_button and emoji == "⏹️":
                 await self.message.delete()
                 break
 
-            if emoji == '➡️':
+            if emoji == "➡️":
                 self.move_right()
 
-            elif emoji == '⬅️':
+            elif emoji == "⬅️":
                 self.move_left()
 
-            elif emoji == '⬇️':
+            elif emoji == "⬇️":
                 self.move_down()
 
-            elif emoji == '⬆️':
+            elif emoji == "⬆️":
                 self.move_up()
 
             if remove_reaction_after:
@@ -332,7 +357,7 @@ class Twenty48:
 
             if lost:
                 self.embed = discord.Embed(
-                    description='Game Over! You lost.',
+                    description="Game Over! You lost.",
                     color=self.embed_color,
                 )
 

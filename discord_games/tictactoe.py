@@ -8,23 +8,25 @@ from discord.ext import commands
 
 from .utils import DiscordColor, DEFAULT_COLOR
 
+
 class Tictactoe:
     """
     TicTacToe Game
     """
+
     BLANK: ClassVar[str] = "⬛"
     CIRCLE: ClassVar[str] = "⭕"
     CROSS: ClassVar[str] = "❌"
     _conversion: ClassVar[dict[str, tuple[int, int]]] = {
-        '1️⃣': (0, 0),
-        '2️⃣': (0, 1),
-        '3️⃣': (0, 2),
-        '4️⃣': (1, 0),
-        '5️⃣': (1, 1),
-        '6️⃣': (1, 2),
-        '7️⃣': (2, 0),
-        '8️⃣': (2, 1),
-        '9️⃣': (2, 2),
+        "1️⃣": (0, 0),
+        "2️⃣": (0, 1),
+        "3️⃣": (0, 2),
+        "4️⃣": (1, 0),
+        "5️⃣": (1, 1),
+        "6️⃣": (1, 2),
+        "7️⃣": (2, 0),
+        "8️⃣": (2, 1),
+        "9️⃣": (2, 2),
     }
 
     _WINNERS: ClassVar[tuple[tuple[tuple[int, int], ...], ...]] = (
@@ -43,24 +45,36 @@ class Tictactoe:
         self.circle = circle
 
         self.board: list[list[str]] = [[self.BLANK for _ in range(3)] for _ in range(3)]
-        self.turn: discord.User  = self.cross
+        self.turn: discord.User = self.cross
 
         self.winner: Optional[discord.User] = None
         self.winning_indexes: list[tuple[int, int]] = []
         self.message: Optional[discord.Message] = None
 
-        self._controls: list[str] = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣']
+        self._controls: list[str] = [
+            "1️⃣",
+            "2️⃣",
+            "3️⃣",
+            "4️⃣",
+            "5️⃣",
+            "6️⃣",
+            "7️⃣",
+            "8️⃣",
+            "9️⃣",
+        ]
 
         self.emoji_to_player: dict[discord.User, str] = {
             self.CIRCLE: self.circle,
-            self.CROSS : self.cross,
+            self.CROSS: self.cross,
         }
-        self.player_to_emoji: dict[str, discord.User] = {v: k for k, v in self.emoji_to_player.items()}
+        self.player_to_emoji: dict[str, discord.User] = {
+            v: k for k, v in self.emoji_to_player.items()
+        }
 
     def board_string(self) -> str:
-        board = ''
+        board = ""
         for row in self.board:
-            board += ''.join(row) + '\n'
+            board += "".join(row) + "\n"
         return board
 
     def make_embed(self, *, game_over: bool = False) -> discord.Embed:
@@ -140,10 +154,16 @@ class Tictactoe:
         while not ctx.bot.is_closed():
 
             def check(reaction: discord.Reaction, user: discord.User) -> bool:
-                return str(reaction.emoji) in self._controls and user == self.turn and reaction.message == self.message
+                return (
+                    str(reaction.emoji) in self._controls
+                    and user == self.turn
+                    and reaction.message == self.message
+                )
 
             try:
-                reaction, user = await ctx.bot.wait_for("reaction_add", timeout=timeout, check=check)
+                reaction, user = await ctx.bot.wait_for(
+                    "reaction_add", timeout=timeout, check=check
+                )
             except asyncio.TimeoutError:
                 break
 

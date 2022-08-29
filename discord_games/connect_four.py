@@ -12,16 +12,26 @@ RED = "🔴"
 BLUE = "🔵"
 BLANK = "⬛"
 
+
 class ConnectFour:
     """
     Connect-4 Game
     """
+
     def __init__(self, *, red: discord.User, blue: discord.User) -> None:
-        self.red_player  = red
+        self.red_player = red
         self.blue_player = blue
 
         self.board: list[list[str]] = [[BLANK for _ in range(7)] for _ in range(6)]
-        self._controls: tuple[str, ...] = ('1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣')
+        self._controls: tuple[str, ...] = (
+            "1️⃣",
+            "2️⃣",
+            "3️⃣",
+            "4️⃣",
+            "5️⃣",
+            "6️⃣",
+            "7️⃣",
+        )
 
         self.turn = self.red_player
         self.message: Optional[discord.Message] = None
@@ -30,8 +40,8 @@ class ConnectFour:
         self._conversion: dict[str, int] = {
             emoji: i for i, emoji in enumerate(self._controls)
         }
-        self.player_to_emoji: dict[discord.User, str]  = {
-            self.red_player : RED,
+        self.player_to_emoji: dict[discord.User, str] = {
+            self.red_player: RED,
             self.blue_player: BLUE,
         }
         self.emoji_to_player: dict[str, discord.User] = {
@@ -76,25 +86,49 @@ class ConnectFour:
 
         for x in range(6):
             for i in range(4):
-                if self.board[x][i] == self.board[x][i+1] == self.board[x][i+2] == self.board[x][i+3] and self.board[x][i] != BLANK:
+                if (
+                    self.board[x][i]
+                    == self.board[x][i + 1]
+                    == self.board[x][i + 2]
+                    == self.board[x][i + 3]
+                    and self.board[x][i] != BLANK
+                ):
                     self.winner = self.emoji_to_player[self.board[x][i]]
                     return True
 
         for x in range(3):
             for i in range(7):
-                if self.board[x][i] == self.board[x+1][i] == self.board[x+2][i] == self.board[x+3][i] and self.board[x][i] != BLANK:
+                if (
+                    self.board[x][i]
+                    == self.board[x + 1][i]
+                    == self.board[x + 2][i]
+                    == self.board[x + 3][i]
+                    and self.board[x][i] != BLANK
+                ):
                     self.winner = self.emoji_to_player[self.board[x][i]]
                     return True
 
         for x in range(3):
             for i in range(4):
-                if self.board[x][i] == self.board[x + 1][i + 1] == self.board[x + 2][i + 2] == self.board[x + 3][i + 3] and self.board[x][i] != BLANK:
+                if (
+                    self.board[x][i]
+                    == self.board[x + 1][i + 1]
+                    == self.board[x + 2][i + 2]
+                    == self.board[x + 3][i + 3]
+                    and self.board[x][i] != BLANK
+                ):
                     self.winner = self.emoji_to_player[self.board[x][i]]
                     return True
 
         for x in range(5, 2, -1):
             for i in range(4):
-                if self.board[x][i] == self.board[x - 1][i + 1] == self.board[x - 2][i + 2] == self.board[x - 3][i + 3] and self.board[x][i] != BLANK:
+                if (
+                    self.board[x][i]
+                    == self.board[x - 1][i + 1]
+                    == self.board[x - 2][i + 2]
+                    == self.board[x - 3][i + 3]
+                    and self.board[x][i] != BLANK
+                ):
                     self.winner = self.emoji_to_player[self.board[x][i]]
                     return True
 
@@ -107,7 +141,7 @@ class ConnectFour:
         timeout: Optional[float] = None,
         embed_color: DiscordColor = DEFAULT_COLOR,
         remove_reaction_after: bool = False,
-        **kwargs
+        **kwargs,
     ) -> discord.Message:
         """
         starts the Connect-4 game
@@ -140,13 +174,16 @@ class ConnectFour:
 
             def check(reaction: discord.Reaction, user: discord.User) -> bool:
                 return (
-                    str(reaction.emoji) in self._controls and
-                    user == self.turn and reaction.message == self.message and
-                    self.board[0][self._conversion[str(reaction.emoji)]] == BLANK
+                    str(reaction.emoji) in self._controls
+                    and user == self.turn
+                    and reaction.message == self.message
+                    and self.board[0][self._conversion[str(reaction.emoji)]] == BLANK
                 )
 
             try:
-                reaction, user = await ctx.bot.wait_for("reaction_add", timeout=timeout, check=check)
+                reaction, user = await ctx.bot.wait_for(
+                    "reaction_add", timeout=timeout, check=check
+                )
             except asyncio.TimeoutError:
                 break
 

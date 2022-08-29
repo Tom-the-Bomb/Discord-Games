@@ -11,8 +11,9 @@ from english_words import english_words_lower_alpha_set
 
 from .utils import DiscordColor, DEFAULT_COLOR
 
-BLANK: Final[str] = '  \u200b'
-STAGES: Final[tuple[str, ...]] = ('''
+BLANK: Final[str] = "  \u200b"
+STAGES: Final[tuple[str, ...]] = (
+    """
             _________\t
             |/      |\t
             |      😵\t
@@ -20,8 +21,8 @@ STAGES: Final[tuple[str, ...]] = ('''
             |       |\t
             |      / \\\t
          ___|___
-            ''',
-            '''
+            """,
+    """
             _________\t
             |/      |\t
             |      😦\t
@@ -29,8 +30,8 @@ STAGES: Final[tuple[str, ...]] = ('''
             |       |\t
             |      /\t
          ___|___
-            ''',
-            '''
+            """,
+    """
             _________\t
             |/      |\t
             |      😦\t
@@ -38,8 +39,8 @@ STAGES: Final[tuple[str, ...]] = ('''
             |       |\t
             |
          ___|___
-            ''',
-            '''
+            """,
+    """
             --------\t
             |/     |\t
             |     😦\t
@@ -47,8 +48,8 @@ STAGES: Final[tuple[str, ...]] = ('''
             |      |\t
             |
          ___|___
-            ''',
-            '''
+            """,
+    """
             _________\t
             |/      |\t
             |      😦\t
@@ -56,8 +57,8 @@ STAGES: Final[tuple[str, ...]] = ('''
             |       |\t
             |
          ___|___
-            ''',
-            '''
+            """,
+    """
             _________\t
             |/      |\t
             |      😦\t
@@ -65,8 +66,8 @@ STAGES: Final[tuple[str, ...]] = ('''
             |
             |
          ___|___
-            ''',
-            '''
+            """,
+    """
             _________\t
             |/      |\t
             |
@@ -74,8 +75,8 @@ STAGES: Final[tuple[str, ...]] = ('''
             |
             |
          ___|___
-            ''',
-            '''
+            """,
+    """
             _________\t
             |/
             |
@@ -83,8 +84,8 @@ STAGES: Final[tuple[str, ...]] = ('''
             |
             |
          ___|___
-            ''',
-            '''
+            """,
+    """
             ___      \t
             |/
             |
@@ -92,20 +93,22 @@ STAGES: Final[tuple[str, ...]] = ('''
             |
             |
          ___|___
-            ''',
+            """,
 )
+
 
 class Hangman:
     """
     Hangman Game
     """
+
     def __init__(self, word: Optional[str] = None) -> None:
         self._alpha: list[str] = list(string.ascii_lowercase)
         self._all_words = tuple(english_words_lower_alpha_set)
 
         if word:
             if not word.isalpha():
-                raise ValueError('Word must be an alphabetical string')
+                raise ValueError("Word must be an alphabetical string")
 
             self.word = word
         else:
@@ -113,10 +116,10 @@ class Hangman:
 
         self.letters: tuple[str, ...] = tuple(self.word)
 
-        self.correct: list[str] = [r'\_' for _ in self.word]
+        self.correct: list[str] = [r"\_" for _ in self.word]
         self.wrong_letters: list[str] = []
 
-        self.embed: discord.Embed = discord.Embed(title='HANGMAN')
+        self.embed: discord.Embed = discord.Embed(title="HANGMAN")
         self.message: Optional[discord.Message] = None
         self._counter: int = 8
 
@@ -135,7 +138,7 @@ class Hangman:
 
         if guess == self.word:
             self.game_over = True
-            self.embed.set_field_at(0, name='Word', value=self.word)
+            self.embed.set_field_at(0, name="Word", value=self.word)
             await self.message.edit(content="**YOU WON**", embed=self.embed)
 
         elif guess in self.letters:
@@ -145,7 +148,7 @@ class Hangman:
             for match in matches:
                 self.correct[match] = guess
 
-            self.embed.set_field_at(0, name='Word', value=f"{' '.join(self.correct)}")
+            self.embed.set_field_at(0, name="Word", value=f"{' '.join(self.correct)}")
             await self.message.edit(embed=self.embed)
         else:
             if len(guess) == 1:
@@ -154,8 +157,14 @@ class Hangman:
 
             self._counter -= 1
 
-            self.embed.set_field_at(1, name='Wrong letters', value=f"{', '.join(self.wrong_letters) or BLANK}")
-            self.embed.set_field_at(2, name='Lives left', value=self.lives(), inline=False)
+            self.embed.set_field_at(
+                1,
+                name="Wrong letters",
+                value=f"{', '.join(self.wrong_letters) or BLANK}",
+            )
+            self.embed.set_field_at(
+                2, name="Lives left", value=self.lives(), inline=False
+            )
             self.embed.description = f"```\n{STAGES[self._counter]}\n```"
             await self.message.edit(embed=self.embed)
 
@@ -163,12 +172,12 @@ class Hangman:
 
         if self._counter == 0:
             self.game_over = True
-            self.embed.set_field_at(0, name='Word', value=self.word)
+            self.embed.set_field_at(0, name="Word", value=self.word)
             await self.message.edit(content="**YOU LOST**", embed=self.embed)
 
-        elif r'\_' not in self.correct:
+        elif r"\_" not in self.correct:
             self.game_over = True
-            self.embed.set_field_at(0, name='Word', value=self.word)
+            self.embed.set_field_at(0, name="Word", value=self.word)
             await self.message.edit(content="**YOU WON**", embed=self.embed)
 
         return self.game_over
@@ -176,11 +185,11 @@ class Hangman:
     def initialize_embed(self) -> discord.Embed:
         self.embed.description = f"```\n{STAGES[self._counter]}\n```"
         self.embed.color = self.embed_color
-        self.embed.add_field(name='Word', value=f"{' '.join(self.correct)}")
+        self.embed.add_field(name="Word", value=f"{' '.join(self.correct)}")
 
-        wrong_letters = ', '.join(self.wrong_letters) or BLANK
-        self.embed.add_field(name='Wrong letters', value=wrong_letters)
-        self.embed.add_field(name='Lives left', value=self.lives(), inline=False)
+        wrong_letters = ", ".join(self.wrong_letters) or BLANK
+        self.embed.add_field(name="Wrong letters", value=wrong_letters)
+        self.embed.add_field(name="Lives left", value=self.lives(), inline=False)
         return self.embed
 
     async def start(
@@ -190,7 +199,7 @@ class Hangman:
         timeout: Optional[float] = None,
         embed_color: DiscordColor = DEFAULT_COLOR,
         delete_after_guess: bool = False,
-        **kwargs
+        **kwargs,
     ) -> discord.Message:
         """
         starts the hangman game
@@ -221,9 +230,14 @@ class Hangman:
 
             def check(m: discord.Message) -> bool:
                 if m.channel == ctx.channel and m.author == self.player:
-                    return (len(m.content) == 1 and m.content.lower() in self._alpha) or (m.content.lower() == self.word)
+                    return (
+                        len(m.content) == 1 and m.content.lower() in self._alpha
+                    ) or (m.content.lower() == self.word)
+
             try:
-                message: discord.Message = await ctx.bot.wait_for("message", timeout=timeout, check=check)
+                message: discord.Message = await ctx.bot.wait_for(
+                    "message", timeout=timeout, check=check
+                )
             except asyncio.TimeoutError:
                 break
 

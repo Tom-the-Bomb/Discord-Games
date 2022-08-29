@@ -8,8 +8,8 @@ from discord.ext import commands
 from ..tictactoe import Tictactoe
 from ..utils import *
 
-class TTTButton(discord.ui.Button['TTTView']):
 
+class TTTButton(discord.ui.Button["TTTView"]):
     def __init__(self, label: str, style: discord.ButtonStyle, *, row: int, col: int):
         super().__init__(
             label=label,
@@ -24,10 +24,14 @@ class TTTButton(discord.ui.Button['TTTView']):
         game = self.view.game
 
         if user not in (game.cross, game.circle):
-            return await interaction.response.send_message('You are not part of this game!', ephemeral=True)
+            return await interaction.response.send_message(
+                "You are not part of this game!", ephemeral=True
+            )
 
         if user != game.turn:
-            return await interaction.response.send_message('it is not your turn!', ephemeral=True)
+            return await interaction.response.send_message(
+                "it is not your turn!", ephemeral=True
+            )
 
         self.label = game.player_to_emoji[user]
         self.disabled = True
@@ -46,8 +50,8 @@ class TTTButton(discord.ui.Button['TTTView']):
         embed = game.make_embed(game_over=game_over or tie)
         await interaction.response.edit_message(embed=embed, view=self.view)
 
-class TTTView(BaseView):
 
+class TTTView(BaseView):
     def __init__(self, game: BetaTictactoe, *, timeout: float) -> None:
         super().__init__(timeout=timeout)
 
@@ -63,13 +67,15 @@ class TTTView(BaseView):
                 )
                 self.add_item(button)
 
+
 class BetaTictactoe(Tictactoe):
     """
     Tictactoe(buttons) game
     """
-    BLANK: ClassVar[str] = '\u200b'
-    CIRCLE: ClassVar[str] = 'O'
-    CROSS: ClassVar[str] = 'X'
+
+    BLANK: ClassVar[str] = "\u200b"
+    CIRCLE: ClassVar[str] = "O"
+    CROSS: ClassVar[str] = "X"
 
     def create_streak(self) -> None:
         chunked = chunk(self.view.children, count=3)

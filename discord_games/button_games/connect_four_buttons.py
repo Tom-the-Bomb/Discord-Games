@@ -8,8 +8,8 @@ from discord.ext import commands
 from ..connect_four import ConnectFour, BLANK
 from ..utils import *
 
-class ConnectFourButton(discord.ui.Button['ConnectFourView']):
 
+class ConnectFourButton(discord.ui.Button["ConnectFourView"]):
     def __init__(self, number: int, style: discord.ButtonStyle) -> None:
         self.number = number
 
@@ -22,13 +22,19 @@ class ConnectFourButton(discord.ui.Button['ConnectFourView']):
         game = self.view.game
 
         if interaction.user not in (game.red_player, game.blue_player):
-            return await interaction.response.send_message('You are not part of this game!', ephemeral=True)
+            return await interaction.response.send_message(
+                "You are not part of this game!", ephemeral=True
+            )
 
         if interaction.user != game.turn:
-            return await interaction.response.send_message('It is not your turn yet!', ephemeral=True)
+            return await interaction.response.send_message(
+                "It is not your turn yet!", ephemeral=True
+            )
 
         if game.board[0][self.number - 1] != BLANK:
-            return await interaction.response.send_message('Selected column is full!', ephemeral=True)
+            return await interaction.response.send_message(
+                "Selected column is full!", ephemeral=True
+            )
 
         game.place_move(self.number - 1, interaction.user)
 
@@ -46,6 +52,7 @@ class ConnectFourButton(discord.ui.Button['ConnectFourView']):
             content=game.board_string(),
         )
 
+
 class ConnectFourView(BaseView):
     game: ConnectFour
 
@@ -55,14 +62,14 @@ class ConnectFourView(BaseView):
         self.game = game
 
         for i in range(1, 8):
-            self.add_item(
-                ConnectFourButton(i, self.game.button_style)
-            )
+            self.add_item(ConnectFourButton(i, self.game.button_style))
+
 
 class BetaConnectFour(ConnectFour):
     """
     Connect-4(buttons) Game
     """
+
     async def start(
         self,
         ctx: commands.Context[commands.Bot],

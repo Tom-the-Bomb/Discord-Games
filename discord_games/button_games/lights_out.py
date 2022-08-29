@@ -11,17 +11,19 @@ from ..utils import *
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
-    Board: TypeAlias = list[list[Optional[Literal['💡']]]]
 
-BULB: Final[Literal['💡']] = '💡'
+    Board: TypeAlias = list[list[Optional[Literal["💡"]]]]
+
+BULB: Final[Literal["💡"]] = "💡"
 
 
-class LightsOutButton(discord.ui.Button['LightsOutView']):
-
-    def __init__(self, emoji: str, *, style: discord.ButtonStyle, row: int, col: int) -> None:
+class LightsOutButton(discord.ui.Button["LightsOutView"]):
+    def __init__(
+        self, emoji: str, *, style: discord.ButtonStyle, row: int, col: int
+    ) -> None:
         super().__init__(
             emoji=emoji,
-            label='\u200b',
+            label="\u200b",
             style=style,
             row=row,
         )
@@ -32,7 +34,9 @@ class LightsOutButton(discord.ui.Button['LightsOutView']):
         game = self.view.game
 
         if interaction.user != game.player:
-            return await interaction.response.send_message('This is not your game!', ephemeral=True)
+            return await interaction.response.send_message(
+                "This is not your game!", ephemeral=True
+            )
         else:
             row, col = self.row, self.col
 
@@ -45,14 +49,17 @@ class LightsOutButton(discord.ui.Button['LightsOutView']):
             self.view.update_board(clear=True)
 
             game.moves += 1
-            game.embed.set_field_at(0, name='\u200b', value=f'Moves: `{game.moves}`')
+            game.embed.set_field_at(0, name="\u200b", value=f"Moves: `{game.moves}`")
 
             if game.tiles == game.completed:
                 self.view.disable_all()
                 self.view.stop()
-                game.embed.description = '**Congrats! You won!**'
+                game.embed.description = "**Congrats! You won!**"
 
-            return await interaction.response.edit_message(embed=game.embed, view=self.view)
+            return await interaction.response.edit_message(
+                embed=game.embed, view=self.view
+            )
+
 
 class LightsOutView(SlideView):
     game: LightsOut
@@ -75,14 +82,16 @@ class LightsOutView(SlideView):
                 )
                 self.add_item(button)
 
+
 class LightsOut:
     """
     Lights Out Game
     """
+
     def __init__(self, count: Literal[1, 2, 3, 4, 5] = 4) -> None:
 
         if count not in range(1, 6):
-            raise ValueError('Count must be an integer between 1 and 5')
+            raise ValueError("Count must be an integer between 1 and 5")
 
         self.moves: int = 0
         self.count = count
@@ -105,7 +114,9 @@ class LightsOut:
         ]
 
         data = [
-            (i, j) for i, j in beside if i in range(self.count) and j in range(self.count)
+            (i, j)
+            for i, j in beside
+            if i in range(self.count) and j in range(self.count)
         ]
         return data
 
@@ -115,7 +126,7 @@ class LightsOut:
         *,
         button_style: discord.ButtonStyle = discord.ButtonStyle.green,
         embed_color: DiscordColor = DEFAULT_COLOR,
-        timeout: Optional[float] = None
+        timeout: Optional[float] = None,
     ) -> discord.Message:
         """
         starts the Lights Out Game
@@ -139,12 +150,14 @@ class LightsOut:
         self.button_style = button_style
         self.player = ctx.author
 
-        self.tiles = random.choices((None, BULB), k=self.count ** 2)
+        self.tiles = random.choices((None, BULB), k=self.count**2)
         self.tiles = chunk(self.tiles, count=self.count)
 
         self.view = LightsOutView(self, timeout=timeout)
-        self.embed = discord.Embed(description='Turn off all the tiles!', color=embed_color)
-        self.embed.add_field(name='\u200b', value='Moves: `0`')
+        self.embed = discord.Embed(
+            description="Turn off all the tiles!", color=embed_color
+        )
+        self.embed.add_field(name="\u200b", value="Moves: `0`")
 
         self.message = await ctx.send(embed=self.embed, view=self.view)
 

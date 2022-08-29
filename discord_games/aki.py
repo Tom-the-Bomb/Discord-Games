@@ -18,24 +18,27 @@ from .utils import DiscordColor, DEFAULT_COLOR
 BACK = "◀️"
 STOP = "⏹️"
 
+
 class Options(Enum):
     yes = "✅"
     no = "❌"
     idk = "🤷"
     p = "🤔"
-    pn  = "😕"
+    pn = "😕"
+
 
 class Akinator:
     """
     Akinator Game, utilizes reactions
     """
+
     BAR: ClassVar[str] = "██"
     instructions: ClassVar[str] = (
-        '✅ 🠒 `yes`\n'
-        '❌ 🠒 `no`\n'
-        '🤷 🠒 `I dont know`\n'
-        '🤔 🠒 `probably`\n'
-        '😕 🠒 `probably not`\n'
+        "✅ 🠒 `yes`\n"
+        "❌ 🠒 `no`\n"
+        "🤷 🠒 `I dont know`\n"
+        "🤔 🠒 `probably`\n"
+        "😕 🠒 `probably not`\n"
     )
 
     def __init__(self) -> None:
@@ -50,7 +53,7 @@ class Akinator:
         self.back_button: bool = False
         self.delete_button: bool = False
 
-        self.bar: str = ''
+        self.bar: str = ""
 
     def build_bar(self) -> str:
         prog = round(self.aki.progression / 8)
@@ -60,21 +63,21 @@ class Akinator:
     def build_embed(self, *, instructions: bool = True) -> discord.Embed:
 
         embed = discord.Embed(
-            title = "Guess your character!",
-            description = (
+            title="Guess your character!",
+            description=(
                 "```swift\n"
                 f"Question-Number  : {self.aki.step + 1}\n"
                 f"Progression-Level: {self.aki.progression:.2f}\n```\n"
                 f"{self.build_bar()}"
             ),
-            color = self.embed_color,
+            color=self.embed_color,
         )
         embed.add_field(name="- Question -", value=self.aki.question)
 
         if instructions:
             embed.add_field(name="\u200b", value=self.instructions, inline=False)
 
-        embed.set_footer(text= "Figuring out the next question | This may take a second")
+        embed.set_footer(text="Figuring out the next question | This may take a second")
         return embed
 
     async def win(self) -> discord.Embed:
@@ -86,7 +89,10 @@ class Akinator:
         embed.title = "Character Guesser Engine Results"
         embed.description = f"Total Questions: `{self.aki.step + 1}`"
 
-        embed.add_field(name="Character Guessed", value=f"\n**Name:** {self.guess.name}\n{self.guess.description}")
+        embed.add_field(
+            name="Character Guessed",
+            value=f"\n**Name:** {self.guess.name}\n{self.guess.description}",
+        )
 
         embed.set_image(url=self.guess.absolute_picture_path)
         embed.set_footer(text="Was I correct?")
@@ -140,10 +146,10 @@ class Akinator:
         self.win_at = win_at
 
         if self.back_button:
-            self.instructions += f'{BACK} 🠒 `back`\n'
+            self.instructions += f"{BACK} 🠒 `back`\n"
 
         if self.delete_button:
-            self.instructions += f'{STOP} 🠒 `cancel`\n'
+            self.instructions += f"{STOP} 🠒 `cancel`\n"
 
         self.aki.child_mode = child_mode
         await self.aki.start_game()
@@ -171,7 +177,9 @@ class Akinator:
                         return emoji in (BACK, STOP)
 
             try:
-                reaction, user = await ctx.bot.wait_for('reaction_add', timeout=timeout, check=check)
+                reaction, user = await ctx.bot.wait_for(
+                    "reaction_add", timeout=timeout, check=check
+                )
             except asyncio.TimeoutError:
                 return
 
@@ -191,7 +199,9 @@ class Akinator:
                 try:
                     await self.aki.back()
                 except CantGoBackAnyFurther:
-                    await self.message.reply('I cannot go back any further', delete_after=10)
+                    await self.message.reply(
+                        "I cannot go back any further", delete_after=10
+                    )
             else:
                 answer = Answer.from_str(Options(emoji).name)
                 await self.aki.answer(answer)

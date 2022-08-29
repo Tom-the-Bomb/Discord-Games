@@ -13,7 +13,7 @@ from .utils import DiscordColor, DEFAULT_COLOR
 class RockPaperScissors:
     message: discord.Message
 
-    OPTIONS: ClassVar[tuple[str, str, str]] = ('\U0001faa8', '\U00002702', '\U0001f4f0')
+    OPTIONS: ClassVar[tuple[str, str, str]] = ("\U0001faa8", "\U00002702", "\U0001f4f0")
     BEATS: ClassVar[dict[str, str]] = {
         OPTIONS[0]: OPTIONS[1],
         OPTIONS[1]: OPTIONS[2],
@@ -23,16 +23,19 @@ class RockPaperScissors:
     def check_win(self, bot_choice: str, user_choice: str) -> bool:
         return self.BEATS[user_choice] == bot_choice
 
-    async def wait_for_choice(self, ctx: commands.Context[commands.Bot], *, timeout: float) -> str:
-
+    async def wait_for_choice(
+        self, ctx: commands.Context[commands.Bot], *, timeout: float
+    ) -> str:
         def check(reaction: discord.Reaction, user: discord.User) -> bool:
             return (
-                str(reaction.emoji) in self.OPTIONS and
-                user == ctx.author and
-                reaction.message == self.message
+                str(reaction.emoji) in self.OPTIONS
+                and user == ctx.author
+                and reaction.message == self.message
             )
 
-        reaction, _ = await ctx.bot.wait_for('reaction_add', timeout=timeout, check=check)
+        reaction, _ = await ctx.bot.wait_for(
+            "reaction_add", timeout=timeout, check=check
+        )
         return str(reaction.emoji)
 
     async def start(
@@ -40,7 +43,7 @@ class RockPaperScissors:
         ctx: commands.Context[commands.Bot],
         *,
         timeout: Optional[float] = None,
-        embed_color: DiscordColor = DEFAULT_COLOR
+        embed_color: DiscordColor = DEFAULT_COLOR,
     ) -> discord.Message:
         """
         starts the Rock Paper Scissor game
@@ -60,8 +63,8 @@ class RockPaperScissors:
             returns the game message
         """
         embed = discord.Embed(
-            title='Rock Paper Scissors',
-            description='React to play!',
+            title="Rock Paper Scissors",
+            description="React to play!",
             color=embed_color,
         )
         self.message = await ctx.send(embed=embed)
@@ -77,12 +80,14 @@ class RockPaperScissors:
             return self.message
 
         if user_choice == bot_choice:
-            embed.description = f'**Tie!**\nWe both picked {user_choice}'
+            embed.description = f"**Tie!**\nWe both picked {user_choice}"
         else:
             if self.check_win(bot_choice, user_choice):
-                embed.description = f'**You Won!**\nYou picked {user_choice} and I picked {bot_choice}.'
+                embed.description = (
+                    f"**You Won!**\nYou picked {user_choice} and I picked {bot_choice}."
+                )
             else:
-                embed.description = f'**You Lost!**\nI picked {bot_choice} and you picked {user_choice}.'
+                embed.description = f"**You Lost!**\nI picked {bot_choice} and you picked {user_choice}."
 
         await self.message.edit(embed=embed)
         return self.message

@@ -10,20 +10,26 @@ from discord.ext import commands
 
 from .utils import DiscordColor, DEFAULT_COLOR
 
+
 class ReactionGame:
     """
     Reaction Game
     """
-    def __init__(self, emoji: str = '🖱️') -> None:
+
+    def __init__(self, emoji: str = "🖱️") -> None:
         self.emoji = emoji
 
-    async def wait_for_reaction(self, ctx: commands.Context[commands.Bot], *, timeout: float) -> tuple[discord.User, float]:
+    async def wait_for_reaction(
+        self, ctx: commands.Context[commands.Bot], *, timeout: float
+    ) -> tuple[discord.User, float]:
         start = time.perf_counter()
 
         def check(reaction: discord.Reaction, _: discord.User) -> bool:
-            return str(reaction.emoji) == self.emoji and reaction.message == self.message
+            return (
+                str(reaction.emoji) == self.emoji and reaction.message == self.message
+            )
 
-        _, user = await ctx.bot.wait_for('reaction_add', timeout=timeout, check=check)
+        _, user = await ctx.bot.wait_for("reaction_add", timeout=timeout, check=check)
         end = time.perf_counter()
 
         return user, (end - start)
@@ -53,8 +59,8 @@ class ReactionGame:
             returns the game message
         """
         embed = discord.Embed(
-            title='Reaction Game',
-            description=f'React with {self.emoji} when the embed is edited!',
+            title="Reaction Game",
+            description=f"React with {self.emoji} when the embed is edited!",
             color=embed_color,
         )
 
@@ -64,7 +70,7 @@ class ReactionGame:
         pause = random.uniform(1.0, 5.0)
         await asyncio.sleep(pause)
 
-        embed.description = f'React with {self.emoji} now!'
+        embed.description = f"React with {self.emoji} now!"
         await self.message.edit(embed=embed)
 
         try:
@@ -72,7 +78,7 @@ class ReactionGame:
         except asyncio.TimeoutError:
             return self.message
 
-        embed.description = f'{user.mention} reacted first in `{elapsed:.2f}s` !'
+        embed.description = f"{user.mention} reacted first in `{elapsed:.2f}s` !"
         await self.message.edit(embed=embed)
 
         return self.message

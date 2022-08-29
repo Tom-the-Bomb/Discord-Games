@@ -8,9 +8,10 @@ from discord.ext import commands
 from ..wordle import Wordle
 from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
 
-class WordInput(discord.ui.Modal, title='Word Input'):
+
+class WordInput(discord.ui.Modal, title="Word Input"):
     word = discord.ui.TextInput(
-        label=f'Input your guess',
+        label=f"Input your guess",
         style=discord.TextStyle.short,
         required=True,
         min_length=5,
@@ -26,48 +27,63 @@ class WordInput(discord.ui.Modal, title='Word Input'):
         game = self.view.game
 
         if content not in game._valid_words:
-            return await interaction.response.send_message('That is not a valid word!', ephemeral=True)
+            return await interaction.response.send_message(
+                "That is not a valid word!", ephemeral=True
+            )
         else:
             won = game.parse_guess(content)
             buf = await game.render_image()
 
-            embed = discord.Embed(title='Wordle!', color=self.view.game.embed_color)
-            embed.set_image(url='attachment://wordle.png')
-            file = discord.File(buf, 'wordle.png')
+            embed = discord.Embed(title="Wordle!", color=self.view.game.embed_color)
+            embed.set_image(url="attachment://wordle.png")
+            file = discord.File(buf, "wordle.png")
 
             if won:
-                await interaction.message.reply('Game Over! You won!', mention_author=True)
+                await interaction.message.reply(
+                    "Game Over! You won!", mention_author=True
+                )
             elif lost := len(game.guesses) >= 6:
-                await interaction.message.reply(f'Game Over! You lose, the word was: **{game.word}**', mention_author=True)
+                await interaction.message.reply(
+                    f"Game Over! You lose, the word was: **{game.word}**",
+                    mention_author=True,
+                )
 
             if won or lost:
                 self.view.disable_all()
                 self.view.stop()
 
-            return await interaction.response.edit_message(embed=embed, attachments=[file], view=self.view)
+            return await interaction.response.edit_message(
+                embed=embed, attachments=[file], view=self.view
+            )
 
-class WordInputButton(discord.ui.Button['WordleView']):
 
+class WordInputButton(discord.ui.Button["WordleView"]):
     def __init__(self, *, cancel_button: bool = False):
         super().__init__(
-            label='Cancel' if cancel_button else 'Make a guess!',
-            style=discord.ButtonStyle.red if cancel_button else discord.ButtonStyle.blurple,
+            label="Cancel" if cancel_button else "Make a guess!",
+            style=discord.ButtonStyle.red
+            if cancel_button
+            else discord.ButtonStyle.blurple,
         )
 
     async def callback(self, interaction: discord.Interaction) -> None:
         game = self.view.game
         if interaction.user != game.player:
-            return await interaction.response.send_message("This isn't your game!", ephemeral=True)
+            return await interaction.response.send_message(
+                "This isn't your game!", ephemeral=True
+            )
         else:
-            if self.label == 'Cancel':
-                await interaction.response.send_message(f'Game Over! the word was: **{game.word}**')
+            if self.label == "Cancel":
+                await interaction.response.send_message(
+                    f"Game Over! the word was: **{game.word}**"
+                )
                 await interaction.message.delete()
                 return self.view.stop()
             else:
                 return await interaction.response.send_modal(WordInput(self.view))
 
-class WordleView(BaseView):
 
+class WordleView(BaseView):
     def __init__(self, game: BetaWordle, *, timeout: float):
         super().__init__(timeout=timeout)
 
@@ -75,17 +91,19 @@ class WordleView(BaseView):
         self.add_item(WordInputButton())
         self.add_item(WordInputButton(cancel_button=True))
 
+
 class BetaWordle(Wordle):
     player: discord.User
     """
     Wordle(buttons) game
     """
+
     async def start(
         self,
         ctx: commands.Context[commands.Bot],
         *,
         embed_color: DiscordColor = DEFAULT_COLOR,
-        timeout: Optional[float] = None
+        timeout: Optional[float] = None,
     ) -> discord.Message:
         """
         starts the wordle(buttons) game
@@ -108,13 +126,13 @@ class BetaWordle(Wordle):
         self.player = ctx.author
 
         buf = await self.render_image()
-        embed = discord.Embed(title='Wordle!', color=self.embed_color)
-        embed.set_image(url='attachment://wordle.png')
+        embed = discord.Embed(title="Wordle!", color=self.embed_color)
+        embed.set_image(url="attachment://wordle.png")
 
         self.view = WordleView(self, timeout=timeout)
         self.message = await ctx.send(
             embed=embed,
-            file=discord.File(buf, 'wordle.png'),
+            file=discord.File(buf, "wordle.png"),
             view=self.view,
         )
         await self.view.wait()

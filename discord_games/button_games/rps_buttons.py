@@ -9,11 +9,11 @@ from discord.ext import commands
 from ..rps import RockPaperScissors
 from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
 
-class RPSButton(discord.ui.Button['RPSView']):
 
+class RPSButton(discord.ui.Button["RPSView"]):
     def __init__(self, emoji: str, *, style: discord.ButtonStyle) -> None:
         super().__init__(
-            label='\u200b',
+            label="\u200b",
             emoji=emoji,
             style=style,
         )
@@ -31,26 +31,30 @@ class RPSButton(discord.ui.Button['RPSView']):
         players = (game.player1, game.player2) if game.player2 else (game.player1,)
 
         if interaction.user not in players:
-            return await interaction.response.send_message('This is not your game!', ephemeral=True)
+            return await interaction.response.send_message(
+                "This is not your game!", ephemeral=True
+            )
         else:
             if not game.player2:
                 bot_choice = random.choice(game.OPTIONS)
                 user_choice = self.emoji.name
 
                 if user_choice == bot_choice:
-                    game.embed.description = f'**Tie!**\nWe both picked {user_choice}'
+                    game.embed.description = f"**Tie!**\nWe both picked {user_choice}"
                 else:
                     if game.check_win(bot_choice, user_choice):
-                        game.embed.description = f'**You Won!**\nYou picked {user_choice} and I picked {bot_choice}.'
+                        game.embed.description = f"**You Won!**\nYou picked {user_choice} and I picked {bot_choice}."
                     else:
-                        game.embed.description = f'**You Lost!**\nI picked {bot_choice} and you picked {user_choice}.'
+                        game.embed.description = f"**You Lost!**\nI picked {bot_choice} and you picked {user_choice}."
 
                 self.view.disable_all()
                 self.view.stop()
 
             else:
                 if self.get_choice(interaction.user):
-                    return await interaction.response.send_message('You have chosen already!', ephemeral=True)
+                    return await interaction.response.send_message(
+                        "You have chosen already!", ephemeral=True
+                    )
 
                 other_player_choice = self.get_choice(interaction.user, other=True)
 
@@ -58,26 +62,33 @@ class RPSButton(discord.ui.Button['RPSView']):
                     game.player1_choice = self.emoji.name
 
                     if not other_player_choice:
-                        game.embed.description += f'\n\n{game.player1.mention} has chosen...\n*Waiting for {game.player2.mention} to choose...*'
+                        game.embed.description += f"\n\n{game.player1.mention} has chosen...\n*Waiting for {game.player2.mention} to choose...*"
                 else:
                     game.player2_choice = self.emoji.name
 
                     if not other_player_choice:
-                        game.embed.description += f'\n\n{game.player2.mention} has chosen...\n*Waiting for {game.player1.mention} to choose...*'
+                        game.embed.description += f"\n\n{game.player2.mention} has chosen...\n*Waiting for {game.player1.mention} to choose...*"
 
                 if game.player1_choice and game.player2_choice:
-                    who_won = game.player1 if game.BEATS[game.player1_choice] == game.player2_choice else game.player2
+                    who_won = (
+                        game.player1
+                        if game.BEATS[game.player1_choice] == game.player2_choice
+                        else game.player2
+                    )
 
                     game.embed.description = (
-                        f'**{who_won.mention} Won!**'
-                        f'\n\n{game.player1.mention} chose {game.player1_choice}.'
-                        f'\n{game.player2.mention} chose {game.player2_choice}.'
+                        f"**{who_won.mention} Won!**"
+                        f"\n\n{game.player1.mention} chose {game.player1_choice}."
+                        f"\n{game.player2.mention} chose {game.player2_choice}."
                     )
 
                     self.view.disable_all()
                     self.view.stop()
 
-            return await interaction.response.edit_message(embed=game.embed, view=self.view)
+            return await interaction.response.edit_message(
+                embed=game.embed, view=self.view
+            )
+
 
 class RPSView(BaseView):
     game: BetaRockPaperScissors
@@ -98,10 +109,12 @@ class RPSView(BaseView):
         for option in self.game.OPTIONS:
             self.add_item(RPSButton(option, style=self.button_style))
 
+
 class BetaRockPaperScissors(RockPaperScissors):
     """
     RockPaperScissors(buttons) game
     """
+
     player1: discord.User
     embed: discord.Embed
 
@@ -142,8 +155,8 @@ class BetaRockPaperScissors(RockPaperScissors):
         self.player1 = ctx.author
 
         self.embed = discord.Embed(
-            title='Rock Paper Scissors',
-            description='Select a button to play!',
+            title="Rock Paper Scissors",
+            description="Select a button to play!",
             color=embed_color,
         )
 

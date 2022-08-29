@@ -11,9 +11,10 @@ from english_words import english_words_alpha_set
 from ..utils import *
 
 
-class BoggleButton(discord.ui.Button['BoggleView']):
-
-    def __init__(self, label: str, style: discord.ButtonStyle, *, row: int, col: int) -> None:
+class BoggleButton(discord.ui.Button["BoggleView"]):
+    def __init__(
+        self, label: str, style: discord.ButtonStyle, *, row: int, col: int
+    ) -> None:
         super().__init__(
             style=style,
             label=label,
@@ -49,8 +50,8 @@ class BoggleButton(discord.ui.Button['BoggleView']):
         embed = game.get_embed()
         await interaction.response.edit_message(view=self.view, embed=embed)
 
-class BoggleView(BaseView):
 
+class BoggleView(BaseView):
     def __init__(self, game: Boggle, *, timeout: float) -> None:
         super().__init__(timeout=timeout)
 
@@ -79,21 +80,29 @@ class BoggleView(BaseView):
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         if check := interaction.user != self.game.player:
-            await interaction.response.send_message('This is not your game!', ephemeral=True)
+            await interaction.response.send_message(
+                "This is not your game!", ephemeral=True
+            )
         return check
 
-    @discord.ui.button(label='Enter', style=discord.ButtonStyle.green, row=4)
+    @discord.ui.button(label="Enter", style=discord.ButtonStyle.green, row=4)
     async def enter_button(self, interaction: discord.Interaction, _) -> None:
         game = self.game
 
         if not game.current_word:
-            return await interaction.response.send_message('You have no current guesses!', ephemeral=True)
+            return await interaction.response.send_message(
+                "You have no current guesses!", ephemeral=True
+            )
 
         if len(game.current_word) < 3:
-            return await interaction.response.send_message('Word must be of at least 3 letters in length!', ephemeral=True)
+            return await interaction.response.send_message(
+                "Word must be of at least 3 letters in length!", ephemeral=True
+            )
 
         if game.current_word in game.correct_guesses:
-            return await interaction.response.send_message('You have guessed this word before!', ephemeral=True)
+            return await interaction.response.send_message(
+                "You have guessed this word before!", ephemeral=True
+            )
 
         if game.current_word.lower() in english_words_alpha_set:
             game.correct_guesses.append(game.current_word)
@@ -105,18 +114,20 @@ class BoggleView(BaseView):
         embed = game.get_embed()
         return await interaction.response.edit_message(view=self, embed=embed)
 
-    @discord.ui.button(label='Clear', style=discord.ButtonStyle.blurple, row=4)
+    @discord.ui.button(label="Clear", style=discord.ButtonStyle.blurple, row=4)
     async def clear_button(self, interaction: discord.Interaction, _) -> None:
 
         if not self.game.current_word:
-            return await interaction.response.send_message('You have no current guesses to clear!', ephemeral=True)
+            return await interaction.response.send_message(
+                "You have no current guesses to clear!", ephemeral=True
+            )
 
         self.game.reset()
 
         embed = self.game.get_embed()
         return await interaction.response.edit_message(view=self, embed=embed)
 
-    @discord.ui.button(label='Stop', style=discord.ButtonStyle.red, row=4)
+    @discord.ui.button(label="Stop", style=discord.ButtonStyle.red, row=4)
     async def stop_button(self, interaction: discord.Interaction, _) -> None:
         embed = self.game.win()
 
@@ -124,10 +135,12 @@ class BoggleView(BaseView):
         await interaction.message.edit(view=self)
         return self.stop()
 
+
 class Boggle:
     """
     Boggle Game
     """
+
     DICE_MATRIX: ClassVar[tuple[tuple[str]]] = (
         ("RIFOBX", "IFEHEY", "DENOWS", "UTOKND"),
         ("HMSRAO", "LUPETS", "ACITOA", "YLGKUE"),
@@ -144,7 +157,7 @@ class Boggle:
         self.correct_guesses: list[str] = []
         self.wrong_guesses: list[str] = []
 
-        self.current_word: str = ''
+        self.current_word: str = ""
         self.indices: list[tuple[int, int]] = []
 
         self.embed_color: Optional[DiscordColor] = None
@@ -161,7 +174,7 @@ class Boggle:
         return corr, wrong, points
 
     def reset(self) -> None:
-        self.current_word = ''
+        self.current_word = ""
         self.indices = []
 
         for button in self.view.children:
@@ -169,36 +182,36 @@ class Boggle:
                 button.style = self.button_style
 
     def get_embed(self) -> discord.Embed:
-        correct_guesses = '\n- '.join(self.correct_guesses)
-        wrong_guesses = '\n- '.join(self.wrong_guesses)
+        correct_guesses = "\n- ".join(self.correct_guesses)
+        wrong_guesses = "\n- ".join(self.wrong_guesses)
 
-        embed = discord.Embed(title='Boggle!', color=self.embed_color)
-        embed.description = f'```yml\nCurrent-word: {self.current_word}\n```'
+        embed = discord.Embed(title="Boggle!", color=self.embed_color)
+        embed.description = f"```yml\nCurrent-word: {self.current_word}\n```"
         embed.add_field(
-            name='Correct Guesses',
-            value=f'```yml\n- {correct_guesses}\n```',
+            name="Correct Guesses",
+            value=f"```yml\n- {correct_guesses}\n```",
         )
         embed.add_field(
-            name='Wrong Guesses',
-            value=f'```yml\n- {wrong_guesses}\n```',
+            name="Wrong Guesses",
+            value=f"```yml\n- {wrong_guesses}\n```",
         )
         return embed
 
     def win(self) -> discord.Embed:
         self.view.disable_all()
 
-        embed = discord.Embed(title='Game Over!', color=self.embed_color)
+        embed = discord.Embed(title="Game Over!", color=self.embed_color)
         embed.description = (
-            '```yml\n'
-            '3-letter-word: 1p\n'
-            '4-letter-word: 2p\n'
-            '5-letter-word: 3p\n'
-            '...\nwrong-word: -1p\n```'
+            "```yml\n"
+            "3-letter-word: 1p\n"
+            "4-letter-word: 2p\n"
+            "5-letter-word: 3p\n"
+            "...\nwrong-word: -1p\n```"
         )
         corr, wrong, points = self.get_results()
         embed.add_field(
-            name='\u200b',
-            value=f'You found **{corr}** correct words (plus **{wrong}** wrong guesses)\nand earned **{points}** points!'
+            name="\u200b",
+            value=f"You found **{corr}** correct words (plus **{wrong}** wrong guesses)\nand earned **{points}** points!",
         )
         return embed
 
@@ -216,8 +229,11 @@ class Boggle:
         )
 
         return [
-            (i, j) for (i, j) in indexes if i in range(4) and j in range(4) and
-            self.view.nested_children[i][j].style != self.selected_style
+            (i, j)
+            for (i, j) in indexes
+            if i in range(4)
+            and j in range(4)
+            and self.view.nested_children[i][j].style != self.selected_style
         ]
 
     async def start(

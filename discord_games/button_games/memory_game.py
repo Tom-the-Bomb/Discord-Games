@@ -9,13 +9,13 @@ from discord.ext import commands
 
 from ..utils import *
 
-class MemoryButton(discord.ui.Button['MemoryView']):
 
+class MemoryButton(discord.ui.Button["MemoryView"]):
     def __init__(self, emoji: str, *, style: discord.ButtonStyle, row: int = 0) -> None:
         self.value = emoji
 
         super().__init__(
-            label='\u200b',
+            label="\u200b",
             style=style,
             row=row,
         )
@@ -25,7 +25,7 @@ class MemoryButton(discord.ui.Button['MemoryView']):
 
         if opened := self.view.opened:
             game.moves += 1
-            game.embed.set_field_at(0, name='\u200b', value=f'Moves: `{game.moves}`')
+            game.embed.set_field_at(0, name="\u200b", value=f"Moves: `{game.moves}`")
 
             self.emoji = self.value
             self.disabled = True
@@ -43,8 +43,14 @@ class MemoryButton(discord.ui.Button['MemoryView']):
             else:
                 self.view.opened = None
 
-                if all(button.disabled for button in self.view.children if isinstance(button, discord.ui.Button)):
-                    await interaction.message.edit(content='Game Over, Congrats!', view=self.view)
+                if all(
+                    button.disabled
+                    for button in self.view.children
+                    if isinstance(button, discord.ui.Button)
+                ):
+                    await interaction.message.edit(
+                        content="Game Over, Congrats!", view=self.view
+                    )
                     return self.view.stop()
 
             return await interaction.message.edit(view=self.view, embed=game.embed)
@@ -54,9 +60,23 @@ class MemoryButton(discord.ui.Button['MemoryView']):
             self.disabled = True
             return await interaction.response.edit_message(view=self.view)
 
+
 class MemoryView(BaseView):
     board: list[list[str]]
-    DEFAULT_ITEMS: ClassVar[list[str]] = ['🥝', '🍓', '🍹', '🍋', '🥭', '🍎', '🍊', '🍍', '🍑', '🍇', '🍉', '🥬']
+    DEFAULT_ITEMS: ClassVar[list[str]] = [
+        "🥝",
+        "🍓",
+        "🍹",
+        "🍋",
+        "🥭",
+        "🍎",
+        "🍊",
+        "🍍",
+        "🍑",
+        "🍇",
+        "🍉",
+        "🥬",
+    ]
 
     def __init__(
         self,
@@ -95,10 +115,12 @@ class MemoryView(BaseView):
                     button.disabled = True
                 self.add_item(button)
 
+
 class MemoryGame:
     """
     Memory Game
     """
+
     def __init__(self) -> None:
         self.embed_color: Optional[DiscordColor] = None
         self.embed: Optional[discord.Embed] = None
@@ -138,15 +160,17 @@ class MemoryGame:
             returns the game message
         """
         self.embed_color = embed_color
-        self.embed = discord.Embed(description='**Memory Game**', color=self.embed_color)
-        self.embed.add_field(name='\u200b', value='Moves: `0`')
+        self.embed = discord.Embed(
+            description="**Memory Game**", color=self.embed_color
+        )
+        self.embed.add_field(name="\u200b", value="Moves: `0`")
 
         self.view = MemoryView(
             game=self,
             items=items,
             button_style=button_style,
             pause_time=pause_time,
-            timeout=timeout
+            timeout=timeout,
         )
         self.message = await ctx.send(embed=self.embed, view=self.view)
 

@@ -9,8 +9,9 @@ import chess
 
 from .utils import DiscordColor, DEFAULT_COLOR
 
+
 class Chess:
-    BASE_URL: ClassVar[str] = 'http://www.fen-to-image.com/image/64/double/coords/'
+    BASE_URL: ClassVar[str] = "http://www.fen-to-image.com/image/64/double/coords/"
 
     def __init__(self, *, white: discord.User, black: discord.User) -> None:
         self.white = white
@@ -24,7 +25,7 @@ class Chess:
 
         self.last_move: dict[str, str] = {}
 
-    def get_color(self) -> Literal['white', 'black']:
+    def get_color(self) -> Literal["white", "black"]:
         return "white" if self.turn == self.white else "black"
 
     async def make_embed(self) -> discord.Embed:
@@ -33,16 +34,13 @@ class Chess:
         embed.set_image(url=f"{self.BASE_URL}{self.board.board_fen()}")
 
         embed.add_field(
-            name='Last Move',
-            value=f"```yml\n{self.last_move.get('color', '-')}: {self.last_move.get('move', '-')}\n```"
+            name="Last Move",
+            value=f"```yml\n{self.last_move.get('color', '-')}: {self.last_move.get('move', '-')}\n```",
         )
         return embed
 
     async def place_move(self, uci: str) -> chess.Board:
-        self.last_move = {
-            'color': self.get_color(),
-            'move': f'{uci[:2]} -> {uci[2:]}'
-        }
+        self.last_move = {"color": self.get_color(), "move": f"{uci[:2]} -> {uci[2:]}"}
 
         self.board.push_uci(uci)
         self.turn = self.white if self.turn == self.black else self.black
@@ -63,7 +61,9 @@ class Chess:
         elif self.board.is_fivefold_repetition():
             embed.description = f"Game over\nFive-fold repitition. | Score: `{results}`"
         else:
-            embed.description = f"Game over\nVariant end condition. | Score: `{results}`"
+            embed.description = (
+                f"Game over\nVariant end condition. | Score: `{results}`"
+            )
 
         embed.set_image(url=f"{self.BASE_URL}{self.board.board_fen()}")
         return embed
@@ -113,7 +113,9 @@ class Chess:
                     return False
 
             try:
-                message: discord.Message = await ctx.bot.wait_for("message", timeout=timeout, check=check)
+                message: discord.Message = await ctx.bot.wait_for(
+                    "message", timeout=timeout, check=check
+                )
             except asyncio.TimeoutError:
                 return
 

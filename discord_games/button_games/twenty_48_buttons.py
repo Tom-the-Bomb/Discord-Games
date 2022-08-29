@@ -10,40 +10,41 @@ from ..twenty_48 import Twenty48
 from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
 
 
-class Twenty48_Button(discord.ui.Button['BaseView']):
-
+class Twenty48_Button(discord.ui.Button["BaseView"]):
     def __init__(self, game: BetaTwenty48, emoji: str) -> None:
         self.game = game
 
-        style = discord.ButtonStyle.red if emoji == '⏹️' else discord.ButtonStyle.blurple
+        style = (
+            discord.ButtonStyle.red if emoji == "⏹️" else discord.ButtonStyle.blurple
+        )
 
         super().__init__(
-            style=style,
-            emoji=discord.PartialEmoji(name=emoji),
-            label="\u200b"
+            style=style, emoji=discord.PartialEmoji(name=emoji), label="\u200b"
         )
 
     async def callback(self, interaction: discord.Interaction) -> None:
 
         if interaction.user != self.game.player:
-            return await interaction.response.send_message('This isn\'t your game!', ephemeral=True)
+            return await interaction.response.send_message(
+                "This isn't your game!", ephemeral=True
+            )
 
         emoji = str(self.emoji)
 
-        if emoji == '⏹️':
+        if emoji == "⏹️":
             self.view.stop()
             return await interaction.message.delete()
 
-        elif emoji == '➡️':
+        elif emoji == "➡️":
             self.game.move_right()
 
-        elif emoji == '⬅️':
+        elif emoji == "⬅️":
             self.game.move_left()
 
-        elif emoji == '⬇️':
+        elif emoji == "⬇️":
             self.game.move_down()
 
-        elif emoji == '⬆️':
+        elif emoji == "⬆️":
             self.game.move_up()
 
         lost = self.game.spawn_new()
@@ -55,22 +56,28 @@ class Twenty48_Button(discord.ui.Button['BaseView']):
 
         if lost:
             self.game.embed = discord.Embed(
-                description='Game Over! You lost.',
+                description="Game Over! You lost.",
                 color=self.game.embed_color,
             )
 
         if self.game._render_image:
             image = await self.game.render_image()
-            await interaction.response.edit_message(attachments=[image], embed=self.game.embed)
+            await interaction.response.edit_message(
+                attachments=[image], embed=self.game.embed
+            )
         else:
             board_string = self.game.number_to_emoji()
-            await interaction.response.edit_message(content=board_string, embed=self.game.embed)
+            await interaction.response.edit_message(
+                content=board_string, embed=self.game.embed
+            )
+
 
 class BetaTwenty48(Twenty48):
     view: discord.ui.View
     """
     Twenty48(buttons) game
     """
+
     async def start(
         self,
         ctx: commands.Context[commands.Bot],
@@ -122,7 +129,9 @@ class BetaTwenty48(Twenty48):
             self.message = await ctx.send(file=image, view=self.view, **kwargs)
         else:
             board_string = self.number_to_emoji()
-            self.message = await ctx.send(content=board_string, view=self.view, **kwargs)
+            self.message = await ctx.send(
+                content=board_string, view=self.view, **kwargs
+            )
 
         await self.view.wait()
         return self.message
