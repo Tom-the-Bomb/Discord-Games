@@ -180,6 +180,7 @@ class TypeRacer:
             requesting the quote failed
         """
         self.embed_color = embed_color
+        parent = pathlib.Path(__file__).parent
 
         if not words_mode:
             async with aiohttp.ClientSession() as session:
@@ -193,7 +194,9 @@ class TypeRacer:
                         )
 
         else:
-            text = " ".join(random.choice(self.SHORT_WORDS).lower() for _ in range(15))
+            with open(parent / "assets/words.txt", "r") as wordsfp:
+                words = wordsfp.read().splitlines()
+                text = " ".join(random.choice(words).lower() for _ in range(8))
 
         if max_quote_length is not None:
             if len(text) > max_quote_length:
@@ -201,7 +204,7 @@ class TypeRacer:
 
         if not path_to_text_font:
             path_to_text_font = str(
-                pathlib.Path(__file__).parent / "assets/segoe-ui-semilight-411.ttf"
+                parent / "assets/segoe-ui-semilight-411.ttf"
             )
 
         buffer = await self._tr_img(text, path_to_text_font)
