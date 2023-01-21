@@ -7,7 +7,7 @@ import asyncio
 
 import discord
 from discord.ext import commands
-from english_words import english_words_lower_alpha_set
+from english_words import get_english_words_set
 
 from .utils import DiscordColor, DEFAULT_COLOR
 
@@ -104,7 +104,13 @@ class Hangman:
 
     def __init__(self, word: Optional[str] = None) -> None:
         self._alpha: list[str] = list(string.ascii_lowercase)
-        self._all_words = tuple(english_words_lower_alpha_set)
+        self._all_words = tuple(
+            get_english_words_set(
+                ['web2'],
+                alpha=True,
+                lower=True,
+            )
+        )
 
         if word:
             if not word.isalpha():

@@ -6,7 +6,7 @@ import string
 
 import discord
 from discord.ext import commands
-from english_words import english_words_alpha_set
+from english_words import get_english_words_set
 
 from ..utils import *
 
@@ -104,7 +104,7 @@ class BoggleView(BaseView):
                 "You have guessed this word before!", ephemeral=True
             )
 
-        if game.current_word.lower() in english_words_alpha_set:
+        if game.current_word.lower() in game.words:
             game.correct_guesses.append(game.current_word)
         else:
             game.wrong_guesses.append(game.current_word)
@@ -149,6 +149,11 @@ class Boggle:
     )
 
     def __init__(self) -> None:
+        self.words: set[str] = get_english_words_set(
+            ['web2'],
+            alpha=True,
+            lower=True,
+        )
         self.board = self.generate_board()
 
         self.button_style: discord.ButtonStyle = discord.ButtonStyle.gray
