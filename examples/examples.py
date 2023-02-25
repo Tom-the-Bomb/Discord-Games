@@ -86,9 +86,9 @@ class Games(commands.Cog):
         await game.start(ctx)
 
     @commands.command(name="wordle")
-    async def worldle(self, ctx: commands.Context[commands.Bot]):
+    async def wordle(self, ctx: commands.Context[commands.Bot]):
 
-        game = button_games.BetaWordle(color=ctx.bot.color)
+        game = button_games.BetaWordle()
         await game.start(ctx)
 
     @commands.command(name="guess")
