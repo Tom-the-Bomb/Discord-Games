@@ -1,7 +1,9 @@
 from __future__ import annotations
+from multiprocessing.sharedctypes import Value
 
 from typing import Optional
 import random
+import asyncio
 
 import discord
 from discord.ext import commands
@@ -14,52 +16,59 @@ class ChimpButton(discord.ui.Button["ChimpView"]):
         self.value = num
 
         super().__init__(
-            label=self.value or "\u200b",
+            label=str(self.value or "\u200b"),
             style=style,
             row=row,
         )
 
-        self.step = 0
-        self.first_clicked = False
-
-    def update_view(self, style: discord.ButtonStyle, show: bool = False) -> None:
-        for num, button in zip(self.view.game.grid, self.view.children):
-            if isinstance(button, discord.ui.Button):
-                if num:
-                    button.style = style
-                button.label = str(self.value) if show else "\u200b"
-
     async def callback(self, interaction: discord.Interaction) -> None:
+        assert self.view
         game = self.view.game
 
-        if not self.first_clicked:
-            self.first_clicked = True
-
-            self.update_view(style=discord.ButtonStyle.blurple)
-            await interaction.response.edit_message(
-                content="Now click the buttons in order!", view=self.view
+        if not game.first_clicked:
+            game.first_clicked = True
+            self.view.update_view(
+                style=self.view.button_style,
+                highlight=game.highlight_tiles,
             )
-        else:
-            idx = self.view.children.index(self)
-            if idx == game.coordinates[self.step]:
-                self.label = str(self.value)
-                self.step += 1
-                await interaction.response.edit_message(view=self.view)
-            else:
-                self.update_view(style=discord.ButtonStyle.red)
-                await interaction.response.edit_message(
-                    content="You Lose!", view=self.view
+
+        idx = self.view.children.index(self)
+        if idx == game.coordinates[game.step]:
+            self.label = str(self.value)
+            self.style = discord.ButtonStyle.green
+            game.step += 1
+
+            if game.step == len(game.coordinates):
+                self.view.disable_all()
+                return await interaction.response.edit_message(
+                    content="Congratulations, you won!",
+                    view=self.view
                 )
-                self.view.stop()
+            else:
+                await interaction.response.edit_message(view=self.view)
+        else:
+            self.view.update_view(
+                style=self.view.button_style,
+                show=True,
+            )
+            self.style = discord.ButtonStyle.red
+            self.view.disable_all()
+
+            await interaction.response.edit_message(
+                content="You Lose!", view=self.view
+            )
+            return self.view.stop()
 
 class ChimpView(BaseView):
     def __init__(
         self,
         game: ChimpTest,
         *,
+        button_style: discord.ButtonStyle = discord.ButtonStyle.blurple,
         timeout: Optional[float] = None,
     ) -> None:
         super().__init__(timeout=timeout)
+        self.button_style = button_style
         self.game = game
 
         for i, row in enumerate(chunk(self.game.grid, count=5)):
@@ -68,12 +77,27 @@ class ChimpView(BaseView):
                 button.disabled = not item
                 self.add_item(button)
 
+    def update_view(
+        self, style: discord.ButtonStyle,
+        *,
+        show: bool = False,
+        highlight: bool = True,
+    ) -> None:
+        for num, button in zip(self.game.grid, self.children):
+            if isinstance(button, ChimpButton):
+                if num and highlight and button.style != discord.ButtonStyle.green:
+                    button.style = style
+                button.label = str(button.value or "\u200b") if show else "\u200b"
 
 class ChimpTest:
     """
     ChimpTest Memory Game
     """
     def __init__(self, count: int = 9) -> None:
+        self.highlight_tiles: bool = True
+
+        if count not in range(1, 26):
+            raise ValueError(f"the count must be between 1 and 26, not {count}")
         self.count = count
 
         self.coordinates = []
@@ -86,10 +110,16 @@ class ChimpTest:
             self.coordinates.append(j)
             self.grid[j] = i + 1
 
+        self.step: int = 0
+        self.first_clicked: bool = False
+
     async def start(
         self,
         ctx: commands.Context[commands.Bot],
         *,
+        highlight_tiles: bool = True,
+        initial_sleep: Optional[float] = None,
+        button_style: discord.ButtonStyle = discord.ButtonStyle.blurple,
         timeout: Optional[float] = None,
     ) -> discord.Message:
         """
@@ -99,6 +129,15 @@ class ChimpTest:
         ----------
         ctx : commands.Context
             the context of the invokation command
+        highlight_tiles : bool, optional
+            specifies whether or not to highlight the tiles where there are numbers
+            with the specified `button_style`, by default True
+        initial_sleep : float, optional
+            specifies the initial time the player gets to look at the non-hidden tiles in `seconds`,
+            if `False`, there is no set time and thbe game will start as soon as the user clicks on a button,
+            by default False
+        button_style : discord.ButtonStyle, optional
+            the button style to use for highlighting all the numeric tiles, by default discord.ButtonStyle.blurple
         timeout : Optional[float], optional
             the timeout for the view, by default None
 
@@ -107,11 +146,28 @@ class ChimpTest:
         discord.Message
             returns the game message
         """
+        self.initial_sleep = initial_sleep
+        self.highlight_tiles = highlight_tiles
         self.view = ChimpView(
             game=self,
+            button_style=button_style,
             timeout=timeout,
         )
-        self.message = await ctx.send(view=self.view)
+        self.message = await ctx.send(
+            content="Click the buttons in order!",
+            view=self.view,
+        )
+
+        if self.initial_sleep is not None:
+            await asyncio.sleep(self.initial_sleep)
+            self.first_clicked = True
+
+            if not self.view.is_finished():
+                self.view.update_view(
+                    style=self.view.button_style,
+                    highlight=self.highlight_tiles,
+                )
+                await self.message.edit(view=self.view)
 
         await double_wait(
             wait_for_delete(ctx, self.message),

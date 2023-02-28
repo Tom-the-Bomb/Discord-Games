@@ -18,15 +18,15 @@ bot = TestBot(command_prefix="!!", intents=discord.Intents.all())
 
 @bot.command(name="test", aliases=["t"])
 @commands.is_owner()
-async def test(ctx: commands.Context[commands.Bot]) -> None:
+async def test(ctx: commands.Context[commands.Bot], pause: float = None) -> None:
 
     game = button_games.ChimpTest()
-    await game.start(ctx)
+    await game.start(ctx, initial_sleep=pause)
     await ctx.reply("done!", mention_author=False)
 
 
 if __name__ == "__main__":
-    with open(pathlib.Path(__file__).parent / "bot_config.json") as bot_config:
+    with open(pathlib.Path(__file__).parent / "bot_config.json", "r") as bot_config:
         bot_config = json.load(bot_config)
         token = bot_config["TOKEN"]
 
