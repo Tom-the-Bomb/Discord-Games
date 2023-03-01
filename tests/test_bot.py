@@ -18,10 +18,10 @@ bot = TestBot(command_prefix="!!", intents=discord.Intents.all())
 
 @bot.command(name="test", aliases=["t"])
 @commands.is_owner()
-async def test(ctx: commands.Context[commands.Bot], lives: int = 1) -> None:
+async def test(ctx: commands.Context[commands.Bot]) -> None:
 
-    game = button_games.ChimpTest()
-    await game.start(ctx, lives=lives)
+    game = button_games.VerbalMemory()
+    await game.start(ctx)
     await ctx.reply("done!", mention_author=False)
 
 

@@ -19,15 +19,18 @@ class VerbalButton(discord.ui.Button["VerbalView"]):
     async def callback(self, interaction: discord.Interaction) -> None:
         assert self.view
         game = self.view.game
+        assert game.embed
 
-        if self.label == "Cancel":
+        if self.label == "Cancel" and interaction.message:
             await interaction.message.delete()
             return self.view.stop()
 
-        if not (
+        if (
             self.label == "Seen" and game.word in game.seen or
             self.label == "New" and game.word not in game.seen
         ):
+            game.score += 1
+        else:
             game.lives -= 1
             game.update_description()
 
@@ -35,8 +38,6 @@ class VerbalButton(discord.ui.Button["VerbalView"]):
                 game.embed.title = "You Lost!"
                 await interaction.response.edit_message(embed=game.embed, view=self.view)
                 return self.view.stop()
-        else:
-            game.score += 1
 
         if game.word not in game.seen:
             game.seen.append(game.word)
@@ -64,7 +65,7 @@ class VerbalView(BaseView):
         self.add_item(VerbalButton(label="Cancel", style=discord.ButtonStyle.red))
 
 class VerbalMemory:
-    def __init__(self, word_set: Optional[tuple[str, ...]] = None, sample_size: int = 100) -> None:
+    def __init__(self, word_set: Optional[tuple[str, ...]] = None, sample_size: int = 40) -> None:
         self.lives: int = 0
         self.embed: Optional[discord.Embed] = None
         self.word_set = word_set or tuple(random.choices(
@@ -78,11 +79,12 @@ class VerbalMemory:
 
         self.score: int = 0
         self.word = random.choice(self.word_set)
-        self.seen: list[str] = [self.word]
+        self.seen: list[str] = []
 
     def update_description(self) -> None:
+        assert self.embed
         self.embed.description = (
-            f"```yml\nSCore: `{self.score}`\nLives: `{self.lives}`\n```"
+            f"```yml\nScore | {self.score}\nLives | {self.lives}\n```"
         )
 
     async def start(
@@ -116,9 +118,9 @@ class VerbalMemory:
         self.lives = lives
         self.embed = discord.Embed(
             title=self.word,
-            description=f"Lives: `{self.lives}`",
             color=embed_color,
         )
+        self.update_description()
         self.view = VerbalView(
             game=self,
             button_style=button_style,
