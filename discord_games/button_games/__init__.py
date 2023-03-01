@@ -18,7 +18,8 @@ from .number_slider import NumberSlider
 from .lights_out import LightsOut
 from .boggle import Boggle
 from .connect_four_buttons import BetaConnectFour
-from .chimptest import ChimpTest
+from .chimp_test import ChimpTest
+from .verbal_memory import VerbalMemory
 
 
 __all__: tuple[str, ...] = (
@@ -38,4 +39,5 @@ __all__: tuple[str, ...] = (
     "LightsOut",
     "Boggle",
     "ChimpTest",
+    "VerbalMemory",
 )
