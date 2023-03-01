@@ -152,7 +152,7 @@ class ChimpTest:
         ctx : commands.Context
             the context of the invokation command
         lives : int
-            the amount of errors that are allowed by the player
+            the amount of errors that are allowed by the player, by default 1
         highlight_tiles : bool, optional
             specifies whether or not to highlight the tiles where there are numbers
             with the specified `button_style`, by default True
