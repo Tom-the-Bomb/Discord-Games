@@ -42,8 +42,7 @@ class ChimpButton(discord.ui.Button["ChimpView"]):
             if game.step == len(game.coordinates):
                 self.view.disable_all()
                 return await interaction.response.edit_message(
-                    content="Congratulations, you won!",
-                    view=self.view
+                    content="Congratulations, you won!", view=self.view
                 )
             else:
                 await interaction.response.edit_message(
@@ -74,6 +73,7 @@ class ChimpButton(discord.ui.Button["ChimpView"]):
                     view=self.view,
                 )
 
+
 class ChimpView(BaseView):
     def __init__(
         self,
@@ -93,7 +93,8 @@ class ChimpView(BaseView):
                 self.add_item(button)
 
     def update_view(
-        self, style: discord.ButtonStyle,
+        self,
+        style: discord.ButtonStyle,
         *,
         show: bool = False,
         highlight: bool = True,
@@ -104,10 +105,12 @@ class ChimpView(BaseView):
                     button.style = style
                 button.label = str(button.value or "\u200b") if show else "\u200b"
 
+
 class ChimpTest:
     """
     ChimpTest Memory Game
     """
+
     def __init__(self, count: int = 9) -> None:
         self.lives: int = 0
         self.initial_sleep: Optional[float] = None
