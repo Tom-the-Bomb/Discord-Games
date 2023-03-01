@@ -3,7 +3,7 @@ from __future__ import annotations
 import pathlib
 import random
 import asyncio
-from typing import Optional, Final
+from typing import Optional, Final, TypedDict, TYPE_CHECKING
 from io import BytesIO
 
 import discord
@@ -11,6 +11,11 @@ from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 
 from .utils import *
+
+if TYPE_CHECKING:
+    class Guess(TypedDict):
+        letter: str
+        color: tuple[int, int, int]
 
 BORDER: Final[int] = 40
 SQ: Final[int] = 100
@@ -42,7 +47,7 @@ class Wordle:
             str(parent / "assets/HelveticaNeuBold.ttf"), self._text_size
         )
 
-        self.guesses: list[list[dict[str, str]]] = []
+        self.guesses: list[list[Guess]] = []
 
         if word:
             if len(word) != 5:

@@ -12,13 +12,12 @@ from ..utils import *
 
 
 class ChimpButton(discord.ui.Button["ChimpView"]):
-    def __init__(self, num: int, *, style: discord.ButtonStyle, row: int = 0) -> None:
+    def __init__(self, num: int, *, style: discord.ButtonStyle) -> None:
         self.value = num
 
         super().__init__(
             label=str(self.value or "\u200b"),
             style=style,
-            row=row,
         )
 
     async def callback(self, interaction: discord.Interaction) -> None:
@@ -38,6 +37,9 @@ class ChimpButton(discord.ui.Button["ChimpView"]):
             self.style = discord.ButtonStyle.green
             game.step += 1
 
+            for button in game.wrong_guesses:
+                button.style = self.view.button_style
+
             if game.step == len(game.coordinates):
                 self.view.disable_all()
                 return await interaction.response.edit_message(
@@ -45,19 +47,33 @@ class ChimpButton(discord.ui.Button["ChimpView"]):
                     view=self.view
                 )
             else:
-                await interaction.response.edit_message(view=self.view)
+                await interaction.response.edit_message(
+                    content=f"Click the buttons in order! **[Lives: {game.lives}]**",
+                    view=self.view,
+                )
         else:
-            self.view.update_view(
-                style=self.view.button_style,
-                show=True,
-            )
-            self.style = discord.ButtonStyle.red
-            self.view.disable_all()
+            game.lives -= 1
 
-            await interaction.response.edit_message(
-                content="You Lose!", view=self.view
-            )
-            return self.view.stop()
+            if game.lives == 0:
+                self.view.update_view(
+                    style=self.view.button_style,
+                    show=True,
+                )
+                self.view.disable_all()
+                self.style = discord.ButtonStyle.red
+
+                await interaction.response.edit_message(
+                    content="You Lose!", view=self.view
+                )
+                return self.view.stop()
+            else:
+                self.style = discord.ButtonStyle.red
+
+                game.wrong_guesses.append(self)
+                await interaction.response.edit_message(
+                    content=f"Click the buttons in order! **[Lives: `{game.lives}`]**",
+                    view=self.view,
+                )
 
 class ChimpView(BaseView):
     def __init__(
@@ -71,9 +87,9 @@ class ChimpView(BaseView):
         self.button_style = button_style
         self.game = game
 
-        for i, row in enumerate(chunk(self.game.grid, count=5)):
+        for row in chunk(self.game.grid, count=5):
             for item in row:
-                button = ChimpButton(item, style=discord.ButtonStyle.gray, row=i)
+                button = ChimpButton(item, style=discord.ButtonStyle.gray)
                 button.disabled = not item
                 self.add_item(button)
 
@@ -94,6 +110,8 @@ class ChimpTest:
     ChimpTest Memory Game
     """
     def __init__(self, count: int = 9) -> None:
+        self.lives: int = 0
+        self.initial_sleep: Optional[float] = None
         self.highlight_tiles: bool = True
 
         if count not in range(1, 26):
@@ -112,11 +130,13 @@ class ChimpTest:
 
         self.step: int = 0
         self.first_clicked: bool = False
+        self.wrong_guesses: list[ChimpButton] = []
 
     async def start(
         self,
         ctx: commands.Context[commands.Bot],
         *,
+        lives: int = 1,
         highlight_tiles: bool = True,
         initial_sleep: Optional[float] = None,
         button_style: discord.ButtonStyle = discord.ButtonStyle.blurple,
@@ -129,6 +149,8 @@ class ChimpTest:
         ----------
         ctx : commands.Context
             the context of the invokation command
+        lives : int
+            the amount of errors that are allowed by the player
         highlight_tiles : bool, optional
             specifies whether or not to highlight the tiles where there are numbers
             with the specified `button_style`, by default True
@@ -146,6 +168,7 @@ class ChimpTest:
         discord.Message
             returns the game message
         """
+        self.lives = lives
         self.initial_sleep = initial_sleep
         self.highlight_tiles = highlight_tiles
         self.view = ChimpView(
@@ -167,7 +190,10 @@ class ChimpTest:
                     style=self.view.button_style,
                     highlight=self.highlight_tiles,
                 )
-                await self.message.edit(view=self.view)
+                await self.message.edit(
+                    content=f"Click the buttons in order! **[Lives: {self.lives}]**",
+                    view=self.view,
+                )
 
         await double_wait(
             wait_for_delete(ctx, self.message),
