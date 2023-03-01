@@ -150,7 +150,7 @@ class Boggle:
 
     def __init__(self) -> None:
         self.words: set[str] = get_english_words_set(
-            ['web2'],
+            ["web2"],
             alpha=True,
             lower=True,
         )

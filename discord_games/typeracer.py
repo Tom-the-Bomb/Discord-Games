@@ -203,9 +203,7 @@ class TypeRacer:
                 text = textwrap.shorten(text, width=max_quote_length, placeholder="")
 
         if not path_to_text_font:
-            path_to_text_font = str(
-                parent / "assets/segoe-ui-semilight-411.ttf"
-            )
+            path_to_text_font = str(parent / "assets/segoe-ui-semilight-411.ttf")
 
         buffer = await self._tr_img(text, path_to_text_font)
 

@@ -106,7 +106,7 @@ class Hangman:
         self._alpha: list[str] = list(string.ascii_lowercase)
         self._all_words = tuple(
             get_english_words_set(
-                ['web2'],
+                ["web2"],
                 alpha=True,
                 lower=True,
             )

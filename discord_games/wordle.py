@@ -13,9 +13,11 @@ from PIL import Image, ImageDraw, ImageFont
 from .utils import *
 
 if TYPE_CHECKING:
+
     class Guess(TypedDict):
         letter: str
         color: tuple[int, int, int]
+
 
 BORDER: Final[int] = 40
 SQ: Final[int] = 100
