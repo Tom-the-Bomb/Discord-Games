@@ -9,6 +9,7 @@ from english_words import get_english_words_set
 
 from ..utils import *
 
+
 class VerbalButton(discord.ui.Button["VerbalView"]):
     def __init__(self, label: str, style: discord.ButtonStyle) -> None:
         super().__init__(
@@ -26,8 +27,10 @@ class VerbalButton(discord.ui.Button["VerbalView"]):
             return self.view.stop()
 
         if (
-            self.label == "Seen" and game.word in game.seen or
-            self.label == "New" and game.word not in game.seen
+            self.label == "Seen"
+            and game.word in game.seen
+            or self.label == "New"
+            and game.word not in game.seen
         ):
             game.score += 1
         else:
@@ -36,7 +39,9 @@ class VerbalButton(discord.ui.Button["VerbalView"]):
 
             if game.lives == 0:
                 game.embed.title = "You Lost!"
-                await interaction.response.edit_message(embed=game.embed, view=self.view)
+                await interaction.response.edit_message(
+                    embed=game.embed, view=self.view
+                )
                 return self.view.stop()
 
         if game.word not in game.seen:
@@ -46,6 +51,7 @@ class VerbalButton(discord.ui.Button["VerbalView"]):
         game.embed.title = game.word
         game.update_description()
         return await interaction.response.edit_message(embed=game.embed, view=self.view)
+
 
 class VerbalView(BaseView):
     def __init__(
@@ -64,18 +70,27 @@ class VerbalView(BaseView):
         self.add_item(VerbalButton(label="New", style=self.button_style))
         self.add_item(VerbalButton(label="Cancel", style=discord.ButtonStyle.red))
 
+
 class VerbalMemory:
-    def __init__(self, word_set: Optional[list[str]] = None, sample_size: int = 100) -> None:
+    def __init__(
+        self, word_set: Optional[list[str]] = None, sample_size: Optional[int] = 100
+    ) -> None:
         self.lives: int = 0
         self.embed: Optional[discord.Embed] = None
-        self.word_set = word_set or random.choices(
-            tuple(get_english_words_set(
-                ["web2"],
-                alpha=True,
-                lower=True,
-            )),
-            k=sample_size,
-        )
+
+        english_words = list(get_english_words_set(
+            ["web2"],
+            alpha=True,
+            lower=True,
+        ))
+
+        if sample_size:
+            self.word_set = word_set or random.choices(
+                english_words,
+                k=sample_size,
+            )
+        else:
+            self.word_set = word_set or english_words
 
         assert self.word_set
 
