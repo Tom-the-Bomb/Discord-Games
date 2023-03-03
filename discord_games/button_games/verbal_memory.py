@@ -42,7 +42,7 @@ class VerbalButton(discord.ui.Button["VerbalView"]):
         if game.word not in game.seen:
             game.seen.append(game.word)
 
-        game.word = random.choice(game.word_set)
+        game.word = game.choose_word()
         game.embed.title = game.word
         game.update_description()
         return await interaction.response.edit_message(embed=game.embed, view=self.view)
@@ -65,21 +65,34 @@ class VerbalView(BaseView):
         self.add_item(VerbalButton(label="Cancel", style=discord.ButtonStyle.red))
 
 class VerbalMemory:
-    def __init__(self, word_set: Optional[tuple[str, ...]] = None, sample_size: int = 40) -> None:
+    def __init__(self, word_set: Optional[list[str]] = None, sample_size: int = 100) -> None:
         self.lives: int = 0
         self.embed: Optional[discord.Embed] = None
-        self.word_set = word_set or tuple(random.choices(
+        self.word_set = word_set or random.choices(
             tuple(get_english_words_set(
                 ["web2"],
                 alpha=True,
                 lower=True,
             )),
             k=sample_size,
-        ))
+        )
+
+        assert self.word_set
 
         self.score: int = 0
-        self.word = random.choice(self.word_set)
         self.seen: list[str] = []
+        self.word = self.choose_word()
+
+    def choose_word(self) -> str:
+        new = random.choice(self.word_set)
+        if self.seen:
+            seen = random.choice(self.seen)
+            word = random.choices([new, seen], weights=self.weights)[0]
+        else:
+            word = new
+        if word in self.word_set:
+            self.word_set.remove(word)
+        return word
 
     def update_description(self) -> None:
         assert self.embed
@@ -92,6 +105,7 @@ class VerbalMemory:
         ctx: commands.Context[commands.Bot],
         *,
         lives: int = 3,
+        weights: tuple[float, float] = None,
         button_style: discord.ButtonStyle = discord.ButtonStyle.blurple,
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None,
@@ -105,6 +119,8 @@ class VerbalMemory:
             the context of the invokation command
         lives : int
             the amount of errors that are allowed by the player, by default 1
+        weights : tuple[float, float]
+            the weights when choosing a word, as (NEW, SEEN), by default (0.7, 0.3)
         button_style : discord.ButtonStyle, optional
             the button style to use for the game buttons, by default discord.ButtonStyle.blurple
         timeout : Optional[float], optional
@@ -115,6 +131,7 @@ class VerbalMemory:
         discord.Message
             returns the game message
         """
+        self.weights = weights or (0.7, 0.3)
         self.lives = lives
         self.embed = discord.Embed(
             title=self.word,
