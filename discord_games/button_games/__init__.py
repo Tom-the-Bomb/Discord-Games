@@ -20,6 +20,7 @@ from .boggle import Boggle
 from .connect_four_buttons import BetaConnectFour
 from .chimp_test import ChimpTest
 from .verbal_memory import VerbalMemory
+from .number_memory import NumberMemory
 
 
 __all__: tuple[str, ...] = (
@@ -40,4 +41,5 @@ __all__: tuple[str, ...] = (
     "Boggle",
     "ChimpTest",
     "VerbalMemory",
+    "NumberMemory",
 )

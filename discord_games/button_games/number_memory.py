@@ -3,6 +3,8 @@ from __future__ import annotations
 from typing import Optional
 import random
 import string
+import asyncio
+import datetime
 
 import discord
 from discord.ext import commands
@@ -22,7 +24,38 @@ class NumModal(discord.ui.Modal, title="Answer"):
         self.view = view
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
-        ...
+        game = self.view.game
+        value = self.word.value
+        assert game.embed
+
+        if not value.isdigit():
+            return await interaction.response.send_message(
+                f"`{value}` is not a valid number!", ephemeral=True
+            )
+        
+        if value == game.number:
+            game.level += 1
+            game.number = game.generate_number()
+            game.update_embed()
+            self.view.answer.disabled = True
+            await interaction.response.edit_message(
+                embed=game.embed, view=self.view
+            )
+
+            await asyncio.sleep(game.pause_time)
+            game.update_embed(hide=True)
+
+            if interaction.message:
+                await interaction.message.edit(embed=game.embed, view=self.view)
+        else:
+            game.embed.description = (
+                "You Lost!\n\n```diff\nCorrect Number:\n"
+                f"+ {game.number}\n"
+                "Your Guess:\n"
+                f"- {value}\n```"
+            )
+            self.view.disable_all()
+            await interaction.response.edit_message(embed=game.embed, view=self.view)
 
 class NumButton(discord.ui.Button["NumView"]):
     def __init__(self, label: str, style: discord.ButtonStyle) -> None:
@@ -38,8 +71,7 @@ class NumButton(discord.ui.Button["NumView"]):
             await interaction.message.delete()
             return self.view.stop()
         else:
-            return await interaction.response.send_modal(NumModal())
-
+            return await interaction.response.send_modal(NumModal(self.view))
 
 class NumView(BaseView):
     def __init__(
@@ -54,7 +86,9 @@ class NumView(BaseView):
         self.game = game
         self.button_style = button_style
 
-        self.add_item(NumButton(label="Answer", style=self.button_style))
+        self.answer = NumButton(label="Answer", style=self.button_style)
+        self.answer.disabled = True
+        self.add_item(self.answer)
         self.add_item(NumButton(label="Cancel", style=discord.ButtonStyle.red))
 
 
@@ -62,12 +96,22 @@ class NumberMemory:
     def __init__(self) -> None:
         self.embed: Optional[discord.Embed] = None
         self.level = 1
+        self.number = self.generate_number()
 
-    def update_description(self) -> None:
+    def update_embed(self, hide: bool = False) -> None:
         assert self.embed
-        self.embed.description = (
-            f"```py\n{self.generate_number()}\n```"
-        )
+        self.embed.title = f"Level: `{self.level}`"
+
+        if hide:
+            self.view.answer.disabled = False
+            self.embed.description = "```yml\nGuess!\n```"
+        else:
+            time = discord.utils.utcnow() + datetime.timedelta(seconds=self.pause_time + 1)
+            pause = discord.utils.format_dt(time, style="R")
+
+            self.embed.description = (
+                f"Guess in {pause}!\n```py\n{self.number}\n```"
+            )
 
     def generate_number(self) -> str:
         return ''.join(random.choices(string.digits, k=self.level))
@@ -88,12 +132,12 @@ class NumberMemory:
         ----------
         ctx : commands.Context
             the context of the invokation command
-        lives : int
-            the amount of errors that are allowed by the player, by default 1
-        weights : tuple[float, float]
-            the weights when choosing a word, as (NEW, SEEN), by default (0.7, 0.3)
+        pause_time : float
+            the time the user gets to look at the number before they have to guess
         button_style : discord.ButtonStyle, optional
             the button style to use for the game buttons, by default discord.ButtonStyle.blurple
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
         timeout : Optional[float], optional
             the timeout for the view, by default None
 
@@ -103,11 +147,9 @@ class NumberMemory:
             returns the game message
         """
         self.pause_time = pause_time
-        self.embed = discord.Embed(
-            title=f'Level: {self.level}',
-            color=embed_color,
-        )
-        self.update_description()
+        self.embed = discord.Embed(color=embed_color)
+        self.update_embed()
+
         self.view = NumView(
             game=self,
             button_style=button_style,
@@ -115,5 +157,10 @@ class NumberMemory:
         )
         self.message = await ctx.send(embed=self.embed, view=self.view)
 
+        await asyncio.sleep(self.pause_time)
+        self.update_embed(hide=True)
+        
+        await self.message.edit(embed=self.embed, view=self.view)
+        
         await self.view.wait()
         return self.message

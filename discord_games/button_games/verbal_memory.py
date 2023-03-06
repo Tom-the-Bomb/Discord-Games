@@ -131,7 +131,7 @@ class VerbalMemory:
         ctx: commands.Context[commands.Bot],
         *,
         lives: int = 3,
-        weights: tuple[float, float] = None,
+        weights: tuple[float, float] = (0.7, 0.3),
         button_style: discord.ButtonStyle = discord.ButtonStyle.blurple,
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None,
@@ -149,6 +149,8 @@ class VerbalMemory:
             the weights when choosing a word, as (NEW, SEEN), by default (0.7, 0.3)
         button_style : discord.ButtonStyle, optional
             the button style to use for the game buttons, by default discord.ButtonStyle.blurple
+        embed_color : DiscordColor, optional
+            the color of the game embed, by default DEFAULT_COLOR
         timeout : Optional[float], optional
             the timeout for the view, by default None
 
@@ -157,7 +159,7 @@ class VerbalMemory:
         discord.Message
             returns the game message
         """
-        self.weights = weights or (0.7, 0.3)
+        self.weights = weights
         self.lives = lives
         self.embed = discord.Embed(
             title=self.word,

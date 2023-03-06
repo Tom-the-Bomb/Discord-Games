@@ -23,8 +23,8 @@ if TYPE_CHECKING:
     P = ParamSpec("P")
     T = TypeVar("T")
 
-    A = TypeVar("A", bool)
-    B = TypeVar("B", bool)
+    A = TypeVar("A", bound=bool)
+    B = TypeVar("B", bound=bool)
 
 __all__: tuple[str, ...] = (
     "DiscordColor",
@@ -45,8 +45,8 @@ def chunk(iterable: list[T], *, count: int) -> list[list[T]]:
     return [iterable[i : i + count] for i in range(0, len(iterable), count)]
 
 
-def executor() -> Callable[[Callable[P, T]], Callable[P, Coroutine[Any, Any, T]]]:
-    def decorator(func: Callable[P, T]) -> Callable[P, Coroutine[Any, Any, T]]:
+def executor() -> Callable[[Callable[P, T]], Callable[P, asyncio.Future[T]]]:
+    def decorator(func: Callable[P, T]) -> Callable[P, asyncio.Future[T]]:
         @functools.wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs):
             partial = functools.partial(func, *args, **kwargs)
@@ -54,7 +54,6 @@ def executor() -> Callable[[Callable[P, T]], Callable[P, Coroutine[Any, Any, T]]
             return loop.run_in_executor(None, partial)
 
         return wrapper
-
     return decorator
 
 
@@ -64,7 +63,7 @@ async def wait_for_delete(
     *,
     emoji: str = "⏹️",
     bot: Optional[discord.Client] = None,
-    user: Optional[Union[discord.User, tuple[discord.User, ...]]] = None,
+    user: Optional[Union[discord.User, discord.Member, tuple[discord.User, ...]]] = None,
     timeout: Optional[float] = None,
 ) -> bool:
 
@@ -81,10 +80,12 @@ async def wait_for_delete(
                 return _user in user
             else:
                 return _user == user
+        else:
+            return False
 
-    bot: discord.Client = bot or ctx.bot
+    resolved_bot: discord.Client = bot or ctx.bot
     try:
-        await bot.wait_for("reaction_add", timeout=timeout, check=check)
+        await resolved_bot.wait_for("reaction_add", timeout=timeout, check=check)
     except asyncio.TimeoutError:
         return False
     else:
@@ -97,7 +98,10 @@ async def double_wait(
     task2: Coroutine[Any, Any, B],
     *,
     loop: Optional[asyncio.AbstractEventLoop] = None,
-) -> tuple[set[asyncio.Task[Union[A, B]]], set[asyncio.Task[Union[A, B]]],]:
+) -> tuple[
+    set[Union[asyncio.Task[A], asyncio.Task[B]]],
+    set[Union[asyncio.Task[A], asyncio.Task[B]]]
+]:
 
     if not loop:
         loop = asyncio.get_event_loop()

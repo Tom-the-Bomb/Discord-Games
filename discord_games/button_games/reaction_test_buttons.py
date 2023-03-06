@@ -49,7 +49,7 @@ class ReactionView(BaseView):
         game: BetaReactionGame,
         *,
         button_style: discord.ButtonStyle,
-        timeout: float,
+        timeout: Optional[float],
     ) -> None:
 
         super().__init__(timeout=timeout)

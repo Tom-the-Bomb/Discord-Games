@@ -20,7 +20,7 @@ bot = TestBot(command_prefix="!!", intents=discord.Intents.all())
 @commands.is_owner()
 async def test(ctx: commands.Context[commands.Bot]) -> None:
 
-    game = button_games.VerbalMemory()
+    game = button_games.NumberMemory()
     await game.start(ctx)
     await ctx.reply("done!", mention_author=False)
 
