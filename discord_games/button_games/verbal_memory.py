@@ -22,6 +22,9 @@ class VerbalButton(discord.ui.Button["VerbalView"]):
         game = self.view.game
         assert game.embed
 
+        score_incr = False
+        lives_decr = False
+
         if self.label == "Cancel" and interaction.message:
             await interaction.message.delete()
             return self.view.stop()
@@ -33,9 +36,11 @@ class VerbalButton(discord.ui.Button["VerbalView"]):
             and game.word not in game.seen
         ):
             game.score += 1
+            score_incr = True
         else:
             game.lives -= 1
-            game.update_description()
+            lives_decr = True
+            game.update_description(score_incr, lives_decr)
 
             if game.lives == 0:
                 game.embed.title = "You Lost!"
@@ -49,7 +54,7 @@ class VerbalButton(discord.ui.Button["VerbalView"]):
 
         game.word = game.choose_word()
         game.embed.title = game.word
-        game.update_description()
+        game.update_description(score_incr, lives_decr)
         return await interaction.response.edit_message(embed=game.embed, view=self.view)
 
 
@@ -78,11 +83,13 @@ class VerbalMemory:
         self.lives: int = 0
         self.embed: Optional[discord.Embed] = None
 
-        english_words = list(get_english_words_set(
-            ["web2"],
-            alpha=True,
-            lower=True,
-        ))
+        english_words = list(
+            get_english_words_set(
+                ["web2"],
+                alpha=True,
+                lower=True,
+            )
+        )
 
         if sample_size:
             self.word_set = word_set or random.choices(
@@ -109,10 +116,14 @@ class VerbalMemory:
             self.word_set.remove(word)
         return word
 
-    def update_description(self) -> None:
+    def update_description(
+        self, score_incr: bool = False, lives_decr: bool = False
+    ) -> None:
         assert self.embed
+        s = "+" if score_incr else "•"
+        l = "-" if lives_decr else "•"
         self.embed.description = (
-            f"```yml\nScore | {self.score}\nLives | {self.lives}\n```"
+            f"```diff\n{s} Score | {self.score}\n{l} Lives | {self.lives}\n```"
         )
 
     async def start(
