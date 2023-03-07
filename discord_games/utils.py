@@ -54,6 +54,7 @@ def executor() -> Callable[[Callable[P, T]], Callable[P, asyncio.Future[T]]]:
             return loop.run_in_executor(None, partial)
 
         return wrapper
+
     return decorator
 
 
@@ -63,7 +64,9 @@ async def wait_for_delete(
     *,
     emoji: str = "⏹️",
     bot: Optional[discord.Client] = None,
-    user: Optional[Union[discord.User, discord.Member, tuple[discord.User, ...]]] = None,
+    user: Optional[
+        Union[discord.User, discord.Member, tuple[discord.User, ...]]
+    ] = None,
     timeout: Optional[float] = None,
 ) -> bool:
 
@@ -100,7 +103,7 @@ async def double_wait(
     loop: Optional[asyncio.AbstractEventLoop] = None,
 ) -> tuple[
     set[Union[asyncio.Task[A], asyncio.Task[B]]],
-    set[Union[asyncio.Task[A], asyncio.Task[B]]]
+    set[Union[asyncio.Task[A], asyncio.Task[B]]],
 ]:
 
     if not loop:

@@ -11,6 +11,7 @@ from discord.ext import commands
 
 from ..utils import *
 
+
 class NumModal(discord.ui.Modal, title="Answer"):
     word = discord.ui.TextInput(
         label="number",
@@ -32,15 +33,14 @@ class NumModal(discord.ui.Modal, title="Answer"):
             return await interaction.response.send_message(
                 f"`{value}` is not a valid number!", ephemeral=True
             )
-        
+
         if value == game.number:
             game.level += 1
+            game.pause_time += game.pause_incr
             game.number = game.generate_number()
             game.update_embed()
             self.view.answer.disabled = True
-            await interaction.response.edit_message(
-                embed=game.embed, view=self.view
-            )
+            await interaction.response.edit_message(embed=game.embed, view=self.view)
 
             await asyncio.sleep(game.pause_time)
             game.update_embed(hide=True)
@@ -57,6 +57,7 @@ class NumModal(discord.ui.Modal, title="Answer"):
             self.view.disable_all()
             await interaction.response.edit_message(embed=game.embed, view=self.view)
 
+
 class NumButton(discord.ui.Button["NumView"]):
     def __init__(self, label: str, style: discord.ButtonStyle) -> None:
         super().__init__(
@@ -72,6 +73,7 @@ class NumButton(discord.ui.Button["NumView"]):
             return self.view.stop()
         else:
             return await interaction.response.send_modal(NumModal(self.view))
+
 
 class NumView(BaseView):
     def __init__(
@@ -106,21 +108,22 @@ class NumberMemory:
             self.view.answer.disabled = False
             self.embed.description = "```yml\nGuess!\n```"
         else:
-            time = discord.utils.utcnow() + datetime.timedelta(seconds=self.pause_time + 1)
+            time = discord.utils.utcnow() + datetime.timedelta(
+                seconds=self.pause_time + 1
+            )
             pause = discord.utils.format_dt(time, style="R")
 
-            self.embed.description = (
-                f"Guess in {pause}!\n```py\n{self.number}\n```"
-            )
+            self.embed.description = f"Guess in {pause}!\n```py\n{self.number}\n```"
 
     def generate_number(self) -> str:
-        return ''.join(random.choices(string.digits, k=self.level))
+        return "".join(random.choices(string.digits, k=self.level))
 
     async def start(
         self,
         ctx: commands.Context[commands.Bot],
         *,
-        pause_time: float = 5.0,
+        initial_pause_time: float = 2.0,
+        pause_time_increment: float = 1.0,
         button_style: discord.ButtonStyle = discord.ButtonStyle.blurple,
         embed_color: DiscordColor = DEFAULT_COLOR,
         timeout: Optional[float] = None,
@@ -132,8 +135,10 @@ class NumberMemory:
         ----------
         ctx : commands.Context
             the context of the invokation command
-        pause_time : float
-            the time the user gets to look at the number before they have to guess
+        initial_pause_time : float
+            the initial time the user gets to look at the number (1 digit) before they have to guess, by default 2.0
+        pause_time_increment : float
+            the increment by which the pause time is increased every level, by default 1.0
         button_style : discord.ButtonStyle, optional
             the button style to use for the game buttons, by default discord.ButtonStyle.blurple
         embed_color : DiscordColor, optional
@@ -146,7 +151,9 @@ class NumberMemory:
         discord.Message
             returns the game message
         """
-        self.pause_time = pause_time
+        self.pause_incr = pause_time_increment
+        self.pause_time = initial_pause_time
+
         self.embed = discord.Embed(color=embed_color)
         self.update_embed()
 
@@ -159,8 +166,8 @@ class NumberMemory:
 
         await asyncio.sleep(self.pause_time)
         self.update_embed(hide=True)
-        
+
         await self.message.edit(embed=self.embed, view=self.view)
-        
+
         await self.view.wait()
         return self.message
