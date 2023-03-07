@@ -44,6 +44,7 @@ class VerbalButton(discord.ui.Button["VerbalView"]):
 
             if game.lives == 0:
                 game.embed.title = "You Lost!"
+                self.view.disable_all()
                 await interaction.response.edit_message(
                     embed=game.embed, view=self.view
                 )
