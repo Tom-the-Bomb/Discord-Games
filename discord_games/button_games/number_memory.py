@@ -56,6 +56,7 @@ class NumModal(discord.ui.Modal, title="Answer"):
             )
             self.view.disable_all()
             await interaction.response.edit_message(embed=game.embed, view=self.view)
+            return self.view.stop()
 
 
 class NumButton(discord.ui.Button["NumView"]):

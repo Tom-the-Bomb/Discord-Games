@@ -78,7 +78,7 @@ class VerbalView(BaseView):
 
 class VerbalMemory:
     def __init__(
-        self, word_set: Optional[list[str]] = None, sample_size: Optional[int] = 100
+        self, word_set: Optional[list[str]] = None, sample_size: Optional[int] = 300
     ) -> None:
         self.lives: int = 0
         self.embed: Optional[discord.Embed] = None
