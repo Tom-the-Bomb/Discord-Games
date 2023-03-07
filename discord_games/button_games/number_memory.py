@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 from typing import Optional
+from io import BytesIO
 import random
 import string
 import asyncio
 import datetime
+import pathlib
 
 import discord
 from discord.ext import commands
+from PIL import Image, ImageDraw, ImageFont
 
 from ..utils import *
 
@@ -38,15 +41,21 @@ class NumModal(discord.ui.Modal, title="Answer"):
             game.level += 1
             game.pause_time += game.pause_incr
             game.number = game.generate_number()
-            game.update_embed()
+            await game.update_embed()
             self.view.answer.disabled = True
-            await interaction.response.edit_message(embed=game.embed, view=self.view)
+
+            files = [game.file] if game.file else discord.utils.MISSING
+            await interaction.response.edit_message(
+                attachments=files, embed=game.embed, view=self.view
+            )
 
             await asyncio.sleep(game.pause_time)
-            game.update_embed(hide=True)
+            await game.update_embed(hide=True)
 
             if interaction.message:
-                await interaction.message.edit(embed=game.embed, view=self.view)
+                await interaction.message.edit(
+                    attachments=[], embed=game.embed, view=self.view
+                )
         else:
             game.embed.description = (
                 "You Lost!\n\n```diff\nCorrect Number:\n"
@@ -55,7 +64,9 @@ class NumModal(discord.ui.Modal, title="Answer"):
                 f"- {value}\n```"
             )
             self.view.disable_all()
-            await interaction.response.edit_message(embed=game.embed, view=self.view)
+            await interaction.response.edit_message(
+                attachments=[], embed=game.embed, view=self.view
+            )
             return self.view.stop()
 
 
@@ -91,33 +102,65 @@ class NumView(BaseView):
 
         self.answer = NumButton(label="Answer", style=self.button_style)
         self.answer.disabled = True
+
         self.add_item(self.answer)
         self.add_item(NumButton(label="Cancel", style=discord.ButtonStyle.red))
 
 
 class NumberMemory:
-    def __init__(self) -> None:
+    def __init__(self, font_size: int = 30) -> None:
+        self.file: Optional[discord.File] = None
         self.embed: Optional[discord.Embed] = None
         self.level = 1
         self.number = self.generate_number()
 
-    def update_embed(self, hide: bool = False) -> None:
+        self._text_size = font_size
+        parent = pathlib.Path(__file__).parent.parent
+        self._font = ImageFont.truetype(
+            str(parent / "assets/ClearSans-Bold.ttf"), self._text_size
+        )
+
+    @executor()
+    def generate_image(self) -> BytesIO:
+        MARGIN = 3
+
+        w, h = self._font.getsize(self.number)
+        with Image.new("RGBA", (w + MARGIN * 2, h + MARGIN * 2), 0) as img:
+            draw = ImageDraw.Draw(img)
+            draw.text(
+                (MARGIN, MARGIN), self.number, font=self._font, color=(255, 255, 255)
+            )
+            buf = BytesIO()
+            img.save(buf, "PNG")
+        buf.seek(0)
+        return buf
+
+    async def update_embed(self, hide: bool = False) -> None:
         assert self.embed
         self.embed.title = f"Level: `{self.level}`"
 
         if hide:
             self.view.answer.disabled = False
             self.embed.description = "```yml\nGuess!\n```"
+            self.file = None
         else:
             time = discord.utils.utcnow() + datetime.timedelta(
                 seconds=self.pause_time + 1
             )
             pause = discord.utils.format_dt(time, style="R")
+            file = await self.generate_image()
+            file = discord.File(file, "number.png")
+            self.file = file
 
-            self.embed.description = f"Guess in {pause}!\n```py\n{self.number}\n```"
+            self.embed.description = f"Guess in {pause}!"
+            self.embed.set_image(url=f"attachment://{file.filename}")
 
     def generate_number(self) -> str:
-        return "".join(random.choices(string.digits, k=self.level))
+        non_zero = list(string.digits)
+        non_zero.remove("0")
+
+        first = random.choice(non_zero)
+        return first + "".join(random.choices(string.digits, k=self.level - 1))
 
     async def start(
         self,
@@ -156,19 +199,19 @@ class NumberMemory:
         self.pause_time = initial_pause_time
 
         self.embed = discord.Embed(color=embed_color)
-        self.update_embed()
+        await self.update_embed()
 
         self.view = NumView(
             game=self,
             button_style=button_style,
             timeout=timeout,
         )
-        self.message = await ctx.send(embed=self.embed, view=self.view)
+        self.message = await ctx.send(file=self.file, embed=self.embed, view=self.view)
 
         await asyncio.sleep(self.pause_time)
-        self.update_embed(hide=True)
+        await self.update_embed(hide=True)
 
-        await self.message.edit(embed=self.embed, view=self.view)
+        await self.message.edit(attachments=[], embed=self.embed, view=self.view)
 
         await self.view.wait()
         return self.message
