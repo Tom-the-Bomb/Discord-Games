@@ -41,6 +41,7 @@ class ChimpButton(discord.ui.Button["ChimpView"]):
 
             if game.step == len(game.coordinates):
                 self.view.disable_all()
+                self.view.stop()
                 return await interaction.response.edit_message(
                     content="Congratulations, you won!", view=self.view
                 )
