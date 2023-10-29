@@ -113,14 +113,14 @@ class Board:
         return all(all(ship.hits) for ship in self.ships)
 
     def draw_dot(
-        self, cur: ImageDraw.Draw, x: int, y: int, fill: Union[int, tuple[int, ...]]
+        self, cur: ImageDraw.ImageDraw, x: int, y: int, fill: Union[int, tuple[int, ...]]
     ) -> None:
         x1, y1 = x - 10, y - 10
         x2, y2 = x + 10, y + 10
         cur.ellipse((x1, y1, x2, y2), fill=fill)
 
     def draw_sq(
-        self, cur: ImageDraw.Draw, x: int, y: int, *, coord: Coords, ship: Ship
+        self, cur: ImageDraw.ImageDraw, x: int, y: int, *, coord: Coords, ship: Ship
     ) -> None:
         vertical = ship.vertical
         left_end = ship.span.index(coord) == 0
