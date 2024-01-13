@@ -3,7 +3,7 @@ from __future__ import annotations
 import pathlib
 import random
 import asyncio
-from typing import Optional, Final, TypedDict, TYPE_CHECKING
+from typing import Optional, Final
 from io import BytesIO
 
 import discord
@@ -11,13 +11,6 @@ from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 
 from .utils import *
-
-if TYPE_CHECKING:
-
-    class Guess(TypedDict):
-        letter: str
-        color: tuple[int, int, int]
-
 
 BORDER: Final[int] = 40
 SQ: Final[int] = 100
@@ -31,11 +24,18 @@ ORANGE: Final[tuple[int, int, int]] = (200, 179, 87)
 GREEN: Final[tuple[int, int, int]] = (105, 169, 99)
 LGRAY: Final[tuple[int, int, int]] = (198, 201, 205)
 
+class Guess:
+    __slots__ = ('letter', 'color')
+
+    def __init__(self, letter: str, color: tuple[int, int, int]) -> None:
+        self.letter = letter
+        self.color = color
 
 class Wordle:
     """
     Wordle Game
     """
+    word: str
 
     def __init__(self, word: Optional[str] = None, *, text_size: int = 55) -> None:
         self.embed_color: Optional[DiscordColor] = None
@@ -60,17 +60,27 @@ class Wordle:
 
             self.word = word
         else:
-            self.word: str = random.choice(self._valid_words)
+            self.word = random.choice(self._valid_words)
 
     def parse_guess(self, guess: str) -> bool:
-        self.guesses.append([])
-        for ind, l in enumerate(guess):
-            if l in self.word:
-                color = GREEN if self.word[ind] == l else ORANGE
-            else:
-                color = GRAY
-            self.guesses[-1].append({"letter": l, "color": color})
+        assert (guess_len := len(guess)) == len(word)
 
+        curr_guess = [None] * guess_len
+        word = list(self.word)
+
+        for i, letter in enumerate(guess):
+            if word[i] == letter:
+                word[i] = None
+                curr_guess[i] = Guess(letter, GREEN)
+
+        for i, letter in enumerate(guess):
+            if word[i] is not None:
+                curr_guess[i] = Guess(
+                    letter,
+                    ORANGE if letter in word else GRAY
+                )
+
+        self.guesses.append(curr_guess)
         return guess == self.word
 
     @executor()
@@ -83,15 +93,15 @@ class Wordle:
                 for j in range(5):
                     try:
                         letter = self.guesses[i][j]
-                        color = letter["color"]
-                        act_letter = letter["letter"]
+                        color = letter.color
+                        literal_letter = letter.letter
                     except (IndexError, KeyError):
                         cursor.rectangle((x, y, x + SQ, y + SQ), outline=LGRAY, width=4)
                     else:
                         cursor.rectangle((x, y, x + SQ, y + SQ), width=0, fill=color)
                         cursor.text(
                             (x + SQ / 2, y + SQ / 2),
-                            act_letter.upper(),
+                            literal_letter.upper(),
                             font=self._font,
                             anchor="mm",
                             fill=(255, 255, 255),
