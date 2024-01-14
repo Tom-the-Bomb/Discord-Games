@@ -63,10 +63,10 @@ class Wordle:
             self.word = random.choice(self._valid_words)
 
     def parse_guess(self, guess: str) -> bool:
-        assert (guess_len := len(guess)) == len(word)
+        assert (guess_len := len(guess)) == len(self.word)
 
-        curr_guess = [None] * guess_len
         word = list(self.word)
+        curr_guess = [None] * guess_len
 
         for i, letter in enumerate(guess):
             if word[i] == letter:

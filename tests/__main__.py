@@ -1,3 +1,4 @@
+import sys
 import json
 import pathlib
 
@@ -10,17 +11,18 @@ from discord_games import button_games
 
 class TestBot(commands.Bot):
     async def setup_hook(self) -> None:
-        await self.load_extension("jishaku")
-
+        try:
+            await self.load_extension("jishaku")
+        except commands.ExtensionNotFound:
+            print("[Jishaku not installed]", file=sys.stderr)
 
 bot = TestBot(command_prefix="!!", intents=discord.Intents.all())
-
 
 @bot.command(name="test", aliases=["t"])
 @commands.is_owner()
 async def test(ctx: commands.Context[commands.Bot]) -> None:
 
-    game = button_games.NumberMemory()
+    game = games.Wordle('grass')
     await game.start(ctx)
     await ctx.reply("done!", mention_author=False)
 
