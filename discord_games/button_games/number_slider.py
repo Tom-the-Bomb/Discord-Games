@@ -195,7 +195,7 @@ class NumberSlider:
         self.completed = chunk(self.all_numbers + [None], count=self.count)
 
         self.numbers = deepcopy(self.completed)
-        self.shuffle(self.count**5)
+        self.shuffle(self.count ** 6)
 
         self.view = SlideView(self, timeout=timeout)
         self.embed = discord.Embed(
