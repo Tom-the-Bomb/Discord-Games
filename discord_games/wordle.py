@@ -172,7 +172,10 @@ class Wordle:
                 await ctx.send(f"Game Over! cancelled, the word was: **{self.word}**")
                 break
 
-            if content not in self._valid_words:
+            if (
+                content != self.word
+                and content not in self._valid_words
+            ):
                 await ctx.send("That is not a valid word!")
             else:
                 won = self.parse_guess(content)
