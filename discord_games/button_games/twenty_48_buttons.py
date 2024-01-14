@@ -23,7 +23,6 @@ class Twenty48_Button(discord.ui.Button["BaseView"]):
         )
 
     async def callback(self, interaction: discord.Interaction) -> None:
-
         if interaction.user != self.game.player:
             return await interaction.response.send_message(
                 "This isn't your game!", ephemeral=True

@@ -34,7 +34,6 @@ class CountryGuesser:
         guesses: int = 5,
         hints: int = 1,
     ) -> None:
-
         self.embed_color: Optional[DiscordColor] = None
         self.hints = hints
         self.guesses = guesses

@@ -68,7 +68,6 @@ class LightsOutView(SlideView):
         super().__init__(game, timeout=timeout)
 
     def update_board(self, *, clear: bool = False) -> None:
-
         if clear:
             self.clear_items()
 
@@ -89,7 +88,6 @@ class LightsOut:
     """
 
     def __init__(self, count: Literal[1, 2, 3, 4, 5] = 4) -> None:
-
         if count not in range(1, 6):
             raise ValueError("Count must be an integer between 1 and 5")
 

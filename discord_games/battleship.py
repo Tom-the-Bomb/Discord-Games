@@ -36,7 +36,6 @@ class Ship:
         color: tuple[int, int, int],
         vertical: bool = False,
     ) -> None:
-
         self.name: str = name
         self.size: int = size
 
@@ -61,7 +60,6 @@ class Ship:
 
 class Board:
     def __init__(self, player: discord.User, random: bool = True) -> None:
-
         self.player: discord.User = player
         self.ships: list[Ship] = []
 
@@ -79,7 +77,6 @@ class Board:
         return self.my_hits + self.my_misses
 
     def _is_valid(self, ship: Ship) -> bool:
-
         if ship.end[0] > 10 or ship.end[1] > 10:
             return False
 
@@ -113,7 +110,11 @@ class Board:
         return all(all(ship.hits) for ship in self.ships)
 
     def draw_dot(
-        self, cur: ImageDraw.ImageDraw, x: int, y: int, fill: Union[int, tuple[int, ...]]
+        self,
+        cur: ImageDraw.ImageDraw,
+        x: int,
+        y: int,
+        fill: Union[int, tuple[int, ...]],
     ) -> None:
         x1, y1 = x - 10, y - 10
         x2, y2 = x + 10, y + 10
@@ -195,7 +196,6 @@ class BattleShip:
         *,
         random: bool = True,
     ) -> None:
-
         self.embed_color: Optional[DiscordColor] = None
 
         self.player1: discord.User = player1
@@ -237,7 +237,6 @@ class BattleShip:
     async def get_file(
         self, player: discord.User, *, hide: bool = True
     ) -> tuple[discord.Embed, discord.File, discord.Embed, discord.File]:
-
         board = self.get_board(player)
         image1 = await board.to_image()
 
@@ -275,7 +274,6 @@ class BattleShip:
     async def get_ship_inputs(
         self, ctx: commands.Context[commands.Bot], user: discord.User
     ) -> bool:
-
         board = self.get_board(user)
 
         async def place_ship(ship: str, size: int, color: tuple[int, int, int]) -> bool:

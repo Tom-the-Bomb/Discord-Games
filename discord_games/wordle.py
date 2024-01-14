@@ -24,17 +24,20 @@ ORANGE: Final[tuple[int, int, int]] = (200, 179, 87)
 GREEN: Final[tuple[int, int, int]] = (105, 169, 99)
 LGRAY: Final[tuple[int, int, int]] = (198, 201, 205)
 
+
 class Guess:
-    __slots__ = ('letter', 'color')
+    __slots__ = ("letter", "color")
 
     def __init__(self, letter: str, color: tuple[int, int, int]) -> None:
         self.letter = letter
         self.color = color
 
+
 class Wordle:
     """
     Wordle Game
     """
+
     word: str
 
     def __init__(self, word: Optional[str] = None, *, text_size: int = 55) -> None:
@@ -75,10 +78,7 @@ class Wordle:
 
         for i, letter in enumerate(guess):
             if word[i] is not None:
-                curr_guess[i] = Guess(
-                    letter,
-                    ORANGE if letter in word else GRAY
-                )
+                curr_guess[i] = Guess(letter, ORANGE if letter in word else GRAY)
 
         self.guesses.append(curr_guess)
         return guess == self.word
@@ -172,10 +172,7 @@ class Wordle:
                 await ctx.send(f"Game Over! cancelled, the word was: **{self.word}**")
                 break
 
-            if (
-                content != self.word
-                and content not in self._valid_words
-            ):
+            if content != self.word and content not in self._valid_words:
                 await ctx.send("That is not a valid word!")
             else:
                 won = self.parse_guess(content)

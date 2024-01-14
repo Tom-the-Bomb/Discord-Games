@@ -40,17 +40,16 @@ class TypeRacer:
 
     @executor()
     def _tr_img(self, text: str, font_path: str) -> BytesIO:
-
         text = "\n".join(textwrap.wrap(text, width=25))
 
         font = ImageFont.truetype(font_path, 30)
         try:
             x, y = font.getsize_multiline(text)
         except AttributeError:
-            _, _, x, y = ImageDraw.Draw(
-                Image.new('RGB', (0, 0))
-            ).multiline_textbbox(
-                (10, 10), text, font=font,
+            _, _, x, y = ImageDraw.Draw(Image.new("RGB", (0, 0))).multiline_textbbox(
+                (10, 10),
+                text,
+                font=font,
             )
 
         with Image.new("RGB", (x + 20, y + 30), (0, 0, 30)) as image:
@@ -73,7 +72,6 @@ class TypeRacer:
         timeout: float,
         min_accuracy: float,
     ) -> discord.Message:
-
         self.embed.description = ""
 
         text = text.lower().replace("\n", " ")

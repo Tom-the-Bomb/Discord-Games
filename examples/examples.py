@@ -9,6 +9,7 @@ from discord_games import button_games
 import discord
 from discord.ext import commands
 
+
 # define games Cog
 class Games(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
@@ -55,7 +56,6 @@ class Games(commands.Cog):
 
     @commands.command(name="chess")
     async def chess(self, ctx: commands.Context[commands.Bot], member: discord.User):
-
         game = games.Chess(
             white=ctx.author,
             black=member,
@@ -64,7 +64,6 @@ class Games(commands.Cog):
 
     @commands.command(name="typerace")
     async def typerace(self, ctx: commands.Context[commands.Bot]):
-
         game = games.TypeRacer()
         await game.start(ctx, timeout=30)
 
@@ -72,7 +71,6 @@ class Games(commands.Cog):
     async def battleship(
         self, ctx: commands.Context[commands.Bot], member: discord.User
     ):
-
         game = games.BattleShip(ctx.author, member)
         await game.start(ctx)
 
@@ -87,25 +85,21 @@ class Games(commands.Cog):
 
     @commands.command(name="wordle")
     async def wordle(self, ctx: commands.Context[commands.Bot]):
-
         game = button_games.BetaWordle()
         await game.start(ctx)
 
     @commands.command(name="guess")
     async def guess(self, ctx: commands.Context[commands.Bot]):
-
         game = button_games.BetaAkinator()
         await game.start(ctx, timeout=120, delete_button=True)
 
     @commands.command(name="twenty48")
     async def twenty48(self, ctx: commands.Context[commands.Bot]):
-
         game = button_games.BetaTwenty48(self.twenty_48_emojis)
         await game.start(ctx)
 
     @commands.command(name="memory")
     async def memory_game(self, ctx: commands.Context[commands.Bot]):
-
         game = button_games.MemoryGame()
         await game.start(ctx)
 
@@ -113,7 +107,6 @@ class Games(commands.Cog):
     async def rps(
         self, ctx: commands.Context[commands.Bot], player: discord.User = None
     ):
-
         game = button_games.BetaRockPaperScissors(
             player
         )  # defaults to playing with bot if player = None

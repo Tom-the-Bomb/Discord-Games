@@ -63,7 +63,6 @@ class Akinator:
         return self.bar
 
     def build_embed(self, *, instructions: bool = True) -> discord.Embed:
-
         embed = discord.Embed(
             title="Guess your character!",
             description=(
@@ -83,7 +82,6 @@ class Akinator:
         return embed
 
     async def win(self) -> discord.Embed:
-
         await self.aki.win()
         self.guess = self.aki.first_guess
 

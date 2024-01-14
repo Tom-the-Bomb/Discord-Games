@@ -69,7 +69,6 @@ class Twenty48:
         *,
         render_image: bool = False,
     ) -> None:
-
         self.embed_color: Optional[DiscordColor] = None
         self.embed: Optional[discord.Embed] = None
 

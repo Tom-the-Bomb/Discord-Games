@@ -141,7 +141,6 @@ class Hangman:
         return f"`{('❤️' * self._counter) or '💀'} ({self._counter})`"
 
     async def make_guess(self, guess: str) -> None:
-
         if guess == self.word:
             self.game_over = True
             self.embed.set_field_at(0, name="Word", value=self.word)
@@ -175,7 +174,6 @@ class Hangman:
             await self.message.edit(embed=self.embed)
 
     async def check_win(self) -> bool:
-
         if self._counter == 0:
             self.game_over = True
             self.embed.set_field_at(0, name="Word", value=self.word)

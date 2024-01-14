@@ -69,7 +69,6 @@ async def wait_for_delete(
     ] = None,
     timeout: Optional[float] = None,
 ) -> bool:
-
     if not user:
         user = ctx.author
     try:
@@ -105,7 +104,6 @@ async def double_wait(
     set[Union[asyncio.Task[A], asyncio.Task[B]]],
     set[Union[asyncio.Task[A], asyncio.Task[B]]],
 ]:
-
     if not loop:
         loop = asyncio.get_event_loop()
 

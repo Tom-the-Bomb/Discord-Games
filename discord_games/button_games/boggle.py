@@ -116,7 +116,6 @@ class BoggleView(BaseView):
 
     @discord.ui.button(label="Clear", style=discord.ButtonStyle.blurple, row=4)
     async def clear_button(self, interaction: discord.Interaction, _) -> None:
-
         if not self.game.current_word:
             return await interaction.response.send_message(
                 "You have no current guesses to clear!", ephemeral=True
@@ -221,7 +220,6 @@ class Boggle:
         return embed
 
     def beside_current(self, row: int, col: int) -> list[tuple[int, int]]:
-
         indexes = (
             (row - 1, col),
             (row + 1, col),

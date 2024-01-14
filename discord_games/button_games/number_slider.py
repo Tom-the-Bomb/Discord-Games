@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional, Literal
+from copy import deepcopy
 import random
 
 import discord
@@ -38,13 +39,10 @@ class SlideButton(discord.ui.Button["SlideView"]):
             if num not in game.beside_blank():
                 return await interaction.response.defer()
             else:
-                ix, iy = game.get_item(num)
-                nx, ny = game.get_item()
+                pressed = game.get_item(num)
+                blank = game.get_item()
 
-                game.numbers[nx][ny], game.numbers[ix][iy] = (
-                    game.numbers[ix][iy],
-                    game.numbers[nx][ny],
-                )
+                game.swap(pressed, blank)
 
                 self.view.update_board(clear=True)
 
@@ -72,7 +70,6 @@ class SlideView(BaseView):
         self.update_board()
 
     def update_board(self, *, clear: bool = False) -> None:
-
         if clear:
             self.clear_items()
 
@@ -97,7 +94,6 @@ class NumberSlider:
     """
 
     def __init__(self, count: Literal[1, 2, 3, 4, 5] = 4) -> None:
-
         if count not in range(1, 6):
             raise ValueError("Count must be an integer between 1 and 5")
 
@@ -138,6 +134,30 @@ class NumberSlider:
         ]
         return data
 
+    def swap(self, pressed: tuple[int, int], blank: tuple[int, int]) -> None:
+        ix, iy = pressed
+        nx, ny = blank
+
+        self.numbers[nx][ny], self.numbers[ix][iy] = (
+            self.numbers[ix][iy],
+            self.numbers[nx][ny],
+        )
+
+    def shuffle(self, count: int) -> None:
+        blank = self.get_item()
+
+        for _ in range(count):
+            neighbors = self.beside_blank()
+            try:
+                row, col = blank
+                neighbors.remove(self.numbers[row][col])
+            except ValueError:
+                pass
+            move = random.choice(neighbors)
+            self.swap(self.get_item(move), blank)
+
+            blank = self.get_item()
+
     async def start(
         self,
         ctx: commands.Context[commands.Bot],
@@ -172,14 +192,10 @@ class NumberSlider:
         self.wrong_style = wrong_style
         self.correct_style = correct_style
 
-        numbers = self.all_numbers[:]
-        random.shuffle(numbers)
-        random.shuffle(numbers)
-
-        numbers.append(None)
-        self.numbers = chunk(numbers, count=self.count)
-
         self.completed = chunk(self.all_numbers + [None], count=self.count)
+
+        self.numbers = deepcopy(self.completed)
+        self.shuffle(self.count**5)
 
         self.view = SlideView(self, timeout=timeout)
         self.embed = discord.Embed(

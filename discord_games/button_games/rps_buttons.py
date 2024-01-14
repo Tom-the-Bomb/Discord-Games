@@ -26,7 +26,6 @@ class RPSButton(discord.ui.Button["RPSView"]):
             return game.player1_choice if user == game.player1 else game.player2_choice
 
     async def callback(self, interaction: discord.Interaction) -> None:
-
         game = self.view.game
         players = (game.player1, game.player2) if game.player2 else (game.player1,)
 
@@ -100,7 +99,6 @@ class RPSView(BaseView):
         button_style: discord.ButtonStyle,
         timeout: float,
     ) -> None:
-
         super().__init__(timeout=timeout)
 
         self.button_style = button_style

@@ -338,7 +338,6 @@ class BetaBattleShip(BattleShip):
         *,
         random: bool = True,
     ) -> None:
-
         super().__init__(player1, player2, random=random)
 
         self.player1: Player = Player(player1, game=self)

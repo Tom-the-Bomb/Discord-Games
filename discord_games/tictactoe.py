@@ -87,7 +87,6 @@ class Tictactoe:
         return embed
 
     def make_move(self, emoji: str, user: discord.User) -> list:
-
         if emoji not in self._controls:
             raise KeyError("Provided emoji is not one of the valid controls")
         else:
@@ -101,7 +100,6 @@ class Tictactoe:
             return self.board
 
     def is_game_over(self, *, tie: bool = False) -> bool:
-
         for possibility in self._WINNERS:
             row = [self.board[r][c] for r, c in possibility]
 

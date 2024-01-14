@@ -64,7 +64,6 @@ class ConnectFour:
         return embed
 
     def place_move(self, column: Union[str, int], user) -> list[list[str]]:
-
         if isinstance(column, str):
             if column not in self._controls:
                 raise KeyError("Provided emoji is not one of the valid controls")
@@ -80,7 +79,6 @@ class ConnectFour:
         return self.board
 
     def is_game_over(self) -> bool:
-
         if all(i != BLANK for i in self.board[0]):
             return True
 

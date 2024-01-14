@@ -87,7 +87,6 @@ class MemoryView(BaseView):
         pause_time: float,
         timeout: Optional[float] = None,
     ) -> None:
-
         super().__init__(timeout=timeout)
 
         self.game = game
