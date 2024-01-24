@@ -23,8 +23,8 @@ bot = TestBot(command_prefix="!!", intents=discord.Intents.all())
 
 @bot.command(name="test", aliases=["t"])
 @commands.is_owner()
-async def test(ctx: commands.Context[TestBot], *, word: int = 4) -> None:
-    game = button_games.NumberSlider(word)
+async def test(ctx: commands.Context[TestBot], *, size: int = 4) -> None:
+    game = button_games.NumberSlider(size)
     await game.start(ctx)
     await ctx.reply("done!", mention_author=False)
 
