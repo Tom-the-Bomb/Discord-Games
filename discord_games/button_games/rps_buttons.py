@@ -71,11 +71,8 @@ class RPSButton(discord.ui.Button["RPSView"]):
                 if game.player1_choice and game.player2_choice:
                     game.embed.description = (
                         "You both tied!" if game.player1_choice == game.player2_choice
-                        else f"**{(
-                            game.player1
-                            if game.BEATS[game.player1_choice] == game.player2_choice
-                            else game.player2
-                        )} Won!**"
+                        else f"**{game.check_human_win()} Won!**"
+
                         f"\n\n{game.player1.mention} chose {game.player1_choice}."
                         f"\n{game.player2.mention} chose {game.player2_choice}."
                     )
@@ -121,6 +118,13 @@ class BetaRockPaperScissors(RockPaperScissors):
         if self.player2:
             self.player1_choice: Optional[str] = None
             self.player2_choice: Optional[str] = None
+
+    def check_human_win(self) -> discord.User:
+        return (
+            self.player1
+            if self.BEATS[self.player1_choice] == self.player2_choice
+            else self.player2
+        )
 
     async def start(
         self,
