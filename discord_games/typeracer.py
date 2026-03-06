@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, ClassVar, TypedDict
+from typing import Optional, ClassVar, TypedDict, TYPE_CHECKING
 from io import BytesIO
 
 import textwrap
@@ -18,11 +18,16 @@ from discord.ext import commands
 from .utils import DEFAULT_COLOR, DiscordColor, executor
 
 
-class UserData(TypedDict):
-    user: discord.User
-    time: float
-    wpm: float
-    acc: float
+if TYPE_CHECKING:
+    class QuoteAPIResponse(TypedDict):
+        quote: str
+        id: int
+
+    class UserData(TypedDict):
+        user: discord.User
+        time: float
+        wpm: float
+        acc: float
 
 
 class TypeRacer:
@@ -31,7 +36,7 @@ class TypeRacer:
     Players race to type a sentence. Measures WPM and accuracy.
     """
 
-    SENTENCE_URL: ClassVar[str] = "https://zenquotes.io/api/random"
+    SENTENCE_URL: ClassVar[str] = "https://dummyjson.com/quotes/random"
     EMOJI_MAP: ClassVar[dict[int, str]] = {
         1: "🥇",
         2: "🥈",
@@ -193,8 +198,8 @@ class TypeRacer:
             async with aiohttp.ClientSession() as session:
                 async with session.get(self.SENTENCE_URL) as r:
                     if r.ok:
-                        data: list[dict[str, str]] = await r.json()
-                        text = data[0].get("q", "").replace("\n", " ").strip()
+                        data: QuoteAPIResponse = await r.json()
+                        text = data.get("quote", "").replace("\n", " ").strip()
                     else:
                         raise RuntimeError(
                             f"HTTP request raised an error: {r.status}; {r.reason}"
