@@ -389,7 +389,7 @@ wheels = [
 
 [[package]]
 name = "discord-games"
-version = "1.12.4"
+version = "1.12.5"
 source = { editable = "." }
 dependencies = [
     { name = "akinator" },
@@ -411,7 +411,7 @@ dev = [
 requires-dist = [
     { name = "akinator", specifier = ">=2.0.2" },
     { name = "chess", specifier = ">=1.0.0" },
-    { name = "discord-py", specifier = ">=2.0.0" },
+    { name = "discord-py", specifier = ">=1.7.0" },
     { name = "english-words", specifier = ">=2.0.0" },
     { name = "pillow", specifier = ">=9.0.0" },
     { name = "typing-extensions", specifier = ">=4.0.0" },
