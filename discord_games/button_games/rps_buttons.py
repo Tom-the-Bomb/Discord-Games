@@ -120,8 +120,10 @@ class RPSView(BaseView):
 
 
 class BetaRockPaperScissors(RockPaperScissors):
-    """
-    RockPaperScissors(buttons) game
+    """Rock-Paper-Scissors, button-based.
+
+    Same as :class:`RockPaperScissors` but uses emoji buttons
+    instead of reactions.
     """
 
     player1: Union[discord.User, discord.Member]

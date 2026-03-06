@@ -146,8 +146,10 @@ class BoggleView(BaseView):
 
 
 class Boggle:
-    """
-    Boggle Game
+    """Boggle word game, button-based.
+
+    Form words by selecting adjacent letters on a 4x4
+    grid of random letter tiles.
     """
 
     DICE_MATRIX: ClassVar[tuple[tuple[str, ...], ...]] = (

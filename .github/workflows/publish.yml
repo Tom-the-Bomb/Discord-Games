@@ -10,7 +10,7 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    environment: pypi
+    environment: PyPI
 
     steps:
       - uses: actions/checkout@v4

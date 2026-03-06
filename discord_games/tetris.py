@@ -9,6 +9,12 @@ from discord.ext import commands
 
 
 class Tetris:
+    """Tetris game, reaction-based.
+
+    Single-player Tetris rendered as an embed,
+    controlled via reactions for movement and rotation.
+    """
+
     WIDTH = 10
     HEIGHT = 20
     BASE_FALL_SPEED = 1.0

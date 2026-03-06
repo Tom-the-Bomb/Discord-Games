@@ -91,8 +91,10 @@ class LightsOutView(SlideView):
 
 
 class LightsOut:
-    """
-    Lights Out Game
+    """Lights Out puzzle, button-based.
+
+    Toggle lights on a grid — each toggle flips adjacent tiles too.
+    Goal is to turn all lights off.
     """
 
     def __init__(self, count: Literal[1, 2, 3, 4, 5] = 4) -> None:

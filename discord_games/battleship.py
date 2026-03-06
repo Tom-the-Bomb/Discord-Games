@@ -184,8 +184,10 @@ class Board:
 
 
 class BattleShip:
-    """
-    BattleShip Game
+    """Battleship, DM-based.
+
+    Two players place ships on a grid and take turns
+    guessing coordinates to sink the opponent's fleet.
     """
 
     inputpat: ClassVar[re.Pattern] = re.compile(r"([a-j])(10|[1-9])")
@@ -322,7 +324,7 @@ class BattleShip:
                 )
                 return False
 
-            vertical = message.content.replace(" ", "").lower() != "yes"
+            vertical = message.content.replace(" ", "").lower() == "yes"
 
             new_ship = Ship(
                 name=ship,

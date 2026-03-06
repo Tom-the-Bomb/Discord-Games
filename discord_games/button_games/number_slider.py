@@ -111,8 +111,10 @@ class SlideView(BaseView):
 
 
 class NumberSlider:
-    """
-    Number Slider Game
+    """Number slider puzzle, button-based.
+
+    Rearrange numbered tiles into order by sliding
+    them into the empty space.
     """
 
     def __init__(self, count: Literal[1, 2, 3, 4, 5] = 4) -> None:

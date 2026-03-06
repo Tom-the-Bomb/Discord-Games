@@ -17,8 +17,9 @@ from .utils import DEFAULT_COLOR, DiscordColor, executor
 
 
 class CountryGuesser:
-    """
-    CountryGuesser Game
+    """Country guessing game, message-based.
+
+    Shows a country's flag and the player guesses the name.
     """
 
     embed: discord.Embed

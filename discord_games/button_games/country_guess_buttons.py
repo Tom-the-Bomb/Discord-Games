@@ -121,8 +121,9 @@ class CountryView(BaseView):
 
 
 class BetaCountryGuesser(CountryGuesser):
-    """
-    Country Guesser(buttons) Game
+    """Country guessing game, button-based.
+
+    Same as :class:`CountryGuesser` but uses a modal for input.
     """
 
     guesslog: str = ""

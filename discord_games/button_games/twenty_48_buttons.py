@@ -74,8 +74,10 @@ class Twenty48_Button(discord.ui.Button["BaseView"]):
 
 
 class BetaTwenty48(Twenty48):
-    """
-    Twenty48(buttons) game
+    """2048 game, button-based.
+
+    Same as :class:`Twenty48` but uses arrow buttons
+    for movement.
     """
 
     async def start(

@@ -1,6 +1,6 @@
 [project]
 name = "discord_games"
-version = "1.12.0"
+version = "1.12.1"
 description = "A library to help users easily implement games within their discord bot"
 readme = "README.md"
 license = "MIT"

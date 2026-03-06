@@ -26,8 +26,9 @@ class UserData(TypedDict):
 
 
 class TypeRacer:
-    """
-    TypeRace Game
+    """Type racing game, message-based.
+
+    Players race to type a sentence. Measures WPM and accuracy.
     """
 
     SENTENCE_URL: ClassVar[str] = "https://zenquotes.io/api/random"

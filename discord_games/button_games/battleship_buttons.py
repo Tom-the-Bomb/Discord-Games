@@ -278,7 +278,7 @@ class SetupInput(discord.ui.Modal):
             )
             return
 
-        vertical = vertical != "y"
+        vertical = vertical == "y"
 
         _, start = game.get_coords(start)
 
@@ -343,8 +343,10 @@ class SetupView(BaseView):
 
 
 class BetaBattleShip(BattleShip):
-    """
-    BattleShip(buttons) Game
+    """Battleship game, button-based.
+
+    Same as :class:`BattleShip` but uses buttons and
+    modals for ship placement and coordinate input.
     """
 
     embed: discord.Embed
@@ -480,8 +482,8 @@ class BetaBattleShip(BattleShip):
 
         if not self.random:
             await asyncio.gather(
-                await self.get_ship_inputs(self.player1),
-                await self.get_ship_inputs(self.player2),
+                self.get_ship_inputs(self.player1),
+                self.get_ship_inputs(self.player2),
             )
 
         self.player1.embed.color = self.embed_color

@@ -27,8 +27,10 @@ class Options(Enum):
 
 
 class Akinator:
-    """
-    Akinator Game, utilizes reactions
+    """Akinator game, reaction-based.
+
+    The bot asks yes/no questions and tries to guess
+    the character the player is thinking of.
     """
 
     BAR: ClassVar[str] = "██"

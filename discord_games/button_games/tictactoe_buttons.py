@@ -85,8 +85,9 @@ class TTTView(BaseView):
 
 
 class BetaTictactoe(Tictactoe):
-    """
-    Tictactoe(buttons) game
+    """Tic-Tac-Toe, button-based.
+
+    Same as :class:`Tictactoe` but uses a 3x3 button grid.
     """
 
     BLANK: ClassVar[str] = "\u200b"

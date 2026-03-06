@@ -11,6 +11,12 @@ from .utils import DiscordColor, DEFAULT_COLOR
 
 
 class Chess:
+    """Chess game, message-based.
+
+    Two-player chess rendered as a board image.
+    Moves are submitted in standard algebraic notation.
+    """
+
     BASE_URL: ClassVar[str] = "http://www.fen-to-image.com/image/64/double/coords/"
 
     def __init__(self, *, white: discord.User, black: discord.User) -> None:

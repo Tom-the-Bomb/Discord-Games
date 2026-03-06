@@ -109,8 +109,10 @@ class ChimpView(BaseView):
 
 
 class ChimpTest:
-    """
-    ChimpTest Memory Game
+    """Chimpanzee memory test, button-based.
+
+    Memorize the positions of numbered buttons, then
+    click them in order after they're hidden.
     """
 
     def __init__(self, count: int = 9) -> None:

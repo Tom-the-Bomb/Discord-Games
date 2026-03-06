@@ -63,8 +63,10 @@ class ReactionView(BaseView):
 
 
 class BetaReactionGame:
-    """
-    Reaction(buttons) game
+    """Reaction time test, button-based.
+
+    Measures how quickly a player clicks a button
+    after its style changes.
     """
 
     async def start(

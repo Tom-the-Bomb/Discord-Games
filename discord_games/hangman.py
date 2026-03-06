@@ -98,8 +98,10 @@ STAGES: Final[tuple[str, ...]] = (
 
 
 class Hangman:
-    """
-    Hangman Game
+    """Hangman game, message-based.
+
+    Guess letters to reveal a hidden word before
+    running out of attempts. Displayed as ASCII art.
     """
 
     def __init__(self, word: Optional[str] = None) -> None:

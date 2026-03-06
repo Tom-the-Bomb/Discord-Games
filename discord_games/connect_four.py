@@ -14,8 +14,10 @@ BLANK = "⬛"
 
 
 class ConnectFour:
-    """
-    Connect-4 Game
+    """Connect Four, reaction-based.
+
+    Two players drop pieces into columns, trying to
+    connect four in a row in any direction.
     """
 
     def __init__(self, *, red: discord.User, blue: discord.User) -> None:

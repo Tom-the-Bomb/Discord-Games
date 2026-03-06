@@ -88,8 +88,9 @@ class HangmanView(BaseView):
 
 
 class BetaHangman(Hangman):
-    """
-    Hangman(buttons) Game
+    """Hangman game, button-based.
+
+    Same as :class:`Hangman` but uses a modal for letter input.
     """
 
     async def start(

@@ -70,8 +70,10 @@ class ConnectFourView(BaseView):
 
 
 class BetaConnectFour(ConnectFour):
-    """
-    Connect-4(buttons) Game
+    """Connect Four, button-based.
+
+    Same as :class:`ConnectFour` but uses numbered buttons
+    to select columns.
     """
 
     async def start(  # type: ignore[override]

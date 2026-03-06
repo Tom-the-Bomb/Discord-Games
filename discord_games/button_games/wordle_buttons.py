@@ -103,10 +103,12 @@ class WordleView(BaseView):
 
 
 class BetaWordle(Wordle):
+    """Wordle game, button-based.
+
+    Same as :class:`Wordle` but uses a modal for word input.
+    """
+
     player: Union[discord.User, discord.Member]
-    """
-    Wordle(buttons) game
-    """
 
     async def start(
         self,

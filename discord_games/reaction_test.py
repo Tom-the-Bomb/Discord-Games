@@ -12,8 +12,9 @@ from .utils import DiscordColor, DEFAULT_COLOR
 
 
 class ReactionGame:
-    """
-    Reaction Game
+    """Reaction time test, reaction-based.
+
+    Measures how quickly a player reacts to an emoji change.
     """
 
     def __init__(self, emoji: str = "🖱️") -> None:

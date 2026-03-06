@@ -10,8 +10,9 @@ from .utils import DiscordColor, DEFAULT_COLOR
 
 
 class Tictactoe:
-    """
-    TicTacToe Game
+    """Tic-Tac-Toe, reaction-based.
+
+    Two players take turns placing marks on a 3x3 grid.
     """
 
     BLANK: ClassVar[str] = "⬛"
@@ -166,15 +167,15 @@ class Tictactoe:
             except asyncio.TimeoutError:
                 break
 
-            if self.is_game_over():
-                break
-
             emoji = str(reaction.emoji)
             self.make_move(emoji, user)
             embed = self.make_embed()
 
             if remove_reaction_after:
                 await self.message.remove_reaction(emoji, user)
+
+            if self.is_game_over():
+                break
 
             await self.message.edit(content=self.board_string(), embed=embed)
 

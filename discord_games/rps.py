@@ -11,6 +11,11 @@ from .utils import DiscordColor, DEFAULT_COLOR
 
 
 class RockPaperScissors:
+    """Rock-Paper-Scissors, reaction-based.
+
+    Two players pick their choice via emoji reactions.
+    """
+
     message: discord.Message
 
     OPTIONS: ClassVar[tuple[str, str, str]] = ("\U0001faa8", "\U00002702", "\U0001f4f0")

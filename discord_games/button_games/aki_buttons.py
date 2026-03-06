@@ -86,8 +86,10 @@ class AkiView(BaseView):
 
 
 class BetaAkinator(Akinator):
-    """
-    Akinator(buttons) Game
+    """Akinator game, button-based.
+
+    Same as :class:`Akinator` but uses UI buttons
+    instead of reactions.
     """
 
     async def start(  # type: ignore[override]

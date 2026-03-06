@@ -110,6 +110,12 @@ class NumView(BaseView):
 
 
 class NumberMemory:
+    """Number memory test, button-based.
+
+    Memorize an increasingly long number shown briefly,
+    then type it back from memory.
+    """
+
     def __init__(self, font_size: int = 30) -> None:
         self.file: Optional[discord.File] = None
         self.embed: Optional[discord.Embed] = None

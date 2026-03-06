@@ -93,7 +93,7 @@ class MemoryView(BaseView):
     def __init__(
         self,
         game: MemoryGame,
-        items: list[str],
+        items: Optional[list[str]] = None,
         *,
         button_style: discord.ButtonStyle,
         pause_time: float,
@@ -128,8 +128,10 @@ class MemoryView(BaseView):
 
 
 class MemoryGame:
-    """
-    Memory Game
+    """Memory card matching game, button-based.
+
+    Flip pairs of emoji cards to find matches.
+    Try to clear the board in as few moves as possible.
     """
 
     def __init__(self) -> None:
@@ -144,7 +146,7 @@ class MemoryGame:
         ctx: commands.Context[commands.Bot],
         *,
         embed_color: DiscordColor = DEFAULT_COLOR,
-        items: list[str] = [],
+        items: Optional[list[str]] = None,
         pause_time: float = 0.7,
         button_style: discord.ButtonStyle = discord.ButtonStyle.red,
         timeout: Optional[float] = None,

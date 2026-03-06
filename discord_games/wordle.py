@@ -34,8 +34,10 @@ class Guess:
 
 
 class Wordle:
-    """
-    Wordle Game
+    """Wordle game, message-based.
+
+    Guess a five-letter word with color-coded feedback
+    for each attempt.
     """
 
     word: str
@@ -44,9 +46,8 @@ class Wordle:
         self.embed_color: Optional[DiscordColor] = None
 
         parent = pathlib.Path(__file__).parent
-        self._valid_words = tuple(
-            open(parent / "assets/words.txt", "r").read().splitlines()
-        )
+        with open(parent / "assets/words.txt", "r") as f:
+            self._valid_words = tuple(f.read().splitlines())
         self._text_size = text_size
         self._font = ImageFont.truetype(
             str(parent / "assets/HelveticaNeuBold.ttf"), self._text_size

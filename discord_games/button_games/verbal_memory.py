@@ -80,6 +80,12 @@ class VerbalView(BaseView):
 
 
 class VerbalMemory:
+    """Verbal memory test, button-based.
+
+    Words are shown one at a time — indicate whether
+    each word is new or was already seen.
+    """
+
     def __init__(
         self, word_set: Optional[list[str]] = None, sample_size: Optional[int] = 300
     ) -> None:

@@ -108,8 +108,9 @@ class ChessView(BaseView):
 
 
 class BetaChess(Chess):
-    """
-    Chess(buttons) Game
+    """Chess game, button-based.
+
+    Same as :class:`Chess` but uses a modal for move input.
     """
 
     async def start(  # type: ignore[override]

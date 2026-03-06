@@ -57,8 +57,10 @@ async def create_2048_emojis(
 
 
 class Twenty48:
-    """
-    Twenty48 Game
+    """2048 game, reaction-based.
+
+    Slide numbered tiles on a grid, combining matching
+    numbers to reach 2048.
     """
 
     player: Union[discord.User, discord.Member]
