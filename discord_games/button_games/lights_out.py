@@ -19,7 +19,7 @@ BULB: Final[Literal["💡"]] = "💡"
 
 class LightsOutButton(discord.ui.Button["LightsOutView"]):
     def __init__(
-        self, emoji: str, *, style: discord.ButtonStyle, row: int, col: int
+        self, emoji: Optional[str], *, style: discord.ButtonStyle, row: int, col: int
     ) -> None:
         super().__init__(
             emoji=emoji,

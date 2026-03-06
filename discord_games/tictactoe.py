@@ -155,7 +155,7 @@ class Tictactoe:
                 return (
                     str(reaction.emoji) in self._controls
                     and user == self.turn
-                    and reaction.message == self.message
+                    and reaction.message.id == self.message.id
                 )
 
             try:

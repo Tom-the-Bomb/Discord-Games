@@ -81,7 +81,7 @@ class SlideView(BaseView):
                     style = self.game.wrong_style
 
                 button = SlideButton(
-                    label=number or "\u200b",
+                    label=str(number) if number else "\u200b",
                     style=style,
                     row=i,
                 )

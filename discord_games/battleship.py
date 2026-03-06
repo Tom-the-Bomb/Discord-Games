@@ -286,8 +286,9 @@ class BattleShip:
 
             def check(msg: discord.Message) -> bool:
                 if not msg.guild and msg.author == user:
-                    content = re.sub(r"\s+", "", message.content).lower()
+                    content = re.sub(r"\s+", "", msg.content).lower()
                     return bool(self.inputpat.match(content))
+                return False
 
             try:
                 message: discord.Message = await ctx.bot.wait_for(
@@ -307,6 +308,7 @@ class BattleShip:
                 if not msg.guild and msg.author == user:
                     content = msg.content.replace(" ", "").lower()
                     return content in ("yes", "no")
+                return False
 
             try:
                 message: discord.Message = await ctx.bot.wait_for(
@@ -380,6 +382,7 @@ class BattleShip:
                 if not msg.guild and msg.author == self.turn:
                     content = msg.content.replace(" ", "").lower()
                     return bool(self.inputpat.match(content))
+                return False
 
             try:
                 message: discord.Message = await ctx.bot.wait_for(

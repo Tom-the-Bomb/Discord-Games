@@ -174,11 +174,12 @@ class Akinator:
 
             def check(reaction: discord.Reaction, user: discord.User) -> bool:
                 emoji = str(reaction.emoji)
-                if reaction.message == self.message and user == ctx.author:
+                if reaction.message.id == self.message.id and user == ctx.author:
                     try:
                         return bool(Options(emoji))
                     except ValueError:
                         return emoji in (BACK, STOP)
+                return False
 
             try:
                 reaction, user = await ctx.bot.wait_for(

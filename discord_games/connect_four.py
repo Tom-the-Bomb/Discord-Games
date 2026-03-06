@@ -174,7 +174,7 @@ class ConnectFour:
                 return (
                     str(reaction.emoji) in self._controls
                     and user == self.turn
-                    and reaction.message == self.message
+                    and reaction.message.id == self.message.id
                     and self.board[0][self._conversion[str(reaction.emoji)]] == BLANK
                 )
 

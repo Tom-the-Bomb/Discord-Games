@@ -237,6 +237,7 @@ class Hangman:
                     return (
                         len(m.content) == 1 and m.content.lower() in self._alpha
                     ) or (m.content.lower() == self.word)
+                return False
 
             try:
                 message: discord.Message = await ctx.bot.wait_for(

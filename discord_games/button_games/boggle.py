@@ -79,11 +79,12 @@ class BoggleView(BaseView):
         return self.stop()
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        if check := interaction.user != self.game.player:
+        if interaction.user != self.game.player:
             await interaction.response.send_message(
                 "This is not your game!", ephemeral=True
             )
-        return check
+            return False
+        return True
 
     @discord.ui.button(label="Enter", style=discord.ButtonStyle.green, row=4)
     async def enter_button(self, interaction: discord.Interaction, _) -> None:

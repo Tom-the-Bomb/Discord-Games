@@ -79,11 +79,6 @@ class Twenty48:
         self._conversion = number_to_display_mapping
         self._render_image = render_image
 
-        if self._render_image and discord.version_info.major < 2:
-            raise ValueError(
-                "discord.py versions under v2.0.0 do not support rendering images since editing files is new in 2.0"
-            )
-
         if self._render_image:
             self._color_mapping: dict[str, tuple[tuple[int, int, int], int]] = {
                 "0": ((204, 192, 179), 50),
@@ -317,7 +312,7 @@ class Twenty48:
                 return (
                     str(reaction.emoji) in self._controls
                     and user == self.player
-                    and reaction.message == self.message
+                    and reaction.message.id == self.message.id
                 )
 
             try:

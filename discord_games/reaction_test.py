@@ -26,7 +26,7 @@ class ReactionGame:
 
         def check(reaction: discord.Reaction, _: discord.User) -> bool:
             return (
-                str(reaction.emoji) == self.emoji and reaction.message == self.message
+                str(reaction.emoji) == self.emoji and reaction.message.id == self.message.id
             )
 
         _, user = await ctx.bot.wait_for("reaction_add", timeout=timeout, check=check)

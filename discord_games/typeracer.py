@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import Optional, ClassVar, TypedDict, Any
-from datetime import datetime as dt
 from io import BytesIO
 
 import textwrap
@@ -89,6 +88,7 @@ class TypeRacer:
                 ):
                     sim = difflib.SequenceMatcher(None, content, text).ratio()
                     return sim >= min_accuracy
+                return False
 
             try:
                 message: discord.Message = await ctx.bot.wait_for(
@@ -128,7 +128,7 @@ class TypeRacer:
 
         desc = [self.format_line(i, x) for i, x in enumerate(winners, 1)]
         embed = discord.Embed(
-            title="Typerace results", color=self.embed_color, timestamp=dt.utcnow()
+            title="Typerace results", color=self.embed_color, timestamp=discord.utils.utcnow()
         )
         embed.add_field(name="Winners", value="\n".join(desc))
 
@@ -213,16 +213,12 @@ class TypeRacer:
         buffer = await self._tr_img(text, path_to_text_font)
 
         embed = discord.Embed(
-            title=embed_title, color=self.embed_color, timestamp=dt.utcnow()
+            title=embed_title, color=self.embed_color, timestamp=discord.utils.utcnow()
         )
         embed.set_image(url="attachment://tr.png")
 
         if show_author:
-            if discord.version_info.major >= 2:
-                av = ctx.author.avatar.url
-            else:
-                av = ctx.author.avatar_url
-            embed.set_author(name=ctx.author.name, icon_url=av)
+            embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
 
         self.embed = embed
         self.message = await ctx.send(embed=embed, file=discord.File(buffer, "tr.png"))

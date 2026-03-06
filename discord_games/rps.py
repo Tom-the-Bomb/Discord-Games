@@ -30,7 +30,7 @@ class RockPaperScissors:
             return (
                 str(reaction.emoji) in self.OPTIONS
                 and user == ctx.author
-                and reaction.message == self.message
+                and reaction.message.id == self.message.id
             )
 
         reaction, _ = await ctx.bot.wait_for(

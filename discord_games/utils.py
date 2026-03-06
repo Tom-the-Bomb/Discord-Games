@@ -50,7 +50,7 @@ def executor() -> Callable[[Callable[P, T]], Callable[P, asyncio.Future[T]]]:
         @functools.wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs):
             partial = functools.partial(func, *args, **kwargs)
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
             return loop.run_in_executor(None, partial)
 
         return wrapper
@@ -77,13 +77,12 @@ async def wait_for_delete(
         pass
 
     def check(reaction: discord.Reaction, _user: discord.User) -> bool:
-        if reaction.emoji == emoji and reaction.message == message:
+        if reaction.emoji == emoji and reaction.message.id == message.id:
             if isinstance(user, tuple):
                 return _user in user
             else:
                 return _user == user
-        else:
-            return False
+        return False
 
     resolved_bot: discord.Client = bot or ctx.bot
     try:
@@ -105,15 +104,20 @@ async def double_wait(
     set[Union[asyncio.Task[A], asyncio.Task[B]]],
 ]:
     if not loop:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
 
-    return await asyncio.wait(
+    done, pending = await asyncio.wait(
         [
             loop.create_task(task1),
             loop.create_task(task2),
         ],
         return_when=asyncio.FIRST_COMPLETED,
     )
+
+    for task in pending:
+        task.cancel()
+
+    return done, pending
 
 
 if hasattr(discord, "ui"):
