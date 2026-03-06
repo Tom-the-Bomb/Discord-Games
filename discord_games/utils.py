@@ -38,7 +38,7 @@ __all__: tuple[str, ...] = (
 
 DiscordColor: TypeAlias = Union[discord.Color, int]
 
-DEFAULT_COLOR: Final[discord.Color] = discord.Color.default()
+DEFAULT_COLOR: Final[discord.Color] = discord.Color(0xffffff)
 
 
 def chunk(iterable: list[T], *, count: int) -> list[list[T]]:
