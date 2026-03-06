@@ -52,7 +52,7 @@ class VersionInfo(NamedTuple):
 version_info: VersionInfo = VersionInfo(
     major=1,
     minor=12,
-    micro=3,
+    micro=4,
 )
 
 del NamedTuple
