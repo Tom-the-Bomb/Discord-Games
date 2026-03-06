@@ -147,5 +147,6 @@ class BetaWordle(Wordle):
             file=discord.File(buf, "wordle.png"),
             view=self.view,
         )
+        self.view.message = self.message
         await self.view.wait()
         return self.message

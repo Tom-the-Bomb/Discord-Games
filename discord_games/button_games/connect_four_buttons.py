@@ -114,6 +114,7 @@ class BetaConnectFour(ConnectFour):
             view=self.view,
             embed=embed,
         )
+        self.view.message = self.message
 
         await self.view.wait()
         return self.message

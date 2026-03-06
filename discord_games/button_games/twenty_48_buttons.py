@@ -134,6 +134,7 @@ class BetaTwenty48(Twenty48):
             self.message = await ctx.send(
                 content=board_string, view=self.view, **kwargs
             )
+        self.view.message = self.message
 
         await self.view.wait()
         return self.message

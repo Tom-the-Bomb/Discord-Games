@@ -292,6 +292,7 @@ class Boggle:
 
         self.view = BoggleView(self, timeout=timeout)
         self.message = await ctx.send(view=self.view, embed=self.get_embed())
+        self.view.message = self.message
 
         await self.view.wait()
         return self.message

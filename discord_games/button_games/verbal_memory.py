@@ -181,6 +181,7 @@ class VerbalMemory:
             timeout=timeout,
         )
         self.message = await ctx.send(embed=self.embed, view=self.view)
+        self.view.message = self.message
 
         await self.view.wait()
         return self.message

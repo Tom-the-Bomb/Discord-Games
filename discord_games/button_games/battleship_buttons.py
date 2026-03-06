@@ -508,12 +508,14 @@ class BetaBattleShip(BattleShip):
             embeds=[e2, e1, self.player1.embed],
             files=[f2, f1],
         )
+        self.view1.message = self.message1
         self.message2 = await self.player2.send(
             content="**Game starting!**",
             view=self.view2,
             embeds=[e4, e3, self.player2.embed],
             files=[f4, f3],
         )
+        self.view2.message = self.message2
 
         await asyncio.gather(
             self.view1.wait(),

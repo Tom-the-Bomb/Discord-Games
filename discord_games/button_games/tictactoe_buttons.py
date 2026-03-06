@@ -138,6 +138,7 @@ class BetaTictactoe(Tictactoe):
 
         self.view = TTTView(self, timeout=timeout)
         self.message = await ctx.send(embed=self.make_embed(), view=self.view)
+        self.view.message = self.message
 
         await double_wait(
             wait_for_delete(ctx, self.message, user=(self.cross, self.circle)),

@@ -156,6 +156,7 @@ class BetaAkinator(Akinator):
 
         embed = self.build_embed(instructions=False)
         self.message = await ctx.send(embed=embed, view=self.view)
+        self.view.message = self.message
 
         await self.view.wait()
         return self.message

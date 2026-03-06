@@ -224,6 +224,7 @@ class NumberMemory:
         )
         assert self.file is not None
         self.message = await ctx.send(file=self.file, embed=self.embed, view=self.view)
+        self.view.message = self.message
 
         await asyncio.sleep(self.pause_time)
         await self.update_embed(hide=True)

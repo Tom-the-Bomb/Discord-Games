@@ -121,10 +121,18 @@ async def double_wait(
 if hasattr(discord, "ui"):
 
     class BaseView(discord.ui.View):
+        message: Optional[discord.Message] = None
+
         def disable_all(self) -> None:
             for button in self.children:
                 if isinstance(button, discord.ui.Button):
                     button.disabled = True
 
         async def on_timeout(self) -> None:
-            return self.stop()
+            self.disable_all()
+            if self.message is not None:
+                try:
+                    await self.message.edit(view=self)
+                except discord.HTTPException:
+                    pass
+            self.stop()

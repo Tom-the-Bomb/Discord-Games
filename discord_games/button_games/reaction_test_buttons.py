@@ -117,6 +117,7 @@ class BetaReactionGame:
         )
         self.view = ReactionView(self, button_style=start_button_style, timeout=timeout)
         self.message = await ctx.send(embed=self.embed, view=self.view)
+        self.view.message = self.message
 
         pause = random.uniform(*pause_range)
         await asyncio.sleep(pause)

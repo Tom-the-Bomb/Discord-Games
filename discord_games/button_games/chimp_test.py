@@ -188,6 +188,7 @@ class ChimpTest:
             content="Click the buttons in order!",
             view=self.view,
         )
+        self.view.message = self.message
 
         if self.initial_sleep is not None:
             await asyncio.sleep(self.initial_sleep)

@@ -143,6 +143,7 @@ class BetaChess(Chess):
         self.view = ChessView(self, timeout=timeout)
 
         self.message = await ctx.send(embed=embed, view=self.view)
+        self.view.message = self.message
 
         await self.view.wait()
         return self.message

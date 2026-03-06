@@ -175,6 +175,7 @@ class BetaCountryGuesser(CountryGuesser):
 
         self.view = CountryView(self, user=ctx.author, timeout=timeout)
         self.message = await ctx.send(embed=self.embed, file=file, view=self.view)
+        self.view.message = self.message
 
         await self.view.wait()
         return self.message
