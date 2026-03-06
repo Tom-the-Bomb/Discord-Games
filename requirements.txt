@@ -1,5 +1,5 @@
 discord.py>=1.7.3
-english-words
+english-words==1.1.0
 chess
 akinator.py
 Pillow
