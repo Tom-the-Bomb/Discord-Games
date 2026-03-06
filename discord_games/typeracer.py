@@ -30,7 +30,7 @@ class TypeRacer:
     TypeRace Game
     """
 
-    SENTENCE_URL: ClassVar[str] = "https://api.quotable.io/random"
+    SENTENCE_URL: ClassVar[str] = "https://zenquotes.io/api/random"
     EMOJI_MAP: ClassVar[dict[int, str]] = {
         1: "🥇",
         2: "🥈",
@@ -192,7 +192,7 @@ class TypeRacer:
                 async with session.get(self.SENTENCE_URL) as r:
                     if r.ok:
                         text: dict[str, Any] = await r.json()
-                        text = text.get("content", "")
+                        text = text.get("q", "")
                     else:
                         raise RuntimeError(
                             f"HTTP request raised an error: {r.status}; {r.reason}"
