@@ -1,21 +1,99 @@
 # Discord-Games
 
-This is a simple package for implementing **games** into your [discord.py](https://github.com/Rapptz/discord.py) bot<br/>
-You can install it with:
-```bash
-$ py -m pip install git+https://github.com/Tom-the-Bomb/Discord-Games.git
-```
----
-## The basic usage of the library goes like this
-- Import the specific game `class` from the library
-    - Ex: `from discord_games import Wordle`
-- Initialize the game class (with the appropriate arguments, normally none but varies from game to game)
-    - Ex: `game = Wordle()`
-- Call the start method (with the appropriate arguments) to start the game
-    - Ex: `await game.start(ctx)` (ctx is always a required argument, rest are optional)<br/>
-- refer to the source for more info on the arguments you *could* pass
+A library for easily adding games to your [discord.py](https://github.com/Rapptz/discord.py) bot.
 
-- #### read the examples [here](https://github.com/Tom-the-Bomb/Discord-Games/blob/master/examples/examples.py)<br/>
----
-### Documentation
-Coming soon...!
+## Installation
+
+From PyPI:
+
+```bash
+pip install discord-games
+```
+
+Or from GitHub for the latest changes:
+
+```bash
+pip install git+https://github.com/Tom-the-Bomb/Discord-Games.git
+```
+
+Requires **Python 3.9+** and **discord.py 2.0+**.
+
+## Available Games
+
+### Reaction-based
+
+These use message reactions for input.
+
+| Game                | Class               |
+| ------------------- | ------------------- |
+| Tic-Tac-Toe         | `Tictactoe`         |
+| Connect Four        | `ConnectFour`       |
+| Rock-Paper-Scissors | `RockPaperScissors` |
+| Chess               | `Chess`             |
+| Battleship          | `BattleShip`        |
+| Hangman             | `Hangman`           |
+| Akinator            | `Akinator`          |
+| 2048                | `Twenty48`          |
+| Wordle              | `Wordle`            |
+| Type Racer          | `TypeRacer`         |
+| Country Guesser     | `CountryGuesser`    |
+| Reaction Test       | `ReactionGame`      |
+
+### Button-based
+
+These use discord UI components (buttons/modals). Available under `discord_games.button_games`.
+
+| Game                | Class                   |
+| ------------------- | ----------------------- |
+| Tic-Tac-Toe         | `BetaTictactoe`         |
+| Connect Four        | `BetaConnectFour`       |
+| Rock-Paper-Scissors | `BetaRockPaperScissors` |
+| Chess               | `BetaChess`             |
+| Battleship          | `BetaBattleShip`        |
+| Hangman             | `BetaHangman`           |
+| Akinator            | `BetaAkinator`          |
+| 2048                | `BetaTwenty48`          |
+| Wordle              | `BetaWordle`            |
+| Country Guesser     | `BetaCountryGuesser`    |
+| Reaction Test       | `BetaReactionGame`      |
+| Memory Game         | `MemoryGame`            |
+| Number Slider       | `NumberSlider`          |
+| Lights Out          | `LightsOut`             |
+| Boggle              | `Boggle`                |
+| Chimp Test          | `ChimpTest`             |
+| Verbal Memory       | `VerbalMemory`          |
+| Number Memory       | `NumberMemory`          |
+
+## Quick Start
+
+```python
+import discord
+from discord.ext import commands
+from discord_games import button_games
+
+intents = discord.Intents.default()
+intents.message_content = True
+
+bot = commands.Bot(command_prefix="!", intents=intents)
+
+@bot.command()
+async def wordle(ctx):
+    game = button_games.BetaWordle()
+    await game.start(ctx)
+
+@bot.command()
+async def tictactoe(ctx, member: discord.Member):
+    game = button_games.BetaTictactoe(cross=ctx.author, circle=member)
+    await game.start(ctx)
+```
+
+Every game follows the same pattern:
+
+1. Import and create the game class
+2. Call `await game.start(ctx)` with any optional arguments
+
+See the full [examples file](https://github.com/Tom-the-Bomb/Discord-Games/blob/master/examples/examples.py) for more.
+
+## License
+
+[MIT](LICENSE)

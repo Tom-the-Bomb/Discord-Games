@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, ClassVar
+from typing import Optional, ClassVar, TYPE_CHECKING
 
 import discord
 from discord.ext import commands
@@ -8,6 +8,9 @@ from akinator import CantGoBackAnyFurther
 
 from ..aki import Akinator
 from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
+
+if TYPE_CHECKING:
+    from typing import Literal
 
 
 class AkiButton(discord.ui.Button["AkiView"]):
@@ -101,8 +104,8 @@ class BetaAkinator(Akinator):
         embed_color: DiscordColor = DEFAULT_COLOR,
         win_at: int = 80,
         timeout: Optional[float] = None,
-        aki_theme: str = "Characters",
-        aki_language: str = "English",
+        aki_theme: Literal["c", "a", "o"] = "c",
+        aki_language: str = "en",
         child_mode: bool = True,
     ) -> discord.Message:
         """
@@ -122,6 +125,10 @@ class BetaAkinator(Akinator):
             indicates when to tell the akinator to make it's guess, by default 80
         timeout : Optional[float], optional
             the timeout for the view, by default None
+        aki_theme : Literal["c", "a", "o"], optional
+            the akinator theme: "c" (characters), "a" (animals), "o" (objects), by default "c"
+        aki_language : str, optional
+            the language code (e.g. "en", "fr", "es") or full name (e.g. "english"), by default "en"
         child_mode : bool, optional
             indicates to filter out NSFW content or not, by default True
 
@@ -141,7 +148,7 @@ class BetaAkinator(Akinator):
         await self.aki.start_game(
             language=aki_language,
             child_mode=child_mode,
-            theme=aki_theme,  # type: ignore[arg-type]
+            theme=aki_theme,
         )
 
         embed = self.build_embed(instructions=False)

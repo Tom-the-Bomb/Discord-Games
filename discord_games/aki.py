@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Union, ClassVar, Any
+from typing import Optional, Union, ClassVar, Any, TYPE_CHECKING
 from enum import Enum
 import asyncio
 
@@ -13,6 +13,9 @@ from akinator import (
 )
 
 from .utils import DiscordColor, DEFAULT_COLOR
+
+if TYPE_CHECKING:
+    from typing import Literal
 
 BACK = "◀️"
 STOP = "⏹️"
@@ -109,8 +112,8 @@ class Akinator:
         timeout: Optional[float] = None,
         back_button: bool = False,
         delete_button: bool = False,
-        aki_theme: str = "Characters",
-        aki_language: str = "English",
+        aki_theme: Literal["c", "a", "o"] = "c",
+        aki_language: str = "en",
         child_mode: bool = True,
     ) -> Optional[discord.Message]:
         """
@@ -132,6 +135,10 @@ class Akinator:
             indicates whether to add a back button, by default False
         delete_button : bool, optional
             indicates whether to add a stop button to stop the game, by default False
+        aki_theme : Literal["c", "a", "o"], optional
+            the akinator theme: "c" (characters), "a" (animals), "o" (objects), by default "c"
+        aki_language : str, optional
+            the language code (e.g. "en", "fr", "es") or full name (e.g. "english"), by default "en"
         child_mode : bool, optional
             indicates to filter out NSFW content or not, by default True
 
@@ -156,7 +163,7 @@ class Akinator:
         await self.aki.start_game(
             language=aki_language,
             child_mode=child_mode,
-            theme=aki_theme,  # type: ignore[arg-type]
+            theme=aki_theme,
         )
 
         embed = self.build_embed()
