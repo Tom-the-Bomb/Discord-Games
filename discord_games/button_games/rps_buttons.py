@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Union
 import random
 
 import discord
@@ -18,7 +18,10 @@ class RPSButton(discord.ui.Button["RPSView"]):
             style=style,
         )
 
-    def get_choice(self, user: discord.User, other: bool = False) -> Optional[str]:
+    def get_choice(
+        self, user: Union[discord.User, discord.Member], other: bool = False
+    ) -> Optional[str]:
+        assert self.view is not None
         game = self.view.game
         if other:
             return game.player2_choice if user == game.player1 else game.player1_choice
@@ -26,16 +29,19 @@ class RPSButton(discord.ui.Button["RPSView"]):
             return game.player1_choice if user == game.player1 else game.player2_choice
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        assert self.view is not None
         game = self.view.game
         players = (game.player1, game.player2) if game.player2 else (game.player1,)
 
         if interaction.user not in players:
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "This is not your game!", ephemeral=True
             )
+            return
         else:
             if not game.player2:
                 bot_choice = random.choice(game.OPTIONS)
+                assert self.emoji is not None and self.emoji.name is not None
                 user_choice = self.emoji.name
 
                 if user_choice == bot_choice:
@@ -51,26 +57,35 @@ class RPSButton(discord.ui.Button["RPSView"]):
 
             else:
                 if self.get_choice(interaction.user):
-                    return await interaction.response.send_message(
+                    await interaction.response.send_message(
                         "You have chosen already!", ephemeral=True
                     )
+                    return
 
                 other_player_choice = self.get_choice(interaction.user, other=True)
 
+                assert self.emoji is not None and self.emoji.name is not None
                 if interaction.user == game.player1:
                     game.player1_choice = self.emoji.name
 
                     if not other_player_choice:
-                        game.embed.description += f"\n\n{game.player1.mention} has chosen...\n*Waiting for {game.player2.mention} to choose...*"
+                        game.embed.description = (
+                            (game.embed.description or "")
+                            + f"\n\n{game.player1.mention} has chosen...\n*Waiting for {game.player2.mention} to choose...*"
+                        )
                 else:
                     game.player2_choice = self.emoji.name
 
                     if not other_player_choice:
-                        game.embed.description += f"\n\n{game.player2.mention} has chosen...\n*Waiting for {game.player1.mention} to choose...*"
+                        game.embed.description = (
+                            (game.embed.description or "")
+                            + f"\n\n{game.player2.mention} has chosen...\n*Waiting for {game.player1.mention} to choose...*"
+                        )
 
                 if game.player1_choice and game.player2_choice:
                     result = (
-                        "You both tied!" if game.player1_choice == game.player2_choice
+                        "You both tied!"
+                        if game.player1_choice == game.player2_choice
                         else f"**{game.check_human_win()} Won!**"
                     )
                     game.embed.description = (
@@ -82,9 +97,7 @@ class RPSButton(discord.ui.Button["RPSView"]):
                     self.view.disable_all()
                     self.view.stop()
 
-            return await interaction.response.edit_message(
-                embed=game.embed, view=self.view
-            )
+            await interaction.response.edit_message(embed=game.embed, view=self.view)
 
 
 class RPSView(BaseView):
@@ -95,7 +108,7 @@ class RPSView(BaseView):
         game: BetaRockPaperScissors,
         *,
         button_style: discord.ButtonStyle,
-        timeout: float,
+        timeout: Optional[float],
     ) -> None:
         super().__init__(timeout=timeout)
 
@@ -111,17 +124,21 @@ class BetaRockPaperScissors(RockPaperScissors):
     RockPaperScissors(buttons) game
     """
 
-    player1: discord.User
+    player1: Union[discord.User, discord.Member]
     embed: discord.Embed
 
-    def __init__(self, other_player: Optional[discord.User] = None) -> None:
-        self.player2 = other_player
+    def __init__(
+        self, other_player: Optional[Union[discord.User, discord.Member]] = None
+    ) -> None:
+        self.player2: Optional[Union[discord.User, discord.Member]] = other_player
 
         if self.player2:
             self.player1_choice: Optional[str] = None
             self.player2_choice: Optional[str] = None
 
-    def check_human_win(self) -> discord.User:
+    def check_human_win(self) -> Union[discord.User, discord.Member]:
+        assert self.player1_choice is not None
+        assert self.player2 is not None
         return (
             self.player1
             if self.BEATS[self.player1_choice] == self.player2_choice

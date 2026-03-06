@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-from typing import Optional, ClassVar
+from typing import Optional, ClassVar, Union
 import random
-import string
 
 import discord
 from discord.ext import commands
 from english_words import get_english_words_set
 
-from ..utils import *
+from ..utils import BaseView, DiscordColor, DEFAULT_COLOR, chunk
 
 
 class BoggleButton(discord.ui.Button["BoggleView"]):
@@ -24,6 +23,9 @@ class BoggleButton(discord.ui.Button["BoggleView"]):
         self.col = col
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        assert self.view is not None
+        assert self.row is not None
+        assert self.label is not None
         game = self.view.game
 
         if self.style == game.button_style:
@@ -38,21 +40,23 @@ class BoggleButton(discord.ui.Button["BoggleView"]):
 
                 self.style = game.selected_style
             else:
-                return await interaction.response.defer()
+                await interaction.response.defer()
+                return
 
         elif (self.row, self.col) == game.indices[-1]:
             self.style = game.button_style
             game.current_word = game.current_word[:-1]
             game.indices.pop(-1)
         else:
-            return await interaction.response.defer()
+            await interaction.response.defer()
+            return
 
         embed = game.get_embed()
         await interaction.response.edit_message(view=self.view, embed=embed)
 
 
 class BoggleView(BaseView):
-    def __init__(self, game: Boggle, *, timeout: float) -> None:
+    def __init__(self, game: Boggle, *, timeout: Optional[float]) -> None:
         super().__init__(timeout=timeout)
 
         self.game = game
@@ -67,8 +71,8 @@ class BoggleView(BaseView):
                 )
                 self.add_item(button)
 
-        clean_children = [item for item in self.children if item.row != 4]
-        self.nested_children: list[list[BoggleButton]] = chunk(clean_children, count=4)
+        clean_children = [item for item in self.children if item.row != 4]  # type: ignore[attr-defined]
+        self.nested_children: list[list[BoggleButton]] = chunk(clean_children, count=4)  # type: ignore[arg-type]
 
     async def on_timeout(self) -> None:
         embed = self.game.win()
@@ -76,7 +80,7 @@ class BoggleView(BaseView):
         message = self.game.message
         await message.edit(view=self)
         await message.reply(embed=embed)
-        return self.stop()
+        self.stop()
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         if interaction.user != self.game.player:
@@ -91,19 +95,22 @@ class BoggleView(BaseView):
         game = self.game
 
         if not game.current_word:
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "You have no current guesses!", ephemeral=True
             )
+            return
 
         if len(game.current_word) < 3:
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "Word must be of at least 3 letters in length!", ephemeral=True
             )
+            return
 
         if game.current_word in game.correct_guesses:
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "You have guessed this word before!", ephemeral=True
             )
+            return
 
         if game.current_word.lower() in game.words:
             game.correct_guesses.append(game.current_word)
@@ -113,27 +120,29 @@ class BoggleView(BaseView):
         game.reset()
 
         embed = game.get_embed()
-        return await interaction.response.edit_message(view=self, embed=embed)
+        await interaction.response.edit_message(view=self, embed=embed)
 
     @discord.ui.button(label="Clear", style=discord.ButtonStyle.blurple, row=4)
     async def clear_button(self, interaction: discord.Interaction, _) -> None:
         if not self.game.current_word:
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "You have no current guesses to clear!", ephemeral=True
             )
+            return
 
         self.game.reset()
 
         embed = self.game.get_embed()
-        return await interaction.response.edit_message(view=self, embed=embed)
+        await interaction.response.edit_message(view=self, embed=embed)
 
     @discord.ui.button(label="Stop", style=discord.ButtonStyle.red, row=4)
     async def stop_button(self, interaction: discord.Interaction, _) -> None:
         embed = self.game.win()
 
         await interaction.response.send_message(embed=embed)
-        await interaction.message.edit(view=self)
-        return self.stop()
+        if interaction.message:
+            await interaction.message.edit(view=self)
+        self.stop()
 
 
 class Boggle:
@@ -141,7 +150,7 @@ class Boggle:
     Boggle Game
     """
 
-    DICE_MATRIX: ClassVar[tuple[tuple[str]]] = (
+    DICE_MATRIX: ClassVar[tuple[tuple[str, ...], ...]] = (
         ("RIFOBX", "IFEHEY", "DENOWS", "UTOKND"),
         ("HMSRAO", "LUPETS", "ACITOA", "YLGKUE"),
         ("5BMJOA", "EHISPN", "VETIGN", "BALIYT"),
@@ -166,6 +175,9 @@ class Boggle:
         self.indices: list[tuple[int, int]] = []
 
         self.embed_color: Optional[DiscordColor] = None
+        self.player: Union[discord.User, discord.Member, None] = None
+        self.view: BoggleView
+        self.message: discord.Message
 
     def generate_board(self) -> list[list[str]]:
         return [[random.choice(die) for die in row] for row in self.DICE_MATRIX]

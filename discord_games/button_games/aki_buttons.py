@@ -4,7 +4,7 @@ from typing import Optional, ClassVar
 
 import discord
 from discord.ext import commands
-from akinator import Theme, Language, Answer, CantGoBackAnyFurther
+from akinator import CantGoBackAnyFurther
 
 from ..aki import Akinator
 from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
@@ -12,7 +12,9 @@ from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
 
 class AkiButton(discord.ui.Button["AkiView"]):
     async def callback(self, interaction: discord.Interaction) -> None:
-        return await self.view.process_input(interaction, self.label.lower())
+        assert self.view is not None
+        assert self.label is not None
+        await self.view.process_input(interaction, self.label.lower())
 
 
 class AkiView(BaseView):
@@ -24,7 +26,7 @@ class AkiView(BaseView):
         "probably not": discord.ButtonStyle.gray,
     }
 
-    def __init__(self, game: BetaAkinator, *, timeout: float) -> None:
+    def __init__(self, game: BetaAkinator, *, timeout: Optional[float]) -> None:
         super().__init__(timeout=timeout)
 
         self.embed_color: Optional[DiscordColor] = None
@@ -47,34 +49,38 @@ class AkiView(BaseView):
         game = self.game
 
         if interaction.user != game.player:
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 content="This isn't your game", ephemeral=True
             )
+            return
 
         if answer == "cancel":
+            assert interaction.message is not None
             await interaction.message.reply("Session ended", mention_author=True)
             self.stop()
-            return await interaction.message.delete()
+            await interaction.message.delete()
+            return
 
         if answer == "back":
             try:
                 await game.aki.back()
                 embed = game.build_embed(instructions=False)
             except CantGoBackAnyFurther:
-                return await interaction.response.send_message(
+                await interaction.response.send_message(
                     "I cant go back any further!", ephemeral=True
                 )
+                return
         else:
-            await game.aki.answer(Answer.from_str(answer))
+            await game.aki.answer(answer)
 
-            if game.aki.progression >= game.win_at:
+            if game.win_at is not None and game.aki.progression >= game.win_at:  # type: ignore[operator]
                 self.disable_all()
                 embed = await game.win()
                 self.stop()
             else:
                 embed = game.build_embed(instructions=False)
         try:
-            return await interaction.response.edit_message(embed=embed, view=self)
+            await interaction.response.edit_message(embed=embed, view=self)
         except discord.NotFound:
             pass
 
@@ -84,7 +90,7 @@ class BetaAkinator(Akinator):
     Akinator(buttons) Game
     """
 
-    async def start(
+    async def start(  # type: ignore[override]
         self,
         ctx: commands.Context[commands.Bot],
         *,
@@ -130,10 +136,11 @@ class BetaAkinator(Akinator):
         self.win_at = win_at
         self.view = AkiView(self, timeout=timeout)
 
-        self.aki.theme = Theme.from_str(aki_theme)
-        self.aki.language = Language.from_str(aki_language)
-        self.aki.child_mode = child_mode
-        await self.aki.start_game()
+        await self.aki.start_game(
+            language=aki_language,
+            child_mode=child_mode,
+            theme=aki_theme,  # type: ignore[arg-type]
+        )
 
         embed = self.build_embed(instructions=False)
         self.message = await ctx.send(embed=embed, view=self.view)

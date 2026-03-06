@@ -12,7 +12,7 @@ import discord
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 
-from ..utils import *
+from ..utils import BaseView, DiscordColor, DEFAULT_COLOR, executor
 
 
 class NumModal(discord.ui.Modal, title="Answer"):
@@ -28,14 +28,16 @@ class NumModal(discord.ui.Modal, title="Answer"):
         self.view = view
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
+        assert self.view is not None
         game = self.view.game
         value = self.word.value
         assert game.embed
 
         if not value.isdigit():
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 f"`{value}` is not a valid number!", ephemeral=True
             )
+            return
 
         if value == game.number:
             game.level += 1
@@ -67,7 +69,7 @@ class NumModal(discord.ui.Modal, title="Answer"):
             await interaction.response.edit_message(
                 attachments=[], embed=game.embed, view=self.view
             )
-            return self.view.stop()
+            self.view.stop()
 
 
 class NumButton(discord.ui.Button["NumView"]):
@@ -82,9 +84,9 @@ class NumButton(discord.ui.Button["NumView"]):
 
         if self.label == "Cancel" and interaction.message:
             await interaction.message.delete()
-            return self.view.stop()
+            self.view.stop()
         else:
-            return await interaction.response.send_modal(NumModal(self.view))
+            await interaction.response.send_modal(NumModal(self.view))
 
 
 class NumView(BaseView):
@@ -115,6 +117,10 @@ class NumberMemory:
         self.number = self.generate_number()
 
         self._text_size = font_size
+        self.view: NumView
+        self.message: discord.Message
+        self.pause_incr: float
+        self.pause_time: float
         parent = pathlib.Path(__file__).parent.parent
         self._font = ImageFont.truetype(
             str(parent / "assets/ClearSans-Bold.ttf"), self._text_size
@@ -125,11 +131,11 @@ class NumberMemory:
         MARGIN = 3
 
         try:
-            w, h = self._font.getsize(self.number)
+            w, h = self._font.getsize(self.number)  # type: ignore[attr-defined]
         except AttributeError:
             _, _, w, h = self._font.getbbox(self.number)
 
-        with Image.new("RGBA", (w + MARGIN * 2, h + MARGIN * 2), 0) as img:
+        with Image.new("RGBA", (int(w) + MARGIN * 2, int(h) + MARGIN * 2), 0) as img:
             draw = ImageDraw.Draw(img)
             draw.text(
                 (MARGIN, MARGIN), self.number, font=self._font, color=(255, 255, 255)
@@ -210,6 +216,7 @@ class NumberMemory:
             button_style=button_style,
             timeout=timeout,
         )
+        assert self.file is not None
         self.message = await ctx.send(file=self.file, embed=self.embed, view=self.view)
 
         await asyncio.sleep(self.pause_time)

@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands
 from english_words import get_english_words_set
 
-from ..utils import *
+from ..utils import BaseView, DiscordColor, DEFAULT_COLOR
 
 
 class VerbalButton(discord.ui.Button["VerbalView"]):
@@ -27,7 +27,8 @@ class VerbalButton(discord.ui.Button["VerbalView"]):
 
         if self.label == "Cancel" and interaction.message:
             await interaction.message.delete()
-            return self.view.stop()
+            self.view.stop()
+            return
 
         if (
             self.label == "Seen"
@@ -48,7 +49,8 @@ class VerbalButton(discord.ui.Button["VerbalView"]):
                 await interaction.response.edit_message(
                     embed=game.embed, view=self.view
                 )
-                return self.view.stop()
+                self.view.stop()
+                return
 
         if game.word not in game.seen:
             game.seen.append(game.word)
@@ -56,7 +58,7 @@ class VerbalButton(discord.ui.Button["VerbalView"]):
         game.word = game.choose_word()
         game.embed.title = game.word
         game.update_description(score_incr, lives_decr)
-        return await interaction.response.edit_message(embed=game.embed, view=self.view)
+        await interaction.response.edit_message(embed=game.embed, view=self.view)
 
 
 class VerbalView(BaseView):
@@ -122,9 +124,9 @@ class VerbalMemory:
     ) -> None:
         assert self.embed
         s = "+" if score_incr else "•"
-        l = "-" if lives_decr else "•"
+        label = "-" if lives_decr else "•"
         self.embed.description = (
-            f"```diff\n{s} Score | {self.score}\n{l} Lives | {self.lives}\n```"
+            f"```diff\n{s} Score | {self.score}\n{label} Lives | {self.lives}\n```"
         )
 
     async def start(

@@ -1,3 +1,5 @@
+from typing import Optional
+
 import discord_games as games
 
 # import base module
@@ -42,10 +44,12 @@ class Games(commands.Cog):
         # it would then default to sending out the plain numbers instead, not fancy, but works.
 
     @commands.command(name="connect4")
-    async def connect4(self, ctx: commands.Context[commands.Bot], member: discord.User):
+    async def connect4(
+        self, ctx: commands.Context[commands.Bot], member: discord.Member
+    ):
         game = games.ConnectFour(
-            red=ctx.author,
-            blue=member,
+            red=ctx.author,  # type: ignore[arg-type]
+            blue=member,  # type: ignore[arg-type]
         )
         await game.start(ctx)
 
@@ -55,10 +59,10 @@ class Games(commands.Cog):
         await game.start(ctx, delete_after_guess=True)
 
     @commands.command(name="chess")
-    async def chess(self, ctx: commands.Context[commands.Bot], member: discord.User):
+    async def chess(self, ctx: commands.Context[commands.Bot], member: discord.Member):
         game = games.Chess(
-            white=ctx.author,
-            black=member,
+            white=ctx.author,  # type: ignore[arg-type]
+            black=member,  # type: ignore[arg-type]
         )
         await game.start(ctx, timeout=60, add_reaction_after_move=True)
 
@@ -69,18 +73,18 @@ class Games(commands.Cog):
 
     @commands.command(name="battleship")
     async def battleship(
-        self, ctx: commands.Context[commands.Bot], member: discord.User
+        self, ctx: commands.Context[commands.Bot], member: discord.Member
     ):
-        game = games.BattleShip(ctx.author, member)
+        game = games.BattleShip(ctx.author, member)  # type: ignore[arg-type]
         await game.start(ctx)
 
     # Button Games: Requires discord.py >= v2.0.0
 
     @commands.command(name="tictactoe")
     async def tictactoe(
-        self, ctx: commands.Context[commands.Bot], member: discord.User
+        self, ctx: commands.Context[commands.Bot], member: discord.Member
     ):
-        game = button_games.BetaTictactoe(cross=ctx.author, circle=member)
+        game = button_games.BetaTictactoe(cross=ctx.author, circle=member)  # type: ignore[arg-type]
         await game.start(ctx)
 
     @commands.command(name="wordle")
@@ -105,7 +109,9 @@ class Games(commands.Cog):
 
     @commands.command(name="rps")
     async def rps(
-        self, ctx: commands.Context[commands.Bot], player: discord.User = None
+        self,
+        ctx: commands.Context[commands.Bot],
+        player: Optional[discord.Member] = None,
     ):
         game = button_games.BetaRockPaperScissors(
             player

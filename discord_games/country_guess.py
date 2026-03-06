@@ -13,7 +13,7 @@ import discord
 from discord.ext import commands
 from PIL import Image, ImageFilter, ImageOps
 
-from .utils import *
+from .utils import DEFAULT_COLOR, DiscordColor, executor
 
 
 class CountryGuesser:
@@ -143,7 +143,7 @@ class CountryGuesser:
         content = message.content.strip().lower()
 
         if options:
-            if not content in options:
+            if content not in options:
                 return
 
         return message, content
@@ -188,11 +188,13 @@ class CountryGuesser:
 
         while not ctx.bot.is_closed():
             try:
-                msg, response = await self.wait_for_response(
-                    ctx, length=self.accepted_length
-                )
+                result = await self.wait_for_response(ctx, length=self.accepted_length)
             except asyncio.TimeoutError:
                 break
+
+            if result is None:
+                continue
+            msg, response = result
 
             if response == self.country:
                 await msg.reply(
@@ -222,12 +224,15 @@ class CountryGuesser:
                     )
 
                     try:
-                        hint_msg, resp = await self.wait_for_response(
+                        hint_result = await self.wait_for_response(
                             ctx, options=("y", "n")
                         )
                     except asyncio.TimeoutError:
                         break
                     else:
+                        if hint_result is None:
+                            continue
+                        hint_msg, resp = hint_result
                         if resp == "y":
                             hint = self.get_hint()
                             self.hints -= 1

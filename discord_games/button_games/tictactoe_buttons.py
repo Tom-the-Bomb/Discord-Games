@@ -6,7 +6,14 @@ import discord
 from discord.ext import commands
 
 from ..tictactoe import Tictactoe
-from ..utils import *
+from ..utils import (
+    BaseView,
+    DiscordColor,
+    DEFAULT_COLOR,
+    chunk,
+    double_wait,
+    wait_for_delete,
+)
 
 
 class TTTButton(discord.ui.Button["TTTView"]):
@@ -20,26 +27,35 @@ class TTTButton(discord.ui.Button["TTTView"]):
         self.col = col
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        assert self.view is not None
         user = interaction.user
         game = self.view.game
 
         if user not in (game.cross, game.circle):
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "You are not part of this game!", ephemeral=True
             )
+            return
 
         if user != game.turn:
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "it is not your turn!", ephemeral=True
             )
+            return
 
-        self.label = game.player_to_emoji[user]
+        self.label = game.player_to_emoji[user]  # type: ignore[index]
         self.disabled = True
 
+        assert self.row is not None
+        assert self.label is not None
         game.board[self.row][self.col] = self.label
         game.turn = game.circle if user == game.cross else game.cross
 
-        tie = all(button.disabled for button in self.view.children)
+        tie = all(
+            button.disabled
+            for button in self.view.children
+            if isinstance(button, discord.ui.Button)
+        )
 
         if game_over := game.is_game_over(tie=tie):
             if game.winning_indexes:
@@ -52,7 +68,7 @@ class TTTButton(discord.ui.Button["TTTView"]):
 
 
 class TTTView(BaseView):
-    def __init__(self, game: BetaTictactoe, *, timeout: float) -> None:
+    def __init__(self, game: BetaTictactoe, *, timeout: Optional[float]) -> None:
         super().__init__(timeout=timeout)
 
         self.game = game
@@ -78,12 +94,14 @@ class BetaTictactoe(Tictactoe):
     CROSS: ClassVar[str] = "X"
 
     def create_streak(self) -> None:
+        assert self.view is not None
         chunked = chunk(self.view.children, count=3)
         for row, col in self.winning_indexes:
-            button: TTTButton = chunked[row][col]
+            button = chunked[row][col]
+            assert isinstance(button, TTTButton)
             button.style = self.win_button_style
 
-    async def start(
+    async def start(  # type: ignore[override]
         self,
         ctx: commands.Context[commands.Bot],
         button_style: discord.ButtonStyle = discord.ButtonStyle.green,

@@ -7,7 +7,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from ..utils import *
+from ..utils import BaseView, chunk, double_wait, wait_for_delete
 
 
 class ChimpButton(discord.ui.Button["ChimpView"]):
@@ -20,7 +20,7 @@ class ChimpButton(discord.ui.Button["ChimpView"]):
         )
 
     async def callback(self, interaction: discord.Interaction) -> None:
-        assert self.view
+        assert self.view is not None
         game = self.view.game
 
         if not game.first_clicked:
@@ -42,9 +42,10 @@ class ChimpButton(discord.ui.Button["ChimpView"]):
             if game.step == len(game.coordinates):
                 self.view.disable_all()
                 self.view.stop()
-                return await interaction.response.edit_message(
+                await interaction.response.edit_message(
                     content="Congratulations, you won!", view=self.view
                 )
+                return
             else:
                 await interaction.response.edit_message(
                     content=f"Click the buttons in order! **[Lives: {game.lives}]**",
@@ -64,7 +65,7 @@ class ChimpButton(discord.ui.Button["ChimpView"]):
                 await interaction.response.edit_message(
                     content="You Lose!", view=self.view
                 )
-                return self.view.stop()
+                self.view.stop()
             else:
                 self.style = discord.ButtonStyle.red
 
@@ -134,6 +135,8 @@ class ChimpTest:
         self.step: int = 0
         self.first_clicked: bool = False
         self.wrong_guesses: list[ChimpButton] = []
+        self.view: ChimpView
+        self.message: discord.Message
 
     async def start(
         self,

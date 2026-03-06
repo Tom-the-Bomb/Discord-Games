@@ -1,6 +1,0 @@
-discord.py>=1.7.3
-english-words
-chess
-akinator.py
-Pillow
-typing_extensions

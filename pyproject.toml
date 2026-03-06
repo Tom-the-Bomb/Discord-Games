@@ -1,0 +1,55 @@
+[project]
+name = "discord_games"
+version = "1.12.0"
+description = "A library to help users easily implement games within their discord bot"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    { name = "Tom-the-Bomb" },
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "akinator>=2.0.2",
+    "chess>=1.0.0",
+    "discord-py>=2.0.0",
+    "english-words>=2.0.0",
+    "pillow>=9.0.0",
+    "typing-extensions>=4.0.0",
+]
+
+[project.urls]
+Repository = "https://github.com/Tom-the-Bomb/Discord-Games"
+"Issue tracker" = "https://github.com/Tom-the-Bomb/Discord-Games/issues"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.4.0",
+    "setuptools>=68.0.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["discord_games*"]
+
+[tool.setuptools.package-data]
+"discord_games" = [
+    "assets/**",
+    "assets/country-data/**",
+    "assets/country-flags/**",
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

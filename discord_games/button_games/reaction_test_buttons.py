@@ -19,15 +19,18 @@ class ReactionButton(discord.ui.Button["ReactionView"]):
         self.clicked: bool = False
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        assert self.view is not None
         game = self.view.game
 
         if game.author_only and interaction.user != game.author:
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "This game is only for the author!", ephemeral=True
             )
+            return
 
         if not self.edited or self.clicked:
-            return await interaction.response.defer()
+            await interaction.response.defer()
+            return
         else:
             end_time = time.perf_counter()
             elapsed = end_time - self.view.game.start_time
@@ -38,7 +41,7 @@ class ReactionButton(discord.ui.Button["ReactionView"]):
             await interaction.response.edit_message(embed=game.embed)
 
             self.clicked = True
-            return game.finished_event.set()
+            game.finished_event.set()
 
 
 class ReactionView(BaseView):
@@ -109,7 +112,7 @@ class BetaReactionGame:
 
         self.embed = discord.Embed(
             title="Reaction Game",
-            description=f"Click the button below, when the button changes color!",
+            description="Click the button below, when the button changes color!",
             color=embed_color,
         )
         self.view = ReactionView(self, button_style=start_button_style, timeout=timeout)

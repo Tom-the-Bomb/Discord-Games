@@ -76,7 +76,7 @@ class Chess:
         embed_color: DiscordColor = DEFAULT_COLOR,
         add_reaction_after_move: bool = False,
         **kwargs,
-    ) -> discord.Message:
+    ) -> Optional[discord.Message]:
         """
         starts the chess game
 

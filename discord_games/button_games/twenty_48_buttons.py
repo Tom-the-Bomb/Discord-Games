@@ -14,25 +14,27 @@ class Twenty48_Button(discord.ui.Button["BaseView"]):
     def __init__(self, game: BetaTwenty48, emoji: str) -> None:
         self.game = game
 
-        style = (
-            discord.ButtonStyle.red if emoji == "⏹️" else discord.ButtonStyle.blurple
-        )
+        style = discord.ButtonStyle.red if emoji == "⏹️" else discord.ButtonStyle.blurple
 
         super().__init__(
             style=style, emoji=discord.PartialEmoji(name=emoji), label="\u200b"
         )
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        assert self.view is not None
         if interaction.user != self.game.player:
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "This isn't your game!", ephemeral=True
             )
+            return
 
         emoji = str(self.emoji)
 
         if emoji == "⏹️":
             self.view.stop()
-            return await interaction.message.delete()
+            assert interaction.message is not None
+            await interaction.message.delete()
+            return
 
         elif emoji == "➡️":
             self.game.move_right()
@@ -72,7 +74,6 @@ class Twenty48_Button(discord.ui.Button["BaseView"]):
 
 
 class BetaTwenty48(Twenty48):
-    view: discord.ui.View
     """
     Twenty48(buttons) game
     """

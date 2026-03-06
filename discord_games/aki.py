@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, ClassVar, Any
+from typing import Optional, Union, ClassVar, Any
 from enum import Enum
 import asyncio
 
@@ -10,9 +10,6 @@ from discord.ext import commands
 from akinator import (
     AsyncAkinator as AkinatorGame,
     CantGoBackAnyFurther,
-    Language,
-    Answer,
-    Theme,
 )
 
 from .utils import DiscordColor, DEFAULT_COLOR
@@ -35,7 +32,7 @@ class Akinator:
     """
 
     BAR: ClassVar[str] = "██"
-    instructions: ClassVar[str] = (
+    DEFAULT_INSTRUCTIONS: ClassVar[str] = (
         "✅ 🠒 `yes`\n"
         "❌ 🠒 `no`\n"
         "🤷 🠒 `I dont know`\n"
@@ -46,19 +43,20 @@ class Akinator:
     def __init__(self) -> None:
         self.aki: AkinatorGame = AkinatorGame()
 
-        self.player: Optional[discord.User] = None
+        self.player: Optional[Union[discord.User, discord.Member]] = None
         self.win_at: Optional[int] = None
-        self.guess: Optional[dict[str, Any]] = None
+        self.guess: Any = None
         self.message: Optional[discord.Message] = None
 
         self.embed_color: Optional[DiscordColor] = None
         self.back_button: bool = False
         self.delete_button: bool = False
+        self.instructions: str = self.DEFAULT_INSTRUCTIONS
 
         self.bar: str = ""
 
     def build_bar(self) -> str:
-        prog = round(self.aki.progression / 8)
+        prog = round(self.aki.progression / 8)  # type: ignore[operator]
         self.bar = f"[`{self.BAR * prog}{'  ' * (10 - prog)}`]"
         return self.bar
 
@@ -67,7 +65,7 @@ class Akinator:
             title="Guess your character!",
             description=(
                 "```swift\n"
-                f"Question-Number  : {self.aki.step + 1}\n"
+                f"Question-Number  : {self.aki.step + 1}\n"  # type: ignore[operator]
                 f"Progression-Level: {self.aki.progression:.2f}\n```\n"
                 f"{self.build_bar()}"
             ),
@@ -82,12 +80,12 @@ class Akinator:
         return embed
 
     async def win(self) -> discord.Embed:
-        await self.aki.win()
-        self.guess = self.aki.first_guess
+        await self.aki.win()  # type: ignore[func-call]
+        self.guess = self.aki.first_guess  # type: ignore[attr-defined]
 
         embed = discord.Embed(color=self.embed_color)
         embed.title = "Character Guesser Engine Results"
-        embed.description = f"Total Questions: `{self.aki.step + 1}`"
+        embed.description = f"Total Questions: `{self.aki.step + 1}`"  # type: ignore[operator]
 
         embed.add_field(
             name="Character Guessed",
@@ -153,10 +151,11 @@ class Akinator:
         if self.delete_button:
             self.instructions += f"{STOP} 🠒 `cancel`\n"
 
-        self.aki.theme = Theme.from_str(aki_theme)
-        self.aki.language = Language.from_str(aki_language)
-        self.aki.child_mode = child_mode
-        await self.aki.start_game()
+        await self.aki.start_game(
+            language=aki_language,
+            child_mode=child_mode,
+            theme=aki_theme,  # type: ignore[arg-type]
+        )
 
         embed = self.build_embed()
         self.message = await ctx.send(embed=embed)
@@ -170,11 +169,15 @@ class Akinator:
         if self.delete_button:
             await self.message.add_reaction(STOP)
 
-        while self.aki.progression <= self.win_at:
+        while self.aki.progression <= self.win_at:  # type: ignore[operator]
 
             def check(reaction: discord.Reaction, user: discord.User) -> bool:
                 emoji = str(reaction.emoji)
-                if reaction.message.id == self.message.id and user == ctx.author:
+                if (
+                    self.message is not None
+                    and reaction.message.id == self.message.id
+                    and user == ctx.author
+                ):
                     try:
                         return bool(Options(emoji))
                     except ValueError:
@@ -208,8 +211,7 @@ class Akinator:
                         "I cannot go back any further", delete_after=10
                     )
             else:
-                answer = Answer.from_str(Options(emoji).name)
-                await self.aki.answer(answer)
+                await self.aki.answer(Options(emoji).name)
 
             embed = self.build_embed()
             await self.message.edit(embed=embed)

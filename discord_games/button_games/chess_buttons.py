@@ -33,7 +33,8 @@ class ChessInput(discord.ui.Modal, title="Make your move"):
         self.add_item(self.move_from)
         self.add_item(self.move_to)
 
-    async def on_submit(self, interaction: discord.Interaction) -> discord.Message:
+    async def on_submit(self, interaction: discord.Interaction) -> None:
+        assert self.view is not None
         game = self.view.game
         from_coord = self.move_from.value.strip().lower()
         to_coord = self.move_to.value.strip().lower()
@@ -46,10 +47,11 @@ class ChessInput(discord.ui.Modal, title="Make your move"):
             is_valid_uci = False
 
         if not is_valid_uci:
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 f"Invalid coordinates for move: `{from_coord} -> {to_coord}`",
                 ephemeral=True,
             )
+            return
         else:
             await game.place_move(uci)
 
@@ -60,35 +62,40 @@ class ChessInput(discord.ui.Modal, title="Make your move"):
             else:
                 embed = await game.make_embed()
 
-            return await interaction.response.edit_message(embed=embed, view=self.view)
+            await interaction.response.edit_message(embed=embed, view=self.view)
 
 
 class ChessButton(WordInputButton):
-    view: ChessView
+    view: ChessView  # type: ignore[assignment]
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        assert self.view is not None
         game = self.view.game
         if interaction.user not in (game.black, game.white):
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "You are not part of this game!", ephemeral=True
             )
+            return
         else:
             if self.label == "Cancel":
                 self.view.disable_all()
+                assert interaction.message is not None
                 await interaction.message.edit(view=self.view)
-                await interaction.response.send_message(f"**Game Over!** Cancelled")
-                return self.view.stop()
+                await interaction.response.send_message("**Game Over!** Cancelled")
+                self.view.stop()
+                return
             else:
                 if interaction.user != game.turn:
-                    return await interaction.response.send_message(
+                    await interaction.response.send_message(
                         "It is not your turn yet!", ephemeral=True
                     )
+                    return
                 else:
-                    return await interaction.response.send_modal(ChessInput(self.view))
+                    await interaction.response.send_modal(ChessInput(self.view))
 
 
 class ChessView(BaseView):
-    def __init__(self, game: BetaChess, *, timeout: float) -> None:
+    def __init__(self, game: BetaChess, *, timeout: Optional[float]) -> None:
         super().__init__(timeout=timeout)
 
         self.game = game
@@ -105,7 +112,7 @@ class BetaChess(Chess):
     Chess(buttons) Game
     """
 
-    async def start(
+    async def start(  # type: ignore[override]
         self,
         ctx: commands.Context[commands.Bot],
         *,

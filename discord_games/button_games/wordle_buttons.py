@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Union
 
 import discord
 from discord.ext import commands
@@ -20,40 +20,46 @@ class WordInput(discord.ui.Modal, title="Word Input"):
 
     def __init__(self, view: WordleView) -> None:
         super().__init__()
-        self.view = view
+        self.wordle_view = view
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
         content = self.word.value.lower()
-        game = self.view.game
+        game = self.wordle_view.game
 
         if content not in game._valid_words:
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "That is not a valid word!", ephemeral=True
             )
+            return
         else:
             won = game.parse_guess(content)
             buf = await game.render_image()
 
-            embed = discord.Embed(title="Wordle!", color=self.view.game.embed_color)
+            embed = discord.Embed(
+                title="Wordle!", color=self.wordle_view.game.embed_color
+            )
             embed.set_image(url="attachment://wordle.png")
             file = discord.File(buf, "wordle.png")
 
+            lost = False
             if won:
+                assert interaction.message is not None
                 await interaction.message.reply(
                     "Game Over! You won!", mention_author=True
                 )
             elif lost := len(game.guesses) >= 6:
+                assert interaction.message is not None
                 await interaction.message.reply(
                     f"Game Over! You lose, the word was: **{game.word}**",
                     mention_author=True,
                 )
 
             if won or lost:
-                self.view.disable_all()
-                self.view.stop()
+                self.wordle_view.disable_all()
+                self.wordle_view.stop()
 
-            return await interaction.response.edit_message(
-                embed=embed, attachments=[file], view=self.view
+            await interaction.response.edit_message(
+                embed=embed, attachments=[file], view=self.wordle_view
             )
 
 
@@ -67,24 +73,28 @@ class WordInputButton(discord.ui.Button["WordleView"]):
         )
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        assert self.view is not None
         game = self.view.game
         if interaction.user != game.player:
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "This isn't your game!", ephemeral=True
             )
+            return
         else:
             if self.label == "Cancel":
                 await interaction.response.send_message(
                     f"Game Over! the word was: **{game.word}**"
                 )
+                assert interaction.message is not None
                 await interaction.message.delete()
-                return self.view.stop()
+                self.view.stop()
+                return
             else:
-                return await interaction.response.send_modal(WordInput(self.view))
+                await interaction.response.send_modal(WordInput(self.view))
 
 
 class WordleView(BaseView):
-    def __init__(self, game: BetaWordle, *, timeout: float):
+    def __init__(self, game: BetaWordle, *, timeout: Optional[float]):
         super().__init__(timeout=timeout)
 
         self.game = game
@@ -93,7 +103,7 @@ class WordleView(BaseView):
 
 
 class BetaWordle(Wordle):
-    player: discord.User
+    player: Union[discord.User, discord.Member]
     """
     Wordle(buttons) game
     """

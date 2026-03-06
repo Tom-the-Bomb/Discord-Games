@@ -10,7 +10,7 @@ import discord
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 
-from .utils import *
+from .utils import DEFAULT_COLOR, DiscordColor, executor
 
 BORDER: Final[int] = 40
 SQ: Final[int] = 100
@@ -52,7 +52,7 @@ class Wordle:
             str(parent / "assets/HelveticaNeuBold.ttf"), self._text_size
         )
 
-        self.guesses: list[list[Guess]] = []
+        self.guesses: list[list[Optional[Guess]]] = []
 
         if word:
             if len(word) != 5:
@@ -68,8 +68,8 @@ class Wordle:
     def parse_guess(self, guess: str) -> bool:
         assert (guess_len := len(guess)) == len(self.word)
 
-        word = list(self.word)
-        curr_guess = [None] * guess_len
+        word: list[Optional[str]] = list(self.word)
+        curr_guess: list[Optional[Guess]] = [None] * guess_len
 
         for i, letter in enumerate(guess):
             if word[i] == letter:
@@ -93,6 +93,7 @@ class Wordle:
                 for j in range(5):
                     try:
                         letter = self.guesses[i][j]
+                        assert letter is not None
                         color = letter.color
                         literal_letter = letter.letter
                     except (IndexError, KeyError):

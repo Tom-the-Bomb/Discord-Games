@@ -20,13 +20,14 @@ class ReactionGame:
         self.emoji = emoji
 
     async def wait_for_reaction(
-        self, ctx: commands.Context[commands.Bot], *, timeout: float
+        self, ctx: commands.Context[commands.Bot], *, timeout: Optional[float]
     ) -> tuple[discord.User, float]:
         start = time.perf_counter()
 
         def check(reaction: discord.Reaction, _: discord.User) -> bool:
             return (
-                str(reaction.emoji) == self.emoji and reaction.message.id == self.message.id
+                str(reaction.emoji) == self.emoji
+                and reaction.message.id == self.message.id
             )
 
         _, user = await ctx.bot.wait_for("reaction_add", timeout=timeout, check=check)

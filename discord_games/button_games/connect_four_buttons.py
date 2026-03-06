@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 
 from ..connect_four import ConnectFour, BLANK
-from ..utils import *
+from ..utils import BaseView, DiscordColor, DEFAULT_COLOR
 
 
 class ConnectFourButton(discord.ui.Button["ConnectFourView"]):
@@ -19,22 +19,26 @@ class ConnectFourButton(discord.ui.Button["ConnectFourView"]):
         )
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        assert self.view is not None
         game = self.view.game
 
         if interaction.user not in (game.red_player, game.blue_player):
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "You are not part of this game!", ephemeral=True
             )
+            return
 
         if interaction.user != game.turn:
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "It is not your turn yet!", ephemeral=True
             )
+            return
 
         if game.board[0][self.number - 1] != BLANK:
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "Selected column is full!", ephemeral=True
             )
+            return
 
         game.place_move(self.number - 1, interaction.user)
 
@@ -46,7 +50,7 @@ class ConnectFourButton(discord.ui.Button["ConnectFourView"]):
             self.view.disable_all()
             self.view.stop()
 
-        return await interaction.response.edit_message(
+        await interaction.response.edit_message(
             view=self.view,
             embed=embed,
             content=game.board_string(),
@@ -56,7 +60,7 @@ class ConnectFourButton(discord.ui.Button["ConnectFourView"]):
 class ConnectFourView(BaseView):
     game: ConnectFour
 
-    def __init__(self, game: BetaConnectFour, timeout: float) -> None:
+    def __init__(self, game: BetaConnectFour, timeout: Optional[float]) -> None:
         super().__init__(timeout=timeout)
 
         self.game = game
@@ -70,7 +74,7 @@ class BetaConnectFour(ConnectFour):
     Connect-4(buttons) Game
     """
 
-    async def start(
+    async def start(  # type: ignore[override]
         self,
         ctx: commands.Context[commands.Bot],
         *,

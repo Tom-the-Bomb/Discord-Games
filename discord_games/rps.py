@@ -24,7 +24,7 @@ class RockPaperScissors:
         return self.BEATS[user_choice] == bot_choice
 
     async def wait_for_choice(
-        self, ctx: commands.Context[commands.Bot], *, timeout: float
+        self, ctx: commands.Context[commands.Bot], *, timeout: Optional[float]
     ) -> str:
         def check(reaction: discord.Reaction, user: discord.User) -> bool:
             return (

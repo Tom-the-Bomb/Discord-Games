@@ -7,7 +7,14 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from ..utils import *
+from ..utils import (
+    BaseView,
+    DiscordColor,
+    DEFAULT_COLOR,
+    chunk,
+    double_wait,
+    wait_for_delete,
+)
 
 
 class MemoryButton(discord.ui.Button["MemoryView"]):
@@ -21,10 +28,12 @@ class MemoryButton(discord.ui.Button["MemoryView"]):
         )
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        assert self.view is not None
         game = self.view.game
 
         if opened := self.view.opened:
             game.moves += 1
+            assert game.embed is not None
             game.embed.set_field_at(0, name="\u200b", value=f"Moves: `{game.moves}`")
 
             self.emoji = self.value
@@ -48,17 +57,20 @@ class MemoryButton(discord.ui.Button["MemoryView"]):
                     for button in self.view.children
                     if isinstance(button, discord.ui.Button)
                 ):
-                    await interaction.message.edit(
-                        content="Game Over, Congrats!", view=self.view
-                    )
-                    return self.view.stop()
+                    if interaction.message:
+                        await interaction.message.edit(
+                            content="Game Over, Congrats!", view=self.view
+                        )
+                    self.view.stop()
+                    return
 
-            return await interaction.message.edit(view=self.view, embed=game.embed)
+            if interaction.message:
+                await interaction.message.edit(view=self.view, embed=game.embed)
         else:
             self.emoji = self.value
             self.view.opened = self
             self.disabled = True
-            return await interaction.response.edit_message(view=self.view)
+            await interaction.response.edit_message(view=self.view)
 
 
 class MemoryView(BaseView):
@@ -102,7 +114,7 @@ class MemoryView(BaseView):
         items *= 2
         random.shuffle(items)
         random.shuffle(items)
-        items.insert(12, None)
+        items.insert(12, None)  # type: ignore[arg-type]
 
         self.board = chunk(items, count=5)
 
@@ -124,6 +136,8 @@ class MemoryGame:
         self.embed_color: Optional[DiscordColor] = None
         self.embed: Optional[discord.Embed] = None
         self.moves: int = 0
+        self.view: MemoryView
+        self.message: discord.Message
 
     async def start(
         self,

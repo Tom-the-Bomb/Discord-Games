@@ -168,12 +168,14 @@ class ConnectFour:
         for button in self._controls:
             await self.message.add_reaction(button)
 
+        status = False
         while not ctx.bot.is_closed():
 
             def check(reaction: discord.Reaction, user: discord.User) -> bool:
                 return (
                     str(reaction.emoji) in self._controls
                     and user == self.turn
+                    and self.message is not None
                     and reaction.message.id == self.message.id
                     and self.board[0][self._conversion[str(reaction.emoji)]] == BLANK
                 )

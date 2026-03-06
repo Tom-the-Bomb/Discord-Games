@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import random
-from typing import Any, TYPE_CHECKING, Optional, Literal, Final
+from typing import TYPE_CHECKING, Optional, Literal, Final, Union
 
 import discord
 from discord.ext import commands
 
 from .number_slider import SlideView
-from ..utils import *
+from ..utils import DiscordColor, DEFAULT_COLOR, chunk, double_wait, wait_for_delete
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -31,13 +31,16 @@ class LightsOutButton(discord.ui.Button["LightsOutView"]):
         self.col = col
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        assert self.view is not None
         game = self.view.game
 
         if interaction.user != game.player:
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "This is not your game!", ephemeral=True
             )
+            return
         else:
+            assert self.row is not None
             row, col = self.row, self.col
 
             beside_item = game.beside_item(row, col)
@@ -56,16 +59,14 @@ class LightsOutButton(discord.ui.Button["LightsOutView"]):
                 self.view.stop()
                 game.embed.description = "**Congrats! You won!**"
 
-            return await interaction.response.edit_message(
-                embed=game.embed, view=self.view
-            )
+            await interaction.response.edit_message(embed=game.embed, view=self.view)
 
 
 class LightsOutView(SlideView):
     game: LightsOut
 
-    def __init__(self, game: LightsOut, *, timeout: float) -> None:
-        super().__init__(game, timeout=timeout)
+    def __init__(self, game: LightsOut, *, timeout: Optional[float]) -> None:
+        super().__init__(game, timeout=timeout)  # type: ignore[arg-type]
 
     def update_board(self, *, clear: bool = False) -> None:
         if clear:
@@ -73,9 +74,9 @@ class LightsOutView(SlideView):
             for i, row in enumerate(self.game.tiles):
                 for j, tile in enumerate(row):
                     button = self.children[idx]
-                    button.emoji = tile
-                    button.label = "\u200b"
-                    button.style = self.game.button_style
+                    button.emoji = tile  # type: ignore[attr-defined]
+                    button.label = "\u200b"  # type: ignore[attr-defined]
+                    button.style = self.game.button_style  # type: ignore[attr-defined]
                     idx += 1
         else:
             for i, row in enumerate(self.game.tiles):
@@ -104,8 +105,11 @@ class LightsOut:
         self.completed: Final[Board] = [[None] * self.count for _ in range(self.count)]
         self.tiles: Board = []
 
-        self.player: Optional[discord.User] = None
+        self.player: Union[discord.User, discord.Member, None] = None
         self.button_style: discord.ButtonStyle = discord.ButtonStyle.green
+        self.view: LightsOutView
+        self.embed: discord.Embed
+        self.message: discord.Message
 
     def toggle(self, row: int, col: int) -> None:
         self.tiles[row][col] = BULB if self.tiles[row][col] is None else None
@@ -155,8 +159,8 @@ class LightsOut:
         self.button_style = button_style
         self.player = ctx.author
 
-        self.tiles = random.choices((None, BULB), k=self.count**2)
-        self.tiles = chunk(self.tiles, count=self.count)
+        flat_tiles = random.choices((None, BULB), k=self.count**2)
+        self.tiles = chunk(flat_tiles, count=self.count)
 
         self.view = LightsOutView(self, timeout=timeout)
         self.embed = discord.Embed(

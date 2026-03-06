@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, Optional
+from typing import TYPE_CHECKING, Literal, Optional, Union
 from io import BytesIO
 import os
 import asyncio
@@ -12,7 +12,7 @@ import discord
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 
-from .utils import *
+from .utils import DEFAULT_COLOR, DiscordColor, executor
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -44,7 +44,7 @@ async def create_2048_emojis(
 
     directory = pathlib.Path(__file__).parent / "assets/2048-emoji-asset-examples"
     files = os.listdir(directory)
-    names = map(lambda n: f"_{n[:-4]}", files) if not names else names
+    names = list(map(lambda n: f"_{n[:-4]}", files)) if not names else names
 
     for name, file in zip(names, files):
         with open(os.path.join(directory, file), "rb") as fp:
@@ -61,7 +61,7 @@ class Twenty48:
     Twenty48 Game
     """
 
-    player: discord.User
+    player: Union[discord.User, discord.Member]
 
     def __init__(
         self,
@@ -194,7 +194,8 @@ class Twenty48:
         game_string = ""
 
         emoji_array = [
-            [self._conversion.get(str(l), f"`{l}` ") for l in row] for row in board
+            [self._conversion.get(str(cell), f"`{cell}` ") for cell in row]
+            for row in board
         ]
 
         for row in emoji_array:
@@ -208,11 +209,14 @@ class Twenty48:
             if num in flattened:
                 if num == 2048:
                     self.embed = discord.Embed(description="", color=self.embed_color)
-                self.embed.description += f"⭐: Congrats! You hit **{num}**!\n"
+                if self.embed is not None:
+                    self.embed.description = (
+                        self.embed.description or ""
+                    ) + f"⭐: Congrats! You hit **{num}**!\n"
 
-                if num == self.win_at:
-                    self.embed.description += "**Game Over! You Won**\n"
-                    return True
+                    if num == self.win_at:
+                        self.embed.description += "**Game Over! You Won**\n"
+                        return True
         return False
 
     @executor()
@@ -225,7 +229,7 @@ class Twenty48:
             for row in self.board:
                 for tile in row:
                     tile = str(tile)
-                    color, fsize = self._color_mapping.get(tile)
+                    color, fsize = self._color_mapping.get(tile, (self.BG_CLR, 50))
                     font = self._font.font_variant(size=fsize)
                     cursor.rounded_rectangle(
                         (x, y, x + SQ, y + SQ), radius=5, width=0, fill=color
@@ -312,6 +316,7 @@ class Twenty48:
                 return (
                     str(reaction.emoji) in self._controls
                     and user == self.player
+                    and self.message is not None
                     and reaction.message.id == self.message.id
                 )
 

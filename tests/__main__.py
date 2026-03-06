@@ -6,7 +6,6 @@ from typing import Optional
 import discord
 from discord.ext import commands
 
-import discord_games as games
 from discord_games import button_games as button_games
 
 
@@ -23,8 +22,10 @@ bot = TestBot(command_prefix="!!", intents=discord.Intents.all())
 
 @bot.command(name="test", aliases=["t"])
 @commands.is_owner()
-async def test(ctx: commands.Context[TestBot], *, member: Optional[discord.Member] = None) -> None:
-    game = button_games.BetaRockPaperScissors(member)
+async def test(
+    ctx: commands.Context[TestBot], *, member: Optional[discord.Member] = None
+) -> None:
+    game = button_games.BetaRockPaperScissors(member)  # type: ignore[arg-type]
     await game.start(ctx)
     await ctx.reply("done!", mention_author=False)
 

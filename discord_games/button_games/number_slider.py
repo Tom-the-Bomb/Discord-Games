@@ -1,13 +1,20 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Literal
+from typing import TYPE_CHECKING, Optional, Literal, Union
 from copy import deepcopy
 import random
 
 import discord
 from discord.ext import commands
 
-from ..utils import *
+from ..utils import (
+    BaseView,
+    DiscordColor,
+    DEFAULT_COLOR,
+    chunk,
+    double_wait,
+    wait_for_delete,
+)
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -27,17 +34,21 @@ class SlideButton(discord.ui.Button["SlideView"]):
             self.disabled = True
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        assert self.view is not None
+        assert self.label is not None
         game = self.view.game
 
         if interaction.user != game.player:
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "This is not your game!", ephemeral=True
             )
+            return
         else:
             num = int(self.label)
 
             if num not in game.beside_blank():
-                return await interaction.response.defer()
+                await interaction.response.defer()
+                return
             else:
                 pressed = game.get_item(num)
                 blank = game.get_item()
@@ -56,13 +67,13 @@ class SlideButton(discord.ui.Button["SlideView"]):
                     self.view.stop()
                     game.embed.description = "**Congrats! You won!**"
 
-                return await interaction.response.edit_message(
+                await interaction.response.edit_message(
                     embed=game.embed, view=self.view
                 )
 
 
 class SlideView(BaseView):
-    def __init__(self, game: NumberSlider, *, timeout: float) -> None:
+    def __init__(self, game: NumberSlider, *, timeout: Optional[float]) -> None:
         super().__init__(timeout=timeout)
 
         self.game = game
@@ -75,9 +86,9 @@ class SlideView(BaseView):
             for i, row in enumerate(self.game.numbers):
                 for j, number in enumerate(row):
                     button = self.children[idx]
-                    button.label = str(number) if number else "\u200b"
-                    button.disabled = not number
-                    button.style = (
+                    button.label = str(number) if number else "\u200b"  # type: ignore[attr-defined]
+                    button.disabled = not number  # type: ignore[attr-defined]
+                    button.style = (  # type: ignore[attr-defined]
                         self.game.correct_style
                         if number == self.game.completed[i][j]
                         else self.game.wrong_style
@@ -110,7 +121,7 @@ class NumberSlider:
 
         self.all_numbers = list(range(1, count**2))
 
-        self.player: Optional[discord.User] = None
+        self.player: Union[discord.User, discord.Member, None] = None
 
         self.moves: int = 0
         self.count = count
@@ -119,6 +130,9 @@ class NumberSlider:
 
         self.wrong_style: discord.ButtonStyle = discord.ButtonStyle.gray
         self.correct_style: discord.ButtonStyle = discord.ButtonStyle.green
+        self.view: SlideView
+        self.embed: discord.Embed
+        self.message: discord.Message
 
     def get_item(self, obj: Optional[int] = None) -> tuple[int, int]:
         return next(
@@ -128,7 +142,7 @@ class NumberSlider:
             if item == obj
         )
 
-    def beside_blank(self) -> list[int]:
+    def beside_blank(self) -> list[Optional[int]]:
         nx, ny = self.get_item()
 
         beside_item = [
@@ -206,7 +220,7 @@ class NumberSlider:
         self.completed = chunk(self.all_numbers + [None], count=self.count)
 
         self.numbers = deepcopy(self.completed)
-        self.shuffle(self.count ** 6)
+        self.shuffle(self.count**6)
 
         self.view = SlideView(self, timeout=timeout)
         self.embed = discord.Embed(

@@ -26,19 +26,22 @@ class HangmanInput(discord.ui.Modal, title="Make a guess!"):
         self.add_item(self.word)
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
+        assert self.view is not None
         content = self.word.value.lower()
         game = self.view.game
 
         if len(content) == 1 and content not in game._alpha:
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "This is not a valid letter to guess (or you've guessed it before)",
                 ephemeral=True,
             )
+            return
 
         elif len(content) > 1 and content not in game._all_words:
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "This is not a valid word!", ephemeral=True
             )
+            return
 
         else:
             await game.make_guess(content)
@@ -46,33 +49,36 @@ class HangmanInput(discord.ui.Modal, title="Make a guess!"):
             if await game.check_win():
                 self.view.disable_all()
                 await interaction.response.edit_message(view=self.view)
-                return self.view.stop()
+                self.view.stop()
             else:
-                return await interaction.response.defer()
+                await interaction.response.defer()
 
 
 class HangmanButton(WordInputButton):
-    view: HangmanView
+    view: HangmanView  # type: ignore[assignment]
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        assert self.view is not None
         game = self.view.game
         if interaction.user != game.player:
-            return await interaction.response.send_message(
+            await interaction.response.send_message(
                 "This isn't your game!", ephemeral=True
             )
+            return
         else:
             if self.label == "Cancel":
                 await interaction.response.send_message(
                     f"Game Over! the word was: **{game.word}**"
                 )
+                assert interaction.message is not None
                 await interaction.message.delete()
-                return self.view.stop()
+                self.view.stop()
             else:
-                return await interaction.response.send_modal(HangmanInput(self.view))
+                await interaction.response.send_modal(HangmanInput(self.view))
 
 
 class HangmanView(BaseView):
-    def __init__(self, game: BetaHangman, *, timeout: float) -> None:
+    def __init__(self, game: BetaHangman, *, timeout: Optional[float]) -> None:
         super().__init__(timeout=timeout)
 
         self.game = game

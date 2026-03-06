@@ -48,7 +48,7 @@ class Tictactoe:
         self.turn: discord.User = self.cross
 
         self.winner: Optional[discord.User] = None
-        self.winning_indexes: list[tuple[int, int]] = []
+        self.winning_indexes: tuple[tuple[int, int], ...] = ()
         self.message: Optional[discord.Message] = None
 
         self._controls: list[str] = [
@@ -63,11 +63,11 @@ class Tictactoe:
             "9️⃣",
         ]
 
-        self.emoji_to_player: dict[discord.User, str] = {
+        self.emoji_to_player: dict[str, discord.User] = {
             self.CIRCLE: self.circle,
             self.CROSS: self.cross,
         }
-        self.player_to_emoji: dict[str, discord.User] = {
+        self.player_to_emoji: dict[discord.User, str] = {
             v: k for k, v in self.emoji_to_player.items()
         }
 
@@ -155,6 +155,7 @@ class Tictactoe:
                 return (
                     str(reaction.emoji) in self._controls
                     and user == self.turn
+                    and self.message is not None
                     and reaction.message.id == self.message.id
                 )
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Union
 
 import discord
 from discord.ext import commands
@@ -24,6 +24,7 @@ class CountryInput(discord.ui.Modal, title="Input your guess!"):
         self.add_item(self.guess)
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
+        assert self.view is not None
         guess = self.guess.value.strip().lower()
         game = self.view.game
 
@@ -35,8 +36,10 @@ class CountryInput(discord.ui.Modal, title="Input your guess!"):
 
             self.view.disable_all()
             game.embed.description = f"```fix\n{game.country.title()}\n```"
+            assert interaction.message is not None
             await interaction.message.edit(view=self.view, embed=game.embed)
-            return self.view.stop()
+            self.view.stop()
+            return
         else:
             game.guesses -= 1
 
@@ -44,11 +47,13 @@ class CountryInput(discord.ui.Modal, title="Input your guess!"):
                 self.view.disable_all()
                 game.update_guesslog("- GAME OVER, you lost -")
 
+                assert interaction.message is not None
                 await interaction.message.edit(embed=game.embed, view=self.view)
                 await interaction.response.send_message(
                     f"Game Over! you lost, The country was `{game.country.title()}`"
                 )
-                return self.view.stop()
+                self.view.stop()
+                return
             else:
                 acc = game.get_accuracy(guess)
                 game.update_guesslog(
@@ -61,7 +66,11 @@ class CountryInput(discord.ui.Modal, title="Input your guess!"):
 
 class CountryView(BaseView):
     def __init__(
-        self, game: BetaCountryGuesser, *, user: discord.User, timeout: float
+        self,
+        game: BetaCountryGuesser,
+        *,
+        user: Union[discord.User, discord.Member],
+        timeout: Optional[float],
     ) -> None:
         super().__init__(timeout=timeout)
 
@@ -71,7 +80,7 @@ class CountryView(BaseView):
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         if interaction.user != self.user:
             await interaction.response.send_message(
-                f"This is not your game!", ephemeral=True
+                "This is not your game!", ephemeral=True
             )
             return False
         else:
@@ -79,7 +88,7 @@ class CountryView(BaseView):
 
     @discord.ui.button(label="Make a guess!", style=discord.ButtonStyle.blurple)
     async def guess_button(self, interaction: discord.Interaction, _) -> None:
-        return await interaction.response.send_modal(CountryInput(self))
+        await interaction.response.send_modal(CountryInput(self))
 
     @discord.ui.button(label="hint", style=discord.ButtonStyle.green)
     async def hint_button(
@@ -93,6 +102,7 @@ class CountryView(BaseView):
 
         if not self.game.hints:
             button.disabled = True
+            assert interaction.message is not None
             await interaction.message.edit(view=self)
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
@@ -105,8 +115,9 @@ class CountryView(BaseView):
         await interaction.response.send_message(
             f"Game Over! The country was `{self.game.country.title()}`"
         )
+        assert interaction.message is not None
         await interaction.message.edit(view=self, embed=self.game.embed)
-        return self.stop()
+        self.stop()
 
 
 class BetaCountryGuesser(CountryGuesser):
@@ -149,7 +160,9 @@ class BetaCountryGuesser(CountryGuesser):
         discord.Message
             returns the game message
         """
-        self.accepted_length = len(self.country) if ignore_diff_len else None
+        self.accepted_length: Optional[int] = (
+            len(self.country) if ignore_diff_len else None
+        )
 
         file = await self.get_country()
 

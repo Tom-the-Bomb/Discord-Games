@@ -11,7 +11,7 @@ import discord
 from discord.ext import commands
 from PIL import Image, ImageDraw
 
-from .utils import *
+from .utils import DiscordColor, executor
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -167,8 +167,9 @@ class Board:
                         if hide:
                             self.draw_dot(cur, x, y, fill=RED)
                         else:
-                            ship = self.get_ship(coord)
-                            self.draw_sq(cur, x, y, coord=coord, ship=ship)
+                            hit_ship = self.get_ship(coord)
+                            if hit_ship is not None:
+                                self.draw_sq(cur, x, y, coord=coord, ship=hit_ship)
                             self.draw_dot(cur, x, y, fill=RED)
 
                     elif ship := self.get_ship(coord):
@@ -207,7 +208,7 @@ class BattleShip:
         self.player2_board: Board = Board(player2, random=self.random)
 
         self.turn: discord.User = self.player1
-        self.timeout: Optional[int] = None
+        self.timeout: Optional[float] = None
 
         self.message1: Optional[discord.Message] = None
         self.message2: Optional[discord.Message] = None
@@ -260,6 +261,7 @@ class BattleShip:
     def get_coords(self, inp: str) -> tuple[str, Coords]:
         inp = re.sub(r"\s+", "", inp).lower()
         match = self.inputpat.match(inp)
+        assert match is not None
         x, y = match.group(1), match.group(2)
         return (inp, (self.to_num(x), int(y)))
 
@@ -304,7 +306,7 @@ class BattleShip:
 
             await user.send("Do you want it to be vertical?\nSay `yes` or `no`")
 
-            def check(msg: discord.Message) -> bool:
+            def check_vertical(msg: discord.Message) -> bool:
                 if not msg.guild and msg.author == user:
                     content = msg.content.replace(" ", "").lower()
                     return content in ("yes", "no")
@@ -312,7 +314,7 @@ class BattleShip:
 
             try:
                 message: discord.Message = await ctx.bot.wait_for(
-                    "message", check=check, timeout=self.timeout
+                    "message", check=check_vertical, timeout=self.timeout
                 )
             except asyncio.TimeoutError:
                 await user.send(
@@ -332,9 +334,10 @@ class BattleShip:
 
             if board._is_valid(new_ship):
                 board.ships.append(new_ship)
+                return True
             else:
                 await user.send("That is a not a valid location, please try again")
-                await place_ship(ship, size, color)
+                return await place_ship(ship, size, color)
 
         for ship, (size, color) in SHIPS.items():
             await place_ship(ship, size, color)
@@ -344,7 +347,7 @@ class BattleShip:
 
     async def start(
         self, ctx: commands.Context[commands.Bot], *, timeout: Optional[float] = None
-    ) -> tuple[discord.Message, discord.Message]:
+    ) -> tuple[Optional[discord.Message], Optional[discord.Message]]:
         """
         starts the battleship game
 
@@ -357,7 +360,7 @@ class BattleShip:
 
         Returns
         -------
-        tuple[discord.Message, discord.Message]
+        tuple[Optional[discord.Message], Optional[discord.Message]]
             returns both player's messages respectively
         """
 
@@ -396,7 +399,7 @@ class BattleShip:
 
             raw, coords = self.get_coords(message.content)
 
-            if coords in self.get_board(self.turn):
+            if coords in self.get_board(self.turn).moves:
                 await self.turn.send("You've attacked this coordinate before!")
 
             else:

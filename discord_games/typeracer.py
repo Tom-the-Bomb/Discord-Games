@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, ClassVar, TypedDict, Any
+from typing import Optional, ClassVar, TypedDict
 from io import BytesIO
 
 import textwrap
@@ -15,7 +15,7 @@ from PIL import Image, ImageDraw, ImageFont
 import discord
 from discord.ext import commands
 
-from .utils import *
+from .utils import DEFAULT_COLOR, DiscordColor, executor
 
 
 class UserData(TypedDict):
@@ -43,7 +43,7 @@ class TypeRacer:
 
         font = ImageFont.truetype(font_path, 30)
         try:
-            x, y = font.getsize_multiline(text)
+            x, y = font.getsize_multiline(text)  # type: ignore[attr-defined]
         except AttributeError:
             _, _, x, y = ImageDraw.Draw(Image.new("RGB", (0, 0))).multiline_textbbox(
                 (10, 10),
@@ -51,7 +51,7 @@ class TypeRacer:
                 font=font,
             )
 
-        with Image.new("RGB", (x + 20, y + 30), (0, 0, 30)) as image:
+        with Image.new("RGB", (int(x) + 20, int(y) + 30), (0, 0, 30)) as image:
             cursor = ImageDraw.Draw(image)
             cursor.multiline_text((10, 10), text, font=font, fill=(220, 200, 220))
 
@@ -73,14 +73,13 @@ class TypeRacer:
     ) -> discord.Message:
         self.embed.description = ""
 
-        text = text.lower().replace("\n", " ")
         winners = []
         start = time.perf_counter()
 
         while not ctx.bot.is_closed():
 
             def check(m: discord.Message) -> bool:
-                content = m.content.lower().replace("\n", " ")
+                content = m.content.replace("\n", " ").strip()
                 if (
                     m.channel == ctx.channel
                     and not m.author.bot
@@ -104,7 +103,7 @@ class TypeRacer:
                     )
 
             end = time.perf_counter()
-            content = message.content.lower().replace("\n", " ")
+            content = message.content.replace("\n", " ").strip()
             timeout -= round(end - start)
 
             winners.append(
@@ -128,7 +127,9 @@ class TypeRacer:
 
         desc = [self.format_line(i, x) for i, x in enumerate(winners, 1)]
         embed = discord.Embed(
-            title="Typerace results", color=self.embed_color, timestamp=discord.utils.utcnow()
+            title="Typerace results",
+            color=self.embed_color,
+            timestamp=discord.utils.utcnow(),
         )
         embed.add_field(name="Winners", value="\n".join(desc))
 
@@ -191,8 +192,8 @@ class TypeRacer:
             async with aiohttp.ClientSession() as session:
                 async with session.get(self.SENTENCE_URL) as r:
                     if r.ok:
-                        data: list[dict[str, Any]] = await r.json()
-                        text = data[0].get("q", "")
+                        data: list[dict[str, str]] = await r.json()
+                        text = data[0].get("q", "").replace("\n", " ").strip()
                     else:
                         raise RuntimeError(
                             f"HTTP request raised an error: {r.status}; {r.reason}"
@@ -218,7 +219,9 @@ class TypeRacer:
         embed.set_image(url="attachment://tr.png")
 
         if show_author:
-            embed.set_author(name=ctx.author.name, icon_url=ctx.author.display_avatar.url)
+            embed.set_author(
+                name=ctx.author.name, icon_url=ctx.author.display_avatar.url
+            )
 
         self.embed = embed
         self.message = await ctx.send(embed=embed, file=discord.File(buffer, "tr.png"))
