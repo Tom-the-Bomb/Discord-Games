@@ -16,7 +16,7 @@ Or from GitHub for the latest changes:
 pip install git+https://github.com/Tom-the-Bomb/Discord-Games.git
 ```
 
-Requires **Python 3.9+** and **discord.py 2.0+**.
+Requires **Python 3.9+** and **discord.py 1.7+** (button-based games require **2.0+**).
 
 ## Available Games
 
