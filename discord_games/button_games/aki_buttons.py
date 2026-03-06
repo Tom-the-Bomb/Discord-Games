@@ -64,12 +64,14 @@ class AkiView(BaseView):
             await interaction.message.delete()
             return
 
+        await interaction.response.defer(thinking=True, ephemeral=True)
+
         if answer == "back":
             try:
                 await game.aki.back()
                 embed = game.build_embed(instructions=False)
             except CantGoBackAnyFurther:
-                await interaction.response.send_message(
+                await interaction.followup.send(
                     "I cant go back any further!", ephemeral=True
                 )
                 return
@@ -83,7 +85,9 @@ class AkiView(BaseView):
             else:
                 embed = game.build_embed(instructions=False)
         try:
-            await interaction.response.edit_message(embed=embed, view=self)
+            assert interaction.message is not None
+            await interaction.message.edit(embed=embed, view=self)
+            await interaction.delete_original_response()
         except discord.NotFound:
             pass
 
