@@ -12,7 +12,7 @@ from akinator import (
     CantGoBackAnyFurther,
 )
 
-from .utils import DiscordColor, DEFAULT_COLOR
+from .utils import DiscordColor, DEFAULT_COLOR, double_wait
 
 if TYPE_CHECKING:
     from typing import Literal
@@ -194,9 +194,11 @@ class Akinator:
                 return False
 
             try:
-                reaction, user = await ctx.bot.wait_for(
-                    "reaction_add", timeout=timeout, check=check
+                done, _ = await double_wait(
+                    ctx.bot.wait_for("reaction_add", timeout=timeout, check=check),
+                    ctx.bot.wait_for("reaction_remove", timeout=timeout, check=check),
                 )
+                reaction, user = done.pop().result()
             except asyncio.TimeoutError:
                 return
 

@@ -106,13 +106,16 @@ async def double_wait(
     if not loop:
         loop = asyncio.get_running_loop()
 
-    return await asyncio.wait(
+    done, pending = await asyncio.wait(
         [
             loop.create_task(task1),
             loop.create_task(task2),
         ],
         return_when=asyncio.FIRST_COMPLETED,
     )
+    for task in pending:
+        task.cancel()
+    return done, pending
 
 
 if hasattr(discord, "ui"):

@@ -16,7 +16,6 @@ class ReactionButton(discord.ui.Button["ReactionView"]):
         super().__init__(label="\u200b", style=style)
 
         self.edited: bool = False
-        self.clicked: bool = False
 
     async def callback(self, interaction: discord.Interaction) -> None:
         assert self.view is not None
@@ -28,20 +27,19 @@ class ReactionButton(discord.ui.Button["ReactionView"]):
             )
             return
 
-        if not self.edited or self.clicked:
+        if not self.edited or interaction.user.id in game.reacted:
             await interaction.response.defer()
             return
-        else:
-            end_time = time.perf_counter()
-            elapsed = end_time - self.view.game.start_time
 
-            game.embed.description = (
-                f"{interaction.user.mention} reacted first in `{elapsed:.2f}s` !"
-            )
-            await interaction.response.edit_message(embed=game.embed)
+        end_time = time.perf_counter()
+        elapsed = end_time - game.start_time
 
-            self.clicked = True
-            game.finished_event.set()
+        game.reacted.add(interaction.user.id)
+        place = len(game.results) + 1
+        game.results.append(f"**{place}.** {interaction.user.mention} — `{elapsed:.2f}s`")
+
+        game.embed.description = "\n".join(game.results)
+        await interaction.response.edit_message(embed=game.embed)
 
 
 class ReactionView(BaseView):
@@ -107,10 +105,10 @@ class BetaReactionGame:
         discord.Message
             returns the game message
         """
-        self.finished_event = asyncio.Event()
-
         self.author_only = author_only
         self.author = ctx.author
+        self.results: list[str] = []
+        self.reacted: set[int] = set()
 
         self.embed = discord.Embed(
             title="Reaction Game",
@@ -132,5 +130,5 @@ class BetaReactionGame:
         self.start_time = time.perf_counter()
         self.view.button.edited = True
 
-        await self.finished_event.wait()
+        await self.view.wait()
         return self.message

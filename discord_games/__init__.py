@@ -37,7 +37,7 @@ __all__: tuple[str, ...] = (
 )
 
 __title__ = "discord_games"
-__version__ = "1.12.3"
+__version__ = "1.12.4"
 __author__ = "Tom-the-Bomb"
 __license__ = "MIT"
 __copyright__ = "Copyright 2021-present Tom-the-Bomb"

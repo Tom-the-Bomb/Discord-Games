@@ -12,7 +12,7 @@ import discord
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 
-from .utils import DEFAULT_COLOR, DiscordColor, executor
+from .utils import DEFAULT_COLOR, DiscordColor, double_wait, executor
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -323,9 +323,11 @@ class Twenty48:
                 )
 
             try:
-                reaction, user = await ctx.bot.wait_for(
-                    "reaction_add", timeout=timeout, check=check
+                done, _ = await double_wait(
+                    ctx.bot.wait_for("reaction_add", timeout=timeout, check=check),
+                    ctx.bot.wait_for("reaction_remove", timeout=timeout, check=check),
                 )
+                reaction, user = done.pop().result()
             except asyncio.TimeoutError:
                 break
 

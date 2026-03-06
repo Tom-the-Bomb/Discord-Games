@@ -21,20 +21,26 @@ class ReactionGame:
         self.emoji = emoji
 
     async def wait_for_reaction(
-        self, ctx: commands.Context[commands.Bot], *, timeout: Optional[float]
+        self,
+        ctx: commands.Context[commands.Bot],
+        *,
+        timeout: Optional[float],
+        start_time: float,
+        reacted: set[int],
     ) -> tuple[discord.User, float]:
-        start = time.perf_counter()
 
-        def check(reaction: discord.Reaction, _: discord.User) -> bool:
+        def check(reaction: discord.Reaction, user: discord.User) -> bool:
             return (
                 str(reaction.emoji) == self.emoji
                 and reaction.message.id == self.message.id
+                and user.id not in reacted
+                and not user.bot
             )
 
         _, user = await ctx.bot.wait_for("reaction_add", timeout=timeout, check=check)
-        end = time.perf_counter()
+        elapsed = time.perf_counter() - start_time
 
-        return user, (end - start)
+        return user, elapsed
 
     async def start(
         self,
@@ -75,12 +81,28 @@ class ReactionGame:
         embed.description = f"React with {self.emoji} now!"
         await self.message.edit(embed=embed)
 
-        try:
-            user, elapsed = await self.wait_for_reaction(ctx, timeout=timeout)
-        except asyncio.TimeoutError:
-            return self.message
+        results: list[str] = []
+        reacted: set[int] = set()
 
-        embed.description = f"{user.mention} reacted first in `{elapsed:.2f}s` !"
-        await self.message.edit(embed=embed)
+        start_time = time.perf_counter()
+
+        while not ctx.bot.is_closed():
+            try:
+                user, reaction_time = await self.wait_for_reaction(
+                    ctx, timeout=timeout, start_time=start_time, reacted=reacted,
+                )
+            except asyncio.TimeoutError:
+                break
+
+            reacted.add(user.id)
+            place = len(results) + 1
+            results.append(f"**{place}.** {user.mention} — `{reaction_time:.2f}s`")
+
+            embed.description = "\n".join(results)
+            await self.message.edit(embed=embed)
+
+        if not results:
+            embed.description = "No one reacted in time!"
+            await self.message.edit(embed=embed)
 
         return self.message

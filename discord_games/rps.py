@@ -7,7 +7,7 @@ from typing import ClassVar, Optional
 import discord
 from discord.ext import commands
 
-from .utils import DiscordColor, DEFAULT_COLOR
+from .utils import DiscordColor, DEFAULT_COLOR, double_wait
 
 
 class RockPaperScissors:
@@ -38,9 +38,11 @@ class RockPaperScissors:
                 and reaction.message.id == self.message.id
             )
 
-        reaction, _ = await ctx.bot.wait_for(
-            "reaction_add", timeout=timeout, check=check
+        done, _ = await double_wait(
+            ctx.bot.wait_for("reaction_add", timeout=timeout, check=check),
+            ctx.bot.wait_for("reaction_remove", timeout=timeout, check=check),
         )
+        reaction, _ = done.pop().result()
         return str(reaction.emoji)
 
     async def start(

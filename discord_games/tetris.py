@@ -7,6 +7,8 @@ from typing import Optional
 import discord
 from discord.ext import commands
 
+from .utils import double_wait
+
 
 class Tetris:
     """Tetris game, reaction-based.
@@ -289,27 +291,11 @@ class Tetris:
 
         while not ctx.bot.is_closed():
             try:
-                task1 = asyncio.create_task(
-                    ctx.bot.wait_for(
-                        "reaction_add",
-                        timeout=timeout,
-                        check=check,
-                    )
-                )
-                task2 = asyncio.create_task(
-                    ctx.bot.wait_for(
-                        "reaction_remove",
-                        timeout=timeout,
-                        check=check,
-                    )
-                )
-                done, _ = await asyncio.wait(
-                    tasks := [task1, task2], return_when=asyncio.FIRST_COMPLETED
+                done, _ = await double_wait(
+                    ctx.bot.wait_for("reaction_add", timeout=timeout, check=check),
+                    ctx.bot.wait_for("reaction_remove", timeout=timeout, check=check),
                 )
                 reaction, _ = done.pop().result()
-
-                for task in tasks:
-                    task.cancel()
             except asyncio.TimeoutError:
                 await self._end_game("Game timed out due to inactivity.")
                 return self.message
