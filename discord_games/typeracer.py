@@ -19,6 +19,7 @@ from .utils import DEFAULT_COLOR, DiscordColor, executor
 
 
 if TYPE_CHECKING:
+
     class QuoteAPIResponse(TypedDict):
         quote: str
         id: int
