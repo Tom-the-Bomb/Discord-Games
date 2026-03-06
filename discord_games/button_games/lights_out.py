@@ -69,17 +69,24 @@ class LightsOutView(SlideView):
 
     def update_board(self, *, clear: bool = False) -> None:
         if clear:
-            self.clear_items()
-
-        for i, row in enumerate(self.game.tiles):
-            for j, tile in enumerate(row):
-                button = LightsOutButton(
-                    emoji=tile,
-                    style=self.game.button_style,
-                    row=i,
-                    col=j,
-                )
-                self.add_item(button)
+            idx = 0
+            for i, row in enumerate(self.game.tiles):
+                for j, tile in enumerate(row):
+                    button = self.children[idx]
+                    button.emoji = tile
+                    button.label = "\u200b"
+                    button.style = self.game.button_style
+                    idx += 1
+        else:
+            for i, row in enumerate(self.game.tiles):
+                for j, tile in enumerate(row):
+                    button = LightsOutButton(
+                        emoji=tile,
+                        style=self.game.button_style,
+                        row=i,
+                        col=j,
+                    )
+                    self.add_item(button)
 
 
 class LightsOut:

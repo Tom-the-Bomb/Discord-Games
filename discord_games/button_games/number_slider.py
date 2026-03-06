@@ -71,21 +71,32 @@ class SlideView(BaseView):
 
     def update_board(self, *, clear: bool = False) -> None:
         if clear:
-            self.clear_items()
+            idx = 0
+            for i, row in enumerate(self.game.numbers):
+                for j, number in enumerate(row):
+                    button = self.children[idx]
+                    button.label = str(number) if number else "\u200b"
+                    button.disabled = not number
+                    button.style = (
+                        self.game.correct_style
+                        if number == self.game.completed[i][j]
+                        else self.game.wrong_style
+                    )
+                    idx += 1
+        else:
+            for i, row in enumerate(self.game.numbers):
+                for j, number in enumerate(row):
+                    if number == self.game.completed[i][j]:
+                        style = self.game.correct_style
+                    else:
+                        style = self.game.wrong_style
 
-        for i, row in enumerate(self.game.numbers):
-            for j, number in enumerate(row):
-                if number == self.game.completed[i][j]:
-                    style = self.game.correct_style
-                else:
-                    style = self.game.wrong_style
-
-                button = SlideButton(
-                    label=str(number) if number else "\u200b",
-                    style=style,
-                    row=i,
-                )
-                self.add_item(button)
+                    button = SlideButton(
+                        label=str(number) if number else "\u200b",
+                        style=style,
+                        row=i,
+                    )
+                    self.add_item(button)
 
 
 class NumberSlider:
