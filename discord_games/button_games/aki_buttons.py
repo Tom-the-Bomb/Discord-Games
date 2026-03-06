@@ -64,7 +64,8 @@ class AkiView(BaseView):
             await interaction.message.delete()
             return
 
-        await interaction.response.defer(thinking=True, ephemeral=True)
+        # defer to avoid 3s interaction timeout while waiting for the akinator API
+        await interaction.response.defer()
 
         if answer == "back":
             try:
@@ -85,9 +86,7 @@ class AkiView(BaseView):
             else:
                 embed = game.build_embed(instructions=False)
         try:
-            assert interaction.message is not None
-            await interaction.message.edit(embed=embed, view=self)
-            await interaction.delete_original_response()
+            await interaction.edit_original_response(embed=embed, view=self)
         except discord.NotFound:
             pass
 
