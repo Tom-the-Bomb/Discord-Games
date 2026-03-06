@@ -191,8 +191,8 @@ class TypeRacer:
             async with aiohttp.ClientSession() as session:
                 async with session.get(self.SENTENCE_URL) as r:
                     if r.ok:
-                        text: dict[str, Any] = await r.json()
-                        text = text.get("q", "")
+                        data: list[dict[str, Any]] = await r.json()
+                        text = data[0].get("q", "")
                     else:
                         raise RuntimeError(
                             f"HTTP request raised an error: {r.status}; {r.reason}"
