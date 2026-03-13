@@ -28,6 +28,7 @@ if TYPE_CHECKING:
 
 __all__: tuple[str, ...] = (
     "DiscordColor",
+    "Player",
     "DEFAULT_COLOR",
     "executor",
     "chunk",
@@ -37,6 +38,7 @@ __all__: tuple[str, ...] = (
 )
 
 DiscordColor: TypeAlias = Union[discord.Color, int]
+Player: TypeAlias = Union[discord.User, discord.Member]
 
 DEFAULT_COLOR: Final[discord.Color] = discord.Color(0xFFFFFF)
 

@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from typing import Optional, ClassVar, Union
+from typing import Optional, ClassVar
 import random
 
 import discord
 from discord.ext import commands
 from english_words import get_english_words_set
 
-from ..utils import BaseView, DiscordColor, DEFAULT_COLOR, chunk
+from ..utils import BaseView, DiscordColor, DEFAULT_COLOR, Player, chunk
 
 
 class BoggleButton(discord.ui.Button["BoggleView"]):
@@ -177,7 +177,7 @@ class Boggle:
         self.indices: list[tuple[int, int]] = []
 
         self.embed_color: Optional[DiscordColor] = None
-        self.player: Union[discord.User, discord.Member, None] = None
+        self.player: Optional[Player] = None
         self.view: BoggleView
         self.message: discord.Message
 

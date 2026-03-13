@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from typing import Optional, Union
+from typing import Optional
 import random
 
 import discord
 from discord.ext import commands
 
 from ..rps import RockPaperScissors
-from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
+from ..utils import DiscordColor, DEFAULT_COLOR, Player, BaseView
 
 
 class RPSButton(discord.ui.Button["RPSView"]):
@@ -19,7 +19,7 @@ class RPSButton(discord.ui.Button["RPSView"]):
         )
 
     def get_choice(
-        self, user: Union[discord.User, discord.Member], other: bool = False
+        self, user: Player, other: bool = False
     ) -> Optional[str]:
         assert self.view is not None
         game = self.view.game
@@ -126,19 +126,19 @@ class BetaRockPaperScissors(RockPaperScissors):
     instead of reactions.
     """
 
-    player1: Union[discord.User, discord.Member]
+    player1: Player
     embed: discord.Embed
 
     def __init__(
-        self, other_player: Optional[Union[discord.User, discord.Member]] = None
+        self, other_player: Optional[Player] = None
     ) -> None:
-        self.player2: Optional[Union[discord.User, discord.Member]] = other_player
+        self.player2: Optional[Player] = other_player
 
         if self.player2:
             self.player1_choice: Optional[str] = None
             self.player2_choice: Optional[str] = None
 
-    def check_human_win(self) -> Union[discord.User, discord.Member]:
+    def check_human_win(self) -> Player:
         assert self.player1_choice is not None
         assert self.player2 is not None
         return (

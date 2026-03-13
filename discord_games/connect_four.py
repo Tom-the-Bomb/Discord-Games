@@ -6,7 +6,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from .utils import DiscordColor, DEFAULT_COLOR, double_wait
+from .utils import DiscordColor, DEFAULT_COLOR, Player, double_wait
 
 RED = "🔴"
 BLUE = "🔵"
@@ -20,7 +20,12 @@ class ConnectFour:
     connect four in a row in any direction.
     """
 
-    def __init__(self, *, red: discord.User, blue: discord.User) -> None:
+    def __init__(
+        self,
+        *,
+        red: Player,
+        blue: Player,
+    ) -> None:
         self.red_player = red
         self.blue_player = blue
 
@@ -37,16 +42,16 @@ class ConnectFour:
 
         self.turn = self.red_player
         self.message: Optional[discord.Message] = None
-        self.winner: Optional[discord.User] = None
+        self.winner: Optional[Player] = None
 
         self._conversion: dict[str, int] = {
             emoji: i for i, emoji in enumerate(self._controls)
         }
-        self.player_to_emoji: dict[discord.User, str] = {
+        self.player_to_emoji: dict[Player, str] = {
             self.red_player: RED,
             self.blue_player: BLUE,
         }
-        self.emoji_to_player: dict[str, discord.User] = {
+        self.emoji_to_player: dict[str, Player] = {
             v: k for k, v in self.player_to_emoji.items()
         }
 

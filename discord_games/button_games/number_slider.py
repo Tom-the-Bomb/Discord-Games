@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, Literal, Union
+from typing import TYPE_CHECKING, Optional, Literal
 from copy import deepcopy
 import random
 
@@ -11,6 +11,7 @@ from ..utils import (
     BaseView,
     DiscordColor,
     DEFAULT_COLOR,
+    Player,
     chunk,
     double_wait,
     wait_for_delete,
@@ -123,7 +124,7 @@ class NumberSlider:
 
         self.all_numbers = list(range(1, count**2))
 
-        self.player: Union[discord.User, discord.Member, None] = None
+        self.player: Optional[Player] = None
 
         self.moves: int = 0
         self.count = count

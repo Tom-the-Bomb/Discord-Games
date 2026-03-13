@@ -8,7 +8,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from .utils import DiscordColor, DEFAULT_COLOR
+from .utils import DiscordColor, DEFAULT_COLOR, Player
 
 
 class ReactionGame:
@@ -27,7 +27,7 @@ class ReactionGame:
         timeout: Optional[float],
         start_time: float,
         reacted: set[int],
-    ) -> tuple[discord.User, float]:
+    ) -> tuple[Player, float]:
 
         def check(reaction: discord.Reaction, user: discord.User) -> bool:
             return (
@@ -89,7 +89,10 @@ class ReactionGame:
         while not ctx.bot.is_closed():
             try:
                 user, reaction_time = await self.wait_for_reaction(
-                    ctx, timeout=timeout, start_time=start_time, reacted=reacted,
+                    ctx,
+                    timeout=timeout,
+                    start_time=start_time,
+                    reacted=reacted,
                 )
             except asyncio.TimeoutError:
                 break

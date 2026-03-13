@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from typing import Optional, Union
+from typing import Optional
 
 import discord
 from discord.ext import commands
 
 from ..country_guess import CountryGuesser
-from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
+from ..utils import DiscordColor, DEFAULT_COLOR, Player, BaseView
 
 
 class CountryInput(discord.ui.Modal, title="Input your guess!"):
@@ -69,7 +69,7 @@ class CountryView(BaseView):
         self,
         game: BetaCountryGuesser,
         *,
-        user: Union[discord.User, discord.Member],
+        user: Player,
         timeout: Optional[float],
     ) -> None:
         super().__init__(timeout=timeout)

@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import random
-from typing import TYPE_CHECKING, Optional, Literal, Final, Union
+from typing import TYPE_CHECKING, Optional, Literal, Final
 
 import discord
 from discord.ext import commands
 
 from .number_slider import SlideView
-from ..utils import DiscordColor, DEFAULT_COLOR, chunk, double_wait, wait_for_delete
+from ..utils import DiscordColor, DEFAULT_COLOR, Player, chunk, double_wait, wait_for_delete
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -107,7 +107,7 @@ class LightsOut:
         self.completed: Final[Board] = [[None] * self.count for _ in range(self.count)]
         self.tiles: Board = []
 
-        self.player: Union[discord.User, discord.Member, None] = None
+        self.player: Optional[Player] = None
         self.button_style: discord.ButtonStyle = discord.ButtonStyle.green
         self.view: LightsOutView
         self.embed: discord.Embed

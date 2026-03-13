@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, Optional, Union
+from typing import TYPE_CHECKING, Literal, Optional
 from io import BytesIO
 import os
 import asyncio
@@ -12,7 +12,7 @@ import discord
 from discord.ext import commands
 from PIL import Image, ImageDraw, ImageFont
 
-from .utils import DEFAULT_COLOR, DiscordColor, double_wait, executor
+from .utils import DEFAULT_COLOR, DiscordColor, Player, double_wait, executor
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -63,7 +63,7 @@ class Twenty48:
     numbers to reach 2048.
     """
 
-    player: Union[discord.User, discord.Member]
+    player: Player
 
     def __init__(
         self,

@@ -15,12 +15,12 @@ from ..battleship import (
 )
 
 from .wordle_buttons import WordInputButton
-from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
+from ..utils import DiscordColor, DEFAULT_COLOR, Player as PlayerType, BaseView
 
 
 class Player:
     def __init__(
-        self, player: Union[discord.User, discord.Member], *, game: BetaBattleShip
+        self, player: PlayerType, *, game: BetaBattleShip
     ) -> None:
         self.game = game
         self.player = player
@@ -353,8 +353,8 @@ class BetaBattleShip(BattleShip):
 
     def __init__(
         self,
-        player1: Union[discord.User, discord.Member],
-        player2: Union[discord.User, discord.Member],
+        player1: PlayerType,
+        player2: PlayerType,
         *,
         random: bool = True,
     ) -> None:

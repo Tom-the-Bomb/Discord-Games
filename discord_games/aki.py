@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, Union, ClassVar, Any, TYPE_CHECKING
+from typing import Optional, ClassVar, Any, TYPE_CHECKING
 from enum import Enum
 import asyncio
 
@@ -12,7 +12,7 @@ from akinator import (
     CantGoBackAnyFurther,
 )
 
-from .utils import DiscordColor, DEFAULT_COLOR, double_wait
+from .utils import DiscordColor, DEFAULT_COLOR, Player, double_wait
 
 if TYPE_CHECKING:
     from typing import Literal
@@ -48,7 +48,7 @@ class Akinator:
     def __init__(self) -> None:
         self.aki: AkinatorGame = AkinatorGame()
 
-        self.player: Optional[Union[discord.User, discord.Member]] = None
+        self.player: Optional[Player] = None
         self.win_at: Optional[int] = None
         self.guess: Any = None
         self.message: Optional[discord.Message] = None

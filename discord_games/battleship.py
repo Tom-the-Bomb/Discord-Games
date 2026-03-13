@@ -11,7 +11,7 @@ import discord
 from discord.ext import commands
 from PIL import Image, ImageDraw
 
-from .utils import DiscordColor, executor
+from .utils import DiscordColor, Player, executor
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -59,8 +59,10 @@ class Ship:
 
 
 class Board:
-    def __init__(self, player: discord.User, random: bool = True) -> None:
-        self.player: discord.User = player
+    def __init__(
+        self, player: Player, random: bool = True
+    ) -> None:
+        self.player: Player = player
         self.ships: list[Ship] = []
 
         self.my_hits: list[Coords] = []
@@ -194,34 +196,38 @@ class BattleShip:
 
     def __init__(
         self,
-        player1: discord.User,
-        player2: discord.User,
+        player1: Player,
+        player2: Player,
         *,
         random: bool = True,
     ) -> None:
         self.embed_color: Optional[DiscordColor] = None
 
-        self.player1: discord.User = player1
-        self.player2: discord.User = player2
+        self.player1: Player = player1
+        self.player2: Player = player2
 
         self.random: bool = random
 
         self.player1_board: Board = Board(player1, random=self.random)
         self.player2_board: Board = Board(player2, random=self.random)
 
-        self.turn: discord.User = self.player1
+        self.turn: Player = self.player1
         self.timeout: Optional[float] = None
 
         self.message1: Optional[discord.Message] = None
         self.message2: Optional[discord.Message] = None
 
-    def get_board(self, player: discord.User, other: bool = False) -> Board:
+    def get_board(
+        self, player: Player, other: bool = False
+    ) -> Board:
         if other:
             return self.player2_board if player == self.player1 else self.player1_board
         else:
             return self.player1_board if player == self.player1 else self.player2_board
 
-    def place_move(self, player: discord.User, coords: Coords) -> tuple[bool, bool]:
+    def place_move(
+        self, player: Player, coords: Coords
+    ) -> tuple[bool, bool]:
         board = self.get_board(player)
         op_board = self.get_board(player, other=True)
 
@@ -238,7 +244,7 @@ class BattleShip:
         return False, False
 
     async def get_file(
-        self, player: discord.User, *, hide: bool = True
+        self, player: Player, *, hide: bool = True
     ) -> tuple[discord.Embed, discord.File, discord.Embed, discord.File]:
         board = self.get_board(player)
         image1 = await board.to_image()
@@ -267,7 +273,7 @@ class BattleShip:
         x, y = match.group(1), match.group(2)
         return (inp, (self.to_num(x), int(y)))
 
-    def who_won(self) -> Optional[discord.User]:
+    def who_won(self) -> Optional[Player]:
         if self.player1_board.won():
             return self.player2
         elif self.player2_board.won():
@@ -276,7 +282,9 @@ class BattleShip:
             return None
 
     async def get_ship_inputs(
-        self, ctx: commands.Context[commands.Bot], user: discord.User
+        self,
+        ctx: commands.Context[commands.Bot],
+        user: Player,
     ) -> bool:
         board = self.get_board(user)
 
@@ -406,7 +414,7 @@ class BattleShip:
 
             else:
                 sunk, hit = self.place_move(self.turn, coords)
-                next_turn: discord.User = (
+                next_turn: Player = (
                     self.player2 if self.turn == self.player1 else self.player1
                 )
 

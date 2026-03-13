@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands
 import chess
 
-from .utils import DiscordColor, DEFAULT_COLOR
+from .utils import DiscordColor, DEFAULT_COLOR, Player
 
 
 class Chess:
@@ -19,12 +19,17 @@ class Chess:
 
     BASE_URL: ClassVar[str] = "http://www.fen-to-image.com/image/64/double/coords/"
 
-    def __init__(self, *, white: discord.User, black: discord.User) -> None:
+    def __init__(
+        self,
+        *,
+        white: Player,
+        black: Player,
+    ) -> None:
         self.white = white
         self.black = black
         self.turn = self.white
 
-        self.winner: Optional[discord.User] = None
+        self.winner: Optional[Player] = None
         self.message: Optional[discord.Message] = None
 
         self.board: chess.Board = chess.Board()

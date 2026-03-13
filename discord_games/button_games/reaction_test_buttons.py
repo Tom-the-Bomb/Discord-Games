@@ -36,7 +36,9 @@ class ReactionButton(discord.ui.Button["ReactionView"]):
 
         game.reacted.add(interaction.user.id)
         place = len(game.results) + 1
-        game.results.append(f"**{place}.** {interaction.user.mention} — `{elapsed:.2f}s`")
+        game.results.append(
+            f"**{place}.** {interaction.user.mention} — `{elapsed:.2f}s`"
+        )
 
         game.embed.description = "\n".join(game.results)
         await interaction.response.edit_message(embed=game.embed)

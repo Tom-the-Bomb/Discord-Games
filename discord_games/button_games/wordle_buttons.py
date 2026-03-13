@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from typing import Optional, Union
+from typing import Optional
 
 import discord
 from discord.ext import commands
 
 from ..wordle import Wordle
-from ..utils import DiscordColor, DEFAULT_COLOR, BaseView
+from ..utils import DiscordColor, DEFAULT_COLOR, Player, BaseView
 
 
 class WordInput(discord.ui.Modal, title="Word Input"):
@@ -108,7 +108,7 @@ class BetaWordle(Wordle):
     Same as :class:`Wordle` but uses a modal for word input.
     """
 
-    player: Union[discord.User, discord.Member]
+    player: Player
 
     async def start(
         self,

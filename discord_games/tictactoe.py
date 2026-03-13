@@ -6,7 +6,7 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from .utils import DiscordColor, DEFAULT_COLOR, double_wait
+from .utils import DiscordColor, DEFAULT_COLOR, Player, double_wait
 
 
 class Tictactoe:
@@ -41,14 +41,18 @@ class Tictactoe:
         ((0, 2), (1, 1), (2, 0)),
     )
 
-    def __init__(self, cross: discord.User, circle: discord.User) -> None:
+    def __init__(
+        self,
+        cross: Player,
+        circle: Player,
+    ) -> None:
         self.cross = cross
         self.circle = circle
 
         self.board: list[list[str]] = [[self.BLANK for _ in range(3)] for _ in range(3)]
-        self.turn: discord.User = self.cross
+        self.turn: Player = self.cross
 
-        self.winner: Optional[discord.User] = None
+        self.winner: Optional[Player] = None
         self.winning_indexes: tuple[tuple[int, int], ...] = ()
         self.message: Optional[discord.Message] = None
 
@@ -64,11 +68,11 @@ class Tictactoe:
             "9️⃣",
         ]
 
-        self.emoji_to_player: dict[str, discord.User] = {
+        self.emoji_to_player: dict[str, Player] = {
             self.CIRCLE: self.circle,
             self.CROSS: self.cross,
         }
-        self.player_to_emoji: dict[discord.User, str] = {
+        self.player_to_emoji: dict[Player, str] = {
             v: k for k, v in self.emoji_to_player.items()
         }
 
@@ -87,7 +91,7 @@ class Tictactoe:
             embed.description = f"**Turn:** {self.turn.mention}\n**Piece:** `{self.player_to_emoji[self.turn]}`"
         return embed
 
-    def make_move(self, emoji: str, user: discord.User) -> list:
+    def make_move(self, emoji: str, user: Player) -> list:
         if emoji not in self._controls:
             raise KeyError("Provided emoji is not one of the valid controls")
         else:
